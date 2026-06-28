@@ -1,0 +1,219 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Montserrat', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+
+    /* ── Brand & Accent ── */
+    --color-primary: #0064E0;
+    --color-primary-deep: #0143B5;
+    --color-primary-soft: rgba(0, 100, 224, 0.12);
+    --color-fb-blue: #1877F2;
+
+    /* ── Surface ── */
+    --color-canvas: #FFFFFF;
+    --color-surface-soft: #F5F6F7;
+    --color-hairline: #CED0D4;
+    --color-hairline-soft: #E4E6EB;
+
+    /* ── Text / Ink ── */
+    --color-ink-deep: #0A131A;
+    --color-ink: #1C2B33;
+    --color-charcoal: #3A4A54;
+    --color-slate: #65676B;
+    --color-steel: #8A8D91;
+    --color-stone: #B0B3B8;
+
+    /* ── Buttons ── */
+    --color-ink-button: #0A131A;
+    --color-on-ink-button: #FFFFFF;
+    --color-on-primary: #FFFFFF;
+
+    /* ── Semantic ── */
+    --color-success: #31A24C;
+    --color-attention: #F7B928;
+    --color-warning: #F7D100;
+    --color-critical: #E41E3F;
+    --color-critical-strong: #D0021B;
+
+    /* ── Radius ── */
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 16px;
+    --radius-xxl: 24px;
+    --radius-xxxl: 32px;
+    --radius-feature: 40px;
+    --radius-full: 100px;
+}
+
+.dark {
+    /* ── Surface ── */
+    --color-canvas: #000000;
+    --color-surface-soft: #121212;
+    --color-hairline: #27272A;
+    --color-hairline-soft: #18181B;
+
+    /* ── Text / Ink ── */
+    --color-ink-deep: #FFFFFF;
+    --color-ink: #E4E6EB;
+    --color-charcoal: #B0B3B8;
+    --color-slate: #8A8D91;
+    --color-steel: #65676B;
+    --color-stone: #3A4A54;
+
+    /* ── Buttons ── */
+    --color-ink-button: #FFFFFF;
+    --color-on-ink-button: #0A131A;
+}
+
+[x-cloak] { display: none !important; }
+
+/* ── Typography Scale ── */
+.type-hero     { font-size: 64px; font-weight: 500; line-height: 1.16; letter-spacing: 0; }
+.type-display  { font-size: 48px; font-weight: 500; line-height: 1.17; letter-spacing: 0; }
+.type-heading-lg { font-size: 36px; font-weight: 500; line-height: 1.28; }
+.type-heading-md { font-size: 28px; font-weight: 300; line-height: 1.21; }
+.type-heading-sm { font-size: 24px; font-weight: 500; line-height: 1.25; }
+.type-subtitle-lg { font-size: 18px; font-weight: 700; line-height: 1.44; }
+.type-subtitle-md { font-size: 18px; font-weight: 400; line-height: 1.44; }
+.type-body-md  { font-size: 16px; font-weight: 400; line-height: 1.50; letter-spacing: -0.16px; }
+.type-body-sm  { font-size: 14px; font-weight: 400; line-height: 1.43; letter-spacing: -0.14px; }
+.type-body-sm-bold { font-size: 14px; font-weight: 700; line-height: 1.43; letter-spacing: -0.14px; }
+.type-caption   { font-size: 12px; font-weight: 400; line-height: 1.33; }
+.type-caption-bold { font-size: 12px; font-weight: 700; line-height: 1.33; }
+.type-button   { font-size: 14px; font-weight: 700; line-height: 1.43; letter-spacing: -0.14px; }
+
+/* ── Pill Buttons ── */
+.btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--color-ink-button); color: var(--color-on-ink-button);
+    font-size: 14px; font-weight: 700; letter-spacing: -0.14px;
+    padding: 14px 30px; border-radius: var(--radius-full);
+    transition: background 150ms ease-out;
+}
+.btn-primary:active { background: var(--color-charcoal); }
+
+.btn-buy {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--color-primary); color: var(--color-on-primary);
+    font-size: 14px; font-weight: 700; letter-spacing: -0.14px;
+    padding: 14px 30px; border-radius: var(--radius-full);
+    transition: background 150ms ease-out;
+}
+.btn-buy:active { background: var(--color-primary-deep); }
+
+.btn-secondary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: transparent; color: var(--color-ink-deep);
+    font-size: 14px; font-weight: 700; letter-spacing: -0.14px;
+    padding: 12px 28px; border-radius: var(--radius-full);
+    border: 2px solid var(--color-ink-deep);
+    transition: background 150ms ease-out;
+}
+
+.btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: transparent; color: var(--color-ink-deep);
+    font-size: 14px; font-weight: 700; letter-spacing: -0.14px;
+    padding: 10px 22px; border-radius: var(--radius-full);
+    border: 2px solid rgba(10, 19, 23, 0.12);
+    transition: all 150ms ease-out;
+}
+.btn-ghost:active { background: var(--color-surface-soft); }
+
+/* ── Pill Tab ── */
+.pill-tab {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 8px 16px; border-radius: var(--radius-full);
+    background: var(--color-canvas); color: var(--color-ink);
+    border: 1px solid var(--color-hairline);
+    font-size: 14px; font-weight: 700; letter-spacing: -0.14px;
+    transition: all 150ms ease-out;
+}
+.pill-tab-active {
+    background: var(--color-ink-deep); color: var(--color-canvas);
+    border-color: transparent;
+}
+
+/* ── Badge Pills ── */
+.badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: var(--radius-full); font-size: 12px; font-weight: 700; line-height: 1.33; }
+.badge-success { background: var(--color-success); color: #fff; }
+.badge-attention { background: var(--color-attention); color: var(--color-canvas); }
+.badge-warning { background: var(--color-warning); color: var(--color-ink-deep); }
+.badge-critical { background: var(--color-critical); color: #fff; }
+.badge-info { background: var(--color-primary-soft); color: var(--color-primary); }
+.badge-neutral { background: var(--color-surface-soft); color: var(--color-charcoal); }
+
+/* ── Cards ── */
+.card {
+    background: var(--color-canvas);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-hairline-soft);
+}
+.card-feature {
+    background: var(--color-canvas);
+    border-radius: var(--radius-xxxl);
+    border: 1px solid var(--color-hairline-soft);
+}
+.card-sticky {
+    background: var(--color-canvas);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-hairline-soft);
+    box-shadow: rgba(20, 22, 26, 0.3) 0px 1px 4px 0px;
+}
+
+/* ── Form Inputs ── */
+.input-field {
+    width: 100%; height: 44px;
+    background: var(--color-canvas); color: var(--color-ink);
+    border: 1px solid var(--color-hairline); border-radius: var(--radius-lg);
+    padding: 0 12px; font-size: 14px;
+    transition: border 150ms ease-out;
+}
+.input-field:focus {
+    border-color: var(--color-fb-blue); border-width: 2px;
+    outline: none; padding: 0 11px;
+}
+
+/* ── Nav Sidebar ── */
+.sidebar-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; border-radius: var(--radius-full);
+    font-size: 14px; font-weight: 500; letter-spacing: -0.14px;
+    color: var(--color-slate); transition: all 150ms ease-out;
+}
+.sidebar-link:hover { background: var(--color-surface-soft); color: var(--color-ink); }
+.sidebar-link-active {
+    background: var(--color-ink-deep); color: var(--color-canvas);
+}
+
+/* ── Tables ── */
+.table-header {
+    font-size: 12px; font-weight: 700; line-height: 1.33;
+    color: var(--color-slate); text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Section spacing ── */
+.section-gap { padding: 32px; }
+.section-gap-sm { padding: 24px; }
+
+@media (max-width: 768px) {
+    .type-hero { font-size: 36px; }
+    .type-display { font-size: 28px; }
+    .type-heading-lg { font-size: 24px; }
+    .section-gap { padding: 16px; }
+    .section-gap-sm { padding: 12px; }
+}
+
+
+/* Global cursor pointer for all buttons as requested */
+button:hover, a:hover, [role="button"]:hover, .btn-primary:hover, .btn-secondary:hover, .btn-ghost:hover, .btn-buy:hover {
+    cursor: pointer !important;
+}
