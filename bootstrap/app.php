@@ -11,8 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Named middleware aliases
+        $middleware->alias([
+            'role'              => \App\Http\Middleware\RoleMiddleware::class,
+            'set.tenant'        => \App\Http\Middleware\SetTenant::class,
+            'set.public.tenant' => \App\Http\Middleware\SetPublicStoreTenant::class,
+            'locale'            => \App\Http\Middleware\SetLocale::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
+

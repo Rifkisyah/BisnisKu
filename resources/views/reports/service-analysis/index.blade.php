@@ -6,7 +6,7 @@
 {{-- HEADER & FILTER                                         --}}
 {{-- ═══════════════════════════════════════════════════════ --}}
 <div class="mb-6 flex items-center justify-between">
-    <a href="javascript:void(0)" onclick="if(window.history.length > 2) { window.history.back(); } else { window.location.href = '{{ route('dashboard') }}'; }" class="btn-ghost"><svg class="w-4 h-4 inline-block -mt-0.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>{{ __('messages.back') ?? 'Kembali' }}</a>
+    <a href="{{ route('reports.index') }}" class="btn-ghost"><svg class="w-4 h-4 inline-block -mt-0.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>{{ __('messages.back') ?? 'Kembali' }}</a>
 </div>
 
 <div class="mb-6 card-feature p-5">
@@ -16,7 +16,7 @@
                 <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Analisis Layanan Perbaikan
             </h1>
-            <p class="type-caption text-[var(--color-slate)] mt-2">Statistik tiket servis dan penggunaan sparepart · Periode {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} <b>-</b> {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
+            <p class="type-caption text-[var(--color-slate)] mt-2">Statistik perbaikan dan penggunaan sparepart · Periode {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} <b>-</b> {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
         </div>
         
         <div class="flex flex-col lg:flex-row lg:items-center gap-4">
@@ -62,7 +62,7 @@
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
     <div class="card-feature p-5 relative overflow-hidden">
         <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-300 rounded-t-[var(--radius-xxxl)]"></div>
-        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider">Total Tiket</p>
+        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider">Total Perbaikan</p>
         <p class="mt-2 type-heading-sm text-[var(--color-ink-deep)]">{{ $serviceStats['total'] }}</p>
         <p class="mt-1 type-caption text-[var(--color-stone)]">Dibuka dalam periode ini</p>
     </div>
@@ -76,7 +76,7 @@
         <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-500 to-green-300 rounded-t-[var(--radius-xxxl)]"></div>
         <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider">Selesai</p>
         <p class="mt-2 type-heading-sm text-[var(--color-success)]">{{ $serviceStats['done'] }}</p>
-        <p class="mt-1 type-caption text-[var(--color-stone)]">Tiket done/picked up</p>
+        <p class="mt-1 type-caption text-[var(--color-stone)]">Perbaikan done/picked up</p>
     </div>
     <div class="card-feature p-5 relative overflow-hidden border-2 border-[var(--color-primary)]/20 bg-[var(--color-primary)]/5">
         <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-deep)] rounded-t-[var(--radius-xxxl)]"></div>
@@ -251,11 +251,11 @@ window.updateServiceTrendChart = function(type, metric) {
     if (metric === 'both' && type === 'line_bar') {
         datasets = [
             { label: 'Revenue (Rp)', type: 'bar', data: data.map(d => parseInt(d.revenue)), backgroundColor: 'rgba(0,100,224,0.1)', borderColor: 'rgba(0,100,224,0.3)', borderWidth: 1, yAxisID: 'y2', order: 2 },
-            { label: 'Jumlah Tiket', type: 'line', data: data.map(d => parseInt(d.count)), borderColor: '#10B981', backgroundColor: '#10B981', tension: 0.3, yAxisID: 'y', order: 1 }
+            { label: 'Jumlah Perbaikan', type: 'line', data: data.map(d => parseInt(d.count)), borderColor: '#10B981', backgroundColor: '#10B981', tension: 0.3, yAxisID: 'y', order: 1 }
         ];
     } else {
         const valueKey = metric === 'count' ? 'count' : 'revenue';
-        const labelStr = metric === 'count' ? 'Jumlah Tiket' : 'Revenue (Rp)';
+        const labelStr = metric === 'count' ? 'Jumlah Perbaikan' : 'Revenue (Rp)';
         datasets = [{
             label: labelStr,
             data: data.map(d => parseInt(d[valueKey])),

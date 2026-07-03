@@ -66,16 +66,16 @@
         $tpChartUrl = 'https://quickchart.io/chart?w=400&h=250&c=' . urlencode(json_encode($tpChartConfig));
 
         // 3. K-Means Chart
-        $kmCounts = ['fast_moving' => 0, 'medium_moving' => 0, 'slow_moving' => 0, 'dead_stock' => 0];
+        $kmCounts = ['fast_moving' => 0, 'medium_moving' => 0, 'slow_moving' => 0, 'dead_stock' => 0, 'new_product' => 0];
         foreach($clusterResults as $i) {
             if(isset($kmCounts[$i['cluster_label']])) $kmCounts[$i['cluster_label']]++;
         }
-        $kmLabelsStr = [__('messages.fast_moving'), __('messages.medium_moving'), __('messages.slow_moving'), __('messages.dead_stock')];
+        $kmLabelsStr = [__('messages.fast_moving'), __('messages.medium_moving'), __('messages.slow_moving'), __('messages.dead_stock'), __('messages.new_product')];
         $kmChartConfig = [
             'type' => 'doughnut',
             'data' => [
                 'labels' => $kmLabelsStr,
-                'datasets' => [['data' => array_values($kmCounts), 'backgroundColor' => ['#31A24C', '#F7B928', '#E41E3F', '#666666']]]
+                'datasets' => [['data' => array_values($kmCounts), 'backgroundColor' => ['#31A24C', '#F7B928', '#E41E3F', '#666666', '#0064E0']]]
             ],
             'options' => [
                 'plugins' => ['datalabels' => ['display' => true, 'color' => '#fff']]

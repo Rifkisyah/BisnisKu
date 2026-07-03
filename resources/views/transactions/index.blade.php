@@ -49,7 +49,17 @@
             <label class="block type-caption-bold text-[var(--color-slate)] mb-1">{{ __('messages.end_date') }}</label>
             <input type="date" name="end_date" value="{{ $endDate ?? '' }}" class="input-field w-full">
         </div>
-        <div class="w-full sm:w-auto">
+        
+            <div class="w-full sm:w-48">
+                <label class="block type-caption-bold text-[var(--color-slate)] mb-1">Urutkan</label>
+                <select name="sort" class="input-field w-full" onchange="this.form.submit()">
+                    <option value="" {{ !request('sort') || request('sort') == 'created_at_desc' ? 'selected' : '' }}>Dibuat (Terbaru)</option>
+                    <option value="created_at_asc" {{ request('sort') == 'created_at_asc' ? 'selected' : '' }}>Dibuat (Terlama)</option>
+                    <option value="updated_at_desc" {{ request('sort') == 'updated_at_desc' ? 'selected' : '' }}>Diupdate (Terbaru)</option>
+                    <option value="updated_at_asc" {{ request('sort') == 'updated_at_asc' ? 'selected' : '' }}>Diupdate (Terlama)</option>
+                </select>
+            </div>
+<div class="w-full sm:w-auto">
             <button type="submit" class="btn-primary w-full sm:w-auto px-6 sm:w-auto px-6 !py-2.5">{{ __('messages.search') }}</button>
         </div>
     </form>

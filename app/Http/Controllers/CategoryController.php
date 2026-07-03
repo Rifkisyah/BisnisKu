@@ -8,11 +8,13 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+
     public function index(Request $request)
     {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat mengelola kategori.');
         $categories = Category::when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%"))
             ->when($request->type, fn($q, $t) => $q->where('type', $t))
-            ->latest()
+            ->applySort($request->sort)
             ->paginate(15)
             ->withQueryString();
 
@@ -21,11 +23,13 @@ class CategoryController extends Controller
 
     public function create()
     {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat mengelola kategori.');
         return view('categories.create');
     }
 
     public function store(Request $request)
     {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat mengelola kategori.');
         $validated = $request->validate([
             'name'        => 'required|string|min:2|max:60|unique:categories,name',
             'description' => 'nullable|string|max:300',
@@ -49,11 +53,13 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat mengelola kategori.');
         return view('categories.edit', compact('category'));
     }
 
     public function update(Request $request, Category $category)
     {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat mengelola kategori.');
         $validated = $request->validate([
             'name'        => 'required|string|min:2|max:60|unique:categories,name,' . $category->category_code . ',category_code',
             'description' => 'nullable|string|max:300',
@@ -72,7 +78,8 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        if ($category->products()->count() > 0) {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat mengelola kategori.');
+        if ($category->products()->exists()) {
             return back()->with('error', __('messages.cannot_delete_has_relation', ['item' => __('messages.category')]));
         }
 

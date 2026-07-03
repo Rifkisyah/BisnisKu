@@ -3,13 +3,13 @@
 @section('content')
 <div class="mx-auto max-w-2xl">
     <div class="mb-6 flex justify-between items-center">
-        <a href="javascript:void(0)" onclick="if(window.history.length > 2) { window.history.back(); } else { window.location.href = '{{ route('dashboard') }}'; }" class="btn-ghost"><svg class="w-4 h-4 inline-block -mt-0.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>{{ __('messages.back') ?? 'Kembali' }}</a>
+        <a href="{{ route('employees.index') }}" class="btn-ghost"><svg class="w-4 h-4 inline-block -mt-0.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>{{ __('messages.back') ?? 'Kembali' }}</a>
     </div>
     <div class="card-feature p-6">
         <div class="flex items-center justify-between mb-4">
             <h3 class="type-heading-sm text-[var(--color-ink-deep)]">{{ $employee->username }}</h3>
             <div class="flex gap-2">
-                <span class="badge badge-info">{{ strtoupper($employee->role->name) }}</span>
+                <span class="badge badge-info">{{ strtoupper($employee->role->display_name) }}</span>
                 <span class="badge {{ $employee->status === 'active' ? 'badge-success' : 'badge-critical' }}">{{ $employee->status }}</span>
             </div>
         </div>

@@ -23,22 +23,22 @@ class ProductPurchaseController extends Controller
         $startDate = $request->get('start_date', now()->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
 
-        $query = ProductPurchase::with('supplier', 'creator')
+        $query = ProductPurchase::with('creator')
             ->whereBetween('purchase_date', [$startDate, \Carbon\Carbon::parse($endDate)->endOfDay()])
             ->when($request->search,   fn($q, $s)   => $q->where('product_purchase_code', 'like', "%{$s}%")->orWhere('notes', 'like', "%{$s}%"))
             ->when($request->status,   fn($q, $st)  => $q->where('status', $st))
-            ->when($request->source,   fn($q, $src) => $q->where('source', $src))
-            ->when($request->supplier, fn($q, $sup) => $q->where('supplier_code', $sup));
+            ->when($request->source,   fn($q, $src) => $q->whereHas('items', fn($iq) => $iq->where('source', $src)))
+            ->when($request->supplier, fn($q, $sup) => $q->whereHas('items', fn($iq) => $iq->where('supplier_code', $sup)));
 
         if ($request->get('export') === 'pdf') {
-            $allPurchases = $query->latest()->get();
+            $allPurchases = $query->applySort($request->sort)->get();
             $pdf = Pdf::loadView('product-purchases.pdf', [
                 'purchases' => $allPurchases, 'startDate' => $startDate, 'endDate' => $endDate,
             ]);
             return $pdf->download('laporan-pengadaan.pdf');
         }
 
-        $productPurchases = $query->latest()->paginate(15)->withQueryString();
+        $productPurchases = $query->applySort($request->sort)->paginate(15)->withQueryString();
         $suppliers        = Supplier::active()->get();
 
         return view('product-purchases.index', compact('productPurchases', 'startDate', 'endDate', 'suppliers'));
@@ -57,28 +57,29 @@ class ProductPurchaseController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'source'                 => 'required|in:whatsapp,marketplace,offline,other,service',
             'purchase_date'          => 'required|date',
             'estimated_arrival_date' => 'nullable|date|after_or_equal:purchase_date',
             'notes'                  => 'nullable|string|max:500',
+            'repair_item_id'         => 'nullable|exists:service_repair_items,id',
             'items'                  => 'required|array|min:1',
             'items.*.product_code'      => 'nullable|exists:products,product_code',
             'items.*.temp_product_name' => 'nullable|string|min:3|max:100',
+            'items.*.is_sparepart'      => 'nullable|boolean',
             'items.*.notes'             => 'nullable|string|max:500',
             'items.*.quantity'          => 'required|integer|min:1',
             'items.*.purchase_price'    => 'required|numeric|min:0',
-            'repair_item_id'            => 'nullable|exists:service_repair_items,id',
-            // Source-specific
-            'supplier_code'        => 'nullable|exists:suppliers,supplier_code',
-            'marketplace_name'     => 'nullable|string|min:2|max:100',
-            'marketplace_seller'   => 'nullable|string|min:2|max:100',
-            'marketplace_order_id' => 'nullable|string|max:100',
-            'marketplace_notes'    => 'nullable|string|max:500',
-            'store_name'           => 'nullable|string|min:2|max:100',
-            'receipt_number'       => 'nullable|string|max:50',
-            'offline_notes'        => 'nullable|string|max:500',
-            'other_source'         => 'nullable|string|min:2|max:100',
-            'other_notes'          => 'nullable|string|max:500',
+            'items.*.source'                 => 'required|in:whatsapp,marketplace,offline,other,service',
+            // Source-specific per item
+            'items.*.supplier_code'        => 'nullable|exists:suppliers,supplier_code',
+            'items.*.marketplace_name'     => 'nullable|string|min:2|max:100',
+            'items.*.marketplace_seller'   => 'nullable|string|min:2|max:100',
+            'items.*.marketplace_order_id' => 'nullable|string|max:100',
+            'items.*.marketplace_notes'    => 'nullable|string|max:500',
+            'items.*.store_name'           => 'nullable|string|min:2|max:100',
+            'items.*.receipt_number'       => 'nullable|string|max:50',
+            'items.*.offline_notes'        => 'nullable|string|max:500',
+            'items.*.other_source'         => 'nullable|string|min:2|max:100',
+            'items.*.other_notes'          => 'nullable|string|max:500',
         ]);
 
         // Setiap item wajib ada product_code atau temp_product_name
@@ -93,8 +94,6 @@ class ProductPurchaseController extends Controller
 
             $purchaseData = [
                 'product_purchase_code'  => $code,
-                'source'                 => $validated['source'],
-                'supplier_code'          => $validated['supplier_code'] ?? null,
                 'purchase_date'          => $validated['purchase_date'],
                 'estimated_arrival_date' => $validated['estimated_arrival_date'] ?? null,
                 'status'                 => 'draft',
@@ -102,23 +101,6 @@ class ProductPurchaseController extends Controller
                 'repair_item_id'         => $validated['repair_item_id'] ?? null,
                 'created_by'             => auth()->id(),
             ];
-
-            match ($validated['source']) {
-                'marketplace' => $purchaseData = array_merge($purchaseData, [
-                    'marketplace_name'     => $validated['marketplace_name'] ?? null,
-                    'marketplace_seller'   => $validated['marketplace_seller'] ?? null,
-                ]),
-                'offline' => $purchaseData = array_merge($purchaseData, [
-                    'store_name'     => $validated['store_name'] ?? null,
-                    'receipt_number' => $validated['receipt_number'] ?? null,
-                    'offline_notes'  => $validated['offline_notes'] ?? null,
-                ]),
-                'other' => $purchaseData = array_merge($purchaseData, [
-                    'other_source' => $validated['other_source'] ?? null,
-                    'other_notes'  => $validated['other_notes'] ?? null,
-                ]),
-                default => null,
-            };
 
             $productPurchase = ProductPurchase::create($purchaseData);
 
@@ -129,10 +111,25 @@ class ProductPurchaseController extends Controller
 
                 // Jika tidak ada product_code dan ada temp name, buat produk sementara
                 if (empty($productCode) && !empty($item['temp_product_name'])) {
-                    $category   = \App\Models\Category::where('slug', 'sparepart')->first()
-                        ?? \App\Models\Category::first();
+                    $isSparepart = !empty($item['is_sparepart']);
+                    $type = $isSparepart ? 'sparepart' : 'physical';
+                    
+                    $catSlug = $isSparepart ? 'sparepart' : 'umum';
+                    $catName = $isSparepart ? 'Sparepart' : 'Umum';
+                    
+                    $category = \App\Models\Category::where('slug', $catSlug)->first()
+                        ?? \App\Models\Category::where('slug', 'umum')->first()
+                        ?? \App\Models\Category::first()
+                        ?? \App\Models\Category::create([
+                            'category_code' => 'CAT' . time() . rand(10,99),
+                            'name' => $catName,
+                            'slug' => $catSlug
+                        ]);
+                        
+                    $supplierCode = ($item['source'] === 'whatsapp' && !empty($item['supplier_code'])) ? $item['supplier_code'] : null;
+
                     $newProduct = Product::create([
-                        'product_code'   => Product::generateCode('physical'),
+                        'product_code'   => Product::generateCode($type),
                         'name'           => $item['temp_product_name'],
                         'category_code'  => $category?->category_code,
                         'purchase_price' => $item['purchase_price'],
@@ -141,12 +138,13 @@ class ProductPurchaseController extends Controller
                         'minimum_stock'  => 0,
                         'unit'           => 'pcs',
                         'status'         => 'temporary',
-                        'type'           => 'physical',
+                        'type'           => $type,
+                        'supplier_code'  => $supplierCode,
                     ]);
                     $productCode = $newProduct->product_code;
                 }
 
-                ProductPurchaseItem::create([
+                $itemData = [
                     'product_purchase_code' => $code,
                     'product_code'          => $productCode,
                     'temp_product_name'     => null,
@@ -158,19 +156,33 @@ class ProductPurchaseController extends Controller
                     'purchase_price'        => $item['purchase_price'],
                     'subtotal'              => $subtotal,
                     'notes'                 => $item['notes'] ?? null,
-                ]);
+                    'source'                => $item['source'],
+                    'supplier_code'         => $item['supplier_code'] ?? null,
+                ];
+
+                match ($item['source']) {
+                    'marketplace' => $itemData = array_merge($itemData, [
+                        'marketplace_name'     => $item['marketplace_name'] ?? null,
+                        'marketplace_seller'   => $item['marketplace_seller'] ?? null,
+                        'marketplace_order_id' => $item['marketplace_order_id'] ?? null,
+                        'marketplace_notes'    => $item['marketplace_notes'] ?? null,
+                    ]),
+                    'offline' => $itemData = array_merge($itemData, [
+                        'store_name'     => $item['store_name'] ?? null,
+                        'receipt_number' => $item['receipt_number'] ?? null,
+                        'offline_notes'  => $item['offline_notes'] ?? null,
+                    ]),
+                    'other' => $itemData = array_merge($itemData, [
+                        'other_source' => $item['other_source'] ?? null,
+                        'other_notes'  => $item['other_notes'] ?? null,
+                    ]),
+                    default => null,
+                };
+
+                ProductPurchaseItem::create($itemData);
                 $total += $subtotal;
             }
             $productPurchase->update(['total' => $total]);
-
-            // Auto-generate WA message content
-            if ($validated['source'] === 'whatsapp') {
-                $productPurchase->load('items.product', 'supplier');
-                $productPurchase->update([
-                    'wa_message_content' => $productPurchase->generateWaMessageContent(),
-                    'wa_message_status'  => 'pending',
-                ]);
-            }
 
             // Link to service: update sparepart item status to 'pending'
             if (!empty($validated['repair_item_id'])) {
@@ -183,11 +195,155 @@ class ProductPurchaseController extends Controller
             ->with('success', __('messages.created', ['item' => __('messages.procurement')]));
     }
 
+    // ─── Edit / Update ──────────────────────────────────────────────────────
+
+    public function edit(ProductPurchase $productPurchase)
+    {
+        if ($productPurchase->status !== 'draft') {
+            return redirect()->route('product-purchases.index')->with('error', 'Hanya pengadaan berstatus draft yang dapat diubah.');
+        }
+
+        $suppliers = Supplier::active()->get();
+        $products  = Product::available()->get();
+        $categories = Category::active()->get();
+        
+        return view('product-purchases.edit', compact('productPurchase', 'suppliers', 'products', 'categories'));
+    }
+
+    public function update(Request $request, ProductPurchase $productPurchase)
+    {
+        if ($productPurchase->status !== 'draft') {
+            return redirect()->route('product-purchases.index')->with('error', 'Hanya pengadaan berstatus draft yang dapat diubah.');
+        }
+
+        $validated = $request->validate([
+            'purchase_date'          => 'required|date',
+            'estimated_arrival_date' => 'nullable|date|after_or_equal:purchase_date',
+            'notes'                  => 'nullable|string|max:500',
+            'items'                  => 'required|array|min:1',
+            'items.*.product_code'      => 'nullable|exists:products,product_code',
+            'items.*.temp_product_name' => 'nullable|string|min:3|max:100',
+            'items.*.is_sparepart'      => 'nullable|boolean',
+            'items.*.notes'             => 'nullable|string|max:500',
+            'items.*.quantity'          => 'required|integer|min:1',
+            'items.*.purchase_price'    => 'required|numeric|min:0',
+            'items.*.source'                 => 'required|in:whatsapp,marketplace,offline,other,service',
+            'items.*.supplier_code'        => 'nullable|exists:suppliers,supplier_code',
+            'items.*.marketplace_name'     => 'nullable|string|min:2|max:100',
+            'items.*.marketplace_seller'   => 'nullable|string|min:2|max:100',
+            'items.*.marketplace_order_id' => 'nullable|string|max:100',
+            'items.*.marketplace_notes'    => 'nullable|string|max:500',
+            'items.*.store_name'           => 'nullable|string|min:2|max:100',
+            'items.*.receipt_number'       => 'nullable|string|max:50',
+            'items.*.offline_notes'        => 'nullable|string|max:500',
+            'items.*.other_source'         => 'nullable|string|min:2|max:100',
+            'items.*.other_notes'          => 'nullable|string|max:500',
+        ]);
+
+        foreach ($validated['items'] as $i => $item) {
+            if (empty($item['product_code']) && empty($item['temp_product_name'])) {
+                return back()->withErrors(["items.{$i}.product_code" => 'Pilih produk atau isi nama produk sementara.'])->withInput();
+            }
+        }
+
+        DB::transaction(function () use ($validated, $productPurchase) {
+            $productPurchase->update([
+                'purchase_date'          => $validated['purchase_date'],
+                'estimated_arrival_date' => $validated['estimated_arrival_date'] ?? null,
+                'notes'                  => $validated['notes'] ?? null,
+            ]);
+
+            // Hapus item lama, karena draft kita bisa re-create semua itemnya
+            $productPurchase->items()->delete();
+
+            $total = 0;
+            foreach ($validated['items'] as $item) {
+                $subtotal    = $item['purchase_price'] * $item['quantity'];
+                $productCode = $item['product_code'] ?? null;
+
+                if (empty($productCode) && !empty($item['temp_product_name'])) {
+                    $isSparepart = !empty($item['is_sparepart']);
+                    $type = $isSparepart ? 'sparepart' : 'physical';
+                    $catSlug = $isSparepart ? 'sparepart' : 'umum';
+                    $catName = $isSparepart ? 'Sparepart' : 'Umum';
+                    
+                    $category = \App\Models\Category::where('slug', $catSlug)->first()
+                        ?? \App\Models\Category::where('slug', 'umum')->first()
+                        ?? \App\Models\Category::first()
+                        ?? \App\Models\Category::create([
+                            'category_code' => 'CAT' . time() . rand(10,99),
+                            'name' => $catName,
+                            'slug' => $catSlug
+                        ]);
+                        
+                    $supplierCode = ($item['source'] === 'whatsapp' && !empty($item['supplier_code'])) ? $item['supplier_code'] : null;
+
+                    $newProduct = Product::create([
+                        'product_code'   => Product::generateCode($type),
+                        'name'           => $item['temp_product_name'],
+                        'category_code'  => $category?->category_code,
+                        'purchase_price' => $item['purchase_price'],
+                        'selling_price'  => $item['purchase_price'],
+                        'stock'          => 0,
+                        'minimum_stock'  => 0,
+                        'unit'           => 'pcs',
+                        'status'         => 'temporary',
+                        'type'           => $type,
+                        'supplier_code'  => $supplierCode,
+                    ]);
+                    $productCode = $newProduct->product_code;
+                }
+
+                $itemData = [
+                    'product_purchase_code' => $productPurchase->product_purchase_code,
+                    'product_code'          => $productCode,
+                    'temp_product_name'     => null,
+                    'is_resolved'           => !empty($productCode),
+                    'resolved_product_code' => $productCode,
+                    'quantity'              => $item['quantity'],
+                    'quantity_received'     => 0,
+                    'quantity_rejected'     => 0,
+                    'purchase_price'        => $item['purchase_price'],
+                    'subtotal'              => $subtotal,
+                    'notes'                 => $item['notes'] ?? null,
+                    'source'                => $item['source'],
+                    'supplier_code'         => $item['supplier_code'] ?? null,
+                ];
+
+                match ($item['source']) {
+                    'marketplace' => $itemData = array_merge($itemData, [
+                        'marketplace_name'     => $item['marketplace_name'] ?? null,
+                        'marketplace_seller'   => $item['marketplace_seller'] ?? null,
+                        'marketplace_order_id' => $item['marketplace_order_id'] ?? null,
+                        'marketplace_notes'    => $item['marketplace_notes'] ?? null,
+                    ]),
+                    'offline' => $itemData = array_merge($itemData, [
+                        'store_name'     => $item['store_name'] ?? null,
+                        'receipt_number' => $item['receipt_number'] ?? null,
+                        'offline_notes'  => $item['offline_notes'] ?? null,
+                    ]),
+                    'other' => $itemData = array_merge($itemData, [
+                        'other_source' => $item['other_source'] ?? null,
+                        'other_notes'  => $item['other_notes'] ?? null,
+                    ]),
+                    default => null,
+                };
+
+                ProductPurchaseItem::create($itemData);
+                $total += $subtotal;
+            }
+            $productPurchase->update(['total' => $total]);
+        });
+
+        return redirect()->route('product-purchases.show', $productPurchase)
+            ->with('success', 'Pengadaan berhasil diperbarui.');
+    }
+
     // ─── Show ───────────────────────────────────────────────────────────────
 
     public function show(ProductPurchase $productPurchase)
     {
-        $productPurchase->load('supplier', 'creator', 'items.product', 'items.resolvedProduct', 'repairItem.serviceRepair');
+        $productPurchase->load('creator', 'items.product', 'items.resolvedProduct', 'repairItem.serviceRepair', 'items.supplier');
         $products = Product::available()->get();
         return view('product-purchases.show', compact('productPurchase', 'products'));
     }
@@ -281,12 +437,24 @@ class ProductPurchaseController extends Controller
                 if ($productPurchase->repair_item_id) {
                     $repairItem = ServiceRepairItem::find($productPurchase->repair_item_id);
                     if ($repairItem) {
-                        $repairItem->update(['sparepart_status' => 'available']);
+                        // Ambil harga asli dari pengadaan yang disetujui (purchase_price)
+                        $purchaseItem = $productPurchase->items->first();
+                        $finalPrice = $purchaseItem ? $purchaseItem->purchase_price : ($repairItem->temp_purchase_price ?? 0);
+
+                        $repairItem->update([
+                            'sparepart_status'    => 'available',
+                            'temp_purchase_price' => $finalPrice,
+                            'subtotal'            => $finalPrice * $repairItem->quantity,
+                        ]);
 
                         $repair = $repairItem->serviceRepair;
-                        if ($repair && $repair->allPartsAvailable()) {
-                            // Auto-advance ticket to 'repairing' when all parts are ready
-                            $repair->update(['status' => 'repairing']);
+                        if ($repair) {
+                            $repair->calculateTotalCost();
+
+                            if ($repair->allPartsAvailable() && $repair->status === 'waiting_parts') {
+                                // Auto-advance ticket to 'repairing' when all parts are ready
+                                $repair->update(['status' => 'repairing']);
+                            }
                         }
                     }
                 }
@@ -326,9 +494,26 @@ class ProductPurchaseController extends Controller
 
     public function destroy(ProductPurchase $productPurchase)
     {
-        if (!$productPurchase->isDraft()) {
-            return back()->with('error', 'Hanya pengadaan berstatus Draft yang bisa dihapus.');
+        if ($productPurchase->isCancelled()) {
+            return back()->with('error', 'Pengadaan yang dibatalkan tidak bisa dihapus.');
         }
+
+        // Revert stock jika ada barang yang sempat diterima (status partial_received atau received)
+        if ($productPurchase->isPartial() || $productPurchase->isReceived()) {
+            $stockService = new \App\Services\StockService();
+            foreach ($productPurchase->items as $item) {
+                if ($item->effective_product_code && $item->quantity_received > 0) {
+                    $stockService->stockOut(
+                        $item->effective_product_code,
+                        $item->quantity_received,
+                        'product_purchase',
+                        $productPurchase->product_purchase_code,
+                        'Revert pengadaan dihapus'
+                    );
+                }
+            }
+        }
+
         $productPurchase->delete();
         return redirect()->route('product-purchases.index')
             ->with('success', __('messages.deleted', ['item' => __('messages.procurement')]));

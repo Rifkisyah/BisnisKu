@@ -50,6 +50,9 @@
             {{-- Dynamic QRIS Config --}}
             <div x-show="mode === 'dynamic'" class="space-y-4 pt-4 border-t border-[var(--color-hairline-soft)]" x-cloak>
                 <h4 class="type-body-sm-bold text-[var(--color-ink)]">Konfigurasi API / Payment Gateway</h4>
+                <div class="mb-4 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm border border-blue-200">
+                    <strong>Catatan:</strong> Untuk keamanan, Client Key, Server Key, dan Webhook URL diatur secara teknis oleh developer di konfigurasi backend (file .env). Anda hanya perlu memilih provider dan memasukkan Merchant ID.
+                </div>
                 <div>
                     <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Provider QRIS</label>
                     <select name="qris_provider" class="input-field">
@@ -62,19 +65,6 @@
                 <div>
                     <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Merchant ID</label>
                     <input type="text" name="merchant_id" value="{{ old('merchant_id', $paymentSetting->merchant_id) }}" class="input-field">
-                </div>
-                <div>
-                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Client Key</label>
-                    <input type="text" name="client_key" value="{{ old('client_key', $paymentSetting->client_key) }}" class="input-field">
-                </div>
-                <div>
-                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Server Key / Secret Key</label>
-                    <input type="password" name="server_key" value="{{ old('server_key', $paymentSetting->server_key) }}" class="input-field">
-                </div>
-                <div>
-                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Callback / Webhook URL</label>
-                    <input type="url" name="callback_url" value="{{ old('callback_url', $paymentSetting->callback_url ?? url('/api/payments/qris/callback')) }}" class="input-field bg-gray-50" readonly>
-                    <p class="type-caption text-[var(--color-stone)] mt-1">URL ini otomatis digenerate. Daftarkan URL ini ke dashboard provider Anda.</p>
                 </div>
             </div>
 

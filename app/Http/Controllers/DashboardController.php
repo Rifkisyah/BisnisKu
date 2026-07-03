@@ -19,11 +19,15 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         if ($user->isKasir()) {
-            return $this->kasirDashboard();
+            return $this->kasirDashboard($request);
         }
 
         if ($user->isTeknisi()) {
-            return $this->teknisiDashboard();
+            return $this->teknisiDashboard($request);
+        }
+
+        if ($user->role->name === 'gudang') {
+            return $this->gudangDashboard($request);
         }
 
         return $this->ownerDashboard($request);
@@ -35,15 +39,15 @@ class DashboardController extends Controller
         $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date'))->endOfDay() : now()->endOfDay();
 
         // 1. SALES REVENUE METRICS
-        $totalRevenue = Transaction::where('status', 'completed')->whereBetween('transaction_date', [$startDate, $endDate])->sum('total');
-        $transactionCount = Transaction::where('status', 'completed')->whereBetween('transaction_date', [$startDate, $endDate])->count();
+        $totalRevenue = Transaction::where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate])->sum('total');
+        $transactionCount = Transaction::where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate])->count();
         
-        $salesTrend = Transaction::where('status', 'completed')
+        $salesTrend = Transaction::where('status', 'paid')
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->selectRaw('DATE(transaction_date) as date, SUM(total) as total, COUNT(*) as count')
             ->groupByRaw('DATE(transaction_date)')->orderBy('date')->get();
 
-        $topProducts = TransactionItem::whereHas('transaction', fn($q) => $q->where('status', 'completed')->whereBetween('transaction_date', [$startDate, $endDate]))
+        $topProducts = TransactionItem::whereHas('transaction', fn($q) => $q->where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate]))
             ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
             ->selectRaw('products.name, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.subtotal) as total_revenue')
             ->groupBy('products.name')->orderByDesc('total_revenue')->limit(5)->get();
@@ -76,44 +80,96 @@ class DashboardController extends Controller
         ));
     }
 
-    private function kasirDashboard()
+    private function kasirDashboard(Request $request)
     {
-        $todayTransactions = Transaction::where('cashier_id', auth()->id())
-            ->whereDate('transaction_date', today())
-            ->where('status', 'completed')
+        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date'))->startOfDay() : now()->startOfDay();
+        $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date'))->endOfDay() : now()->endOfDay();
+
+        $filteredTransactions = Transaction::where('cashier_id', auth()->id())
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->where('status', 'paid')
             ->count();
 
-        $todayRevenue = Transaction::where('cashier_id', auth()->id())
-            ->whereDate('transaction_date', today())
-            ->where('status', 'completed')
+        $filteredRevenue = Transaction::where('cashier_id', auth()->id())
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->where('status', 'paid')
             ->sum('total');
 
         $recentTransactions = Transaction::where('cashier_id', auth()->id())
-            ->where('status', 'completed')
+            ->where('status', 'paid')
             ->latest('transaction_date')
+            ->limit(5)
+            ->get();
+            
+        $productCount = \App\Models\Product::active()->count();
+
+        // Metrik Hutang
+        $unpaidDebts = \App\Models\Debt::where('status', '!=', 'paid')
+            ->whereBetween('debt_date', [$startDate, $endDate])
+            ->count();
+            
+        $totalUnpaidDebtAmount = \App\Models\Debt::where('status', '!=', 'paid')
+            ->whereBetween('debt_date', [$startDate, $endDate])
+            ->sum('remaining_amount');
+
+        // Metrik Layanan Perbaikan
+        $activeRepairs = \App\Models\ServiceRepair::whereNotIn('status', ['completed', 'canceled', 'picked_up'])
+            ->whereBetween('start_date', [$startDate, $endDate])
+            ->count();
+
+        return view('dashboard.kasir', compact(
+            'filteredTransactions', 'filteredRevenue', 'recentTransactions', 'productCount',
+            'unpaidDebts', 'totalUnpaidDebtAmount', 'activeRepairs', 'startDate', 'endDate'
+        ));
+    }
+
+        private function teknisiDashboard(Request $request)
+    {
+        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date'))->startOfDay() : now()->startOfDay();
+        $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date'))->endOfDay() : now()->endOfDay();
+
+        $activeRepairs = ServiceRepair::where('technician_id', auth()->id())
+            ->whereNotIn('status', ['completed', 'canceled', 'picked_up'])
+            ->count();
+
+        $completedRepairs = ServiceRepair::where('technician_id', auth()->id())
+            ->whereIn('status', ['completed', 'picked_up'])
+            ->whereBetween('completion_date', [$startDate, $endDate])
+            ->count();
+
+        $totalRevenue = ServiceRepair::where('technician_id', auth()->id())
+            ->whereIn('status', ['completed', 'picked_up'])
+            ->whereBetween('completion_date', [$startDate, $endDate])
+            ->sum('total_cost');
+
+        $recentRepairs = ServiceRepair::where('technician_id', auth()->id())
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->latest('created_at')
             ->limit(10)
             ->get();
 
-        return view('dashboard.kasir', compact('todayTransactions', 'todayRevenue', 'recentTransactions'));
+        return view('dashboard.teknisi', compact('activeRepairs', 'completedRepairs', 'totalRevenue', 'recentRepairs', 'startDate', 'endDate'));
     }
 
-    private function teknisiDashboard()
+        private function gudangDashboard(Request $request)
     {
-        $myActiveRepairs = ServiceRepair::where('technician_id', auth()->id())
-            ->whereNotIn('status', ['completed', 'canceled', 'picked_up'])
-            ->latest()
-            ->get();
+        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date'))->startOfDay() : now()->startOfDay();
+        $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date'))->endOfDay() : now()->endOfDay();
 
-        $myCompletedToday = ServiceRepair::where('technician_id', auth()->id())
-            ->whereIn('status', ['completed', 'picked_up'])
-            ->whereDate('completion_date', today())
-            ->count();
+        $totalProducts = \App\Models\Product::count();
+        $lowStockProducts = \App\Models\Product::where('stock', '<=', 5)->orderBy('stock', 'asc')->limit(10)->get();
+        
+        $activeProcurements = \App\Models\ProductPurchase::whereNotIn('status', ['received', 'cancelled'])
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $recentProcurements = \App\Models\ProductPurchase::whereBetween('created_at', [$startDate, $endDate])
+            ->latest()->limit(10)->get();
+        
+        $totalSuppliers = \App\Models\Supplier::count();
 
-        $totalActiveRepairs = ServiceRepair::where('technician_id', auth()->id())
-            ->whereNotIn('status', ['completed', 'canceled', 'picked_up'])
-            ->count();
-
-        return view('dashboard.teknisi', compact('myActiveRepairs', 'myCompletedToday', 'totalActiveRepairs'));
+        return view('dashboard.gudang', compact(
+            'totalProducts', 'lowStockProducts', 'activeProcurements', 'recentProcurements', 'totalSuppliers',
+            'startDate', 'endDate'
+        ));
     }
 
     public function exportPdf(Request $request)
@@ -121,10 +177,10 @@ class DashboardController extends Controller
         $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date'))->startOfDay() : now()->startOfDay();
         $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date'))->endOfDay() : now()->endOfDay();
 
-        $totalRevenue = Transaction::where('status', 'completed')->whereBetween('transaction_date', [$startDate, $endDate])->sum('total');
-        $transactionCount = Transaction::where('status', 'completed')->whereBetween('transaction_date', [$startDate, $endDate])->count();
+        $totalRevenue = Transaction::where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate])->sum('total');
+        $transactionCount = Transaction::where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate])->count();
         
-        $topProducts = TransactionItem::whereHas('transaction', fn($q) => $q->where('status', 'completed')->whereBetween('transaction_date', [$startDate, $endDate]))
+        $topProducts = TransactionItem::whereHas('transaction', fn($q) => $q->where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate]))
             ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
             ->selectRaw('products.name, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.subtotal) as total_revenue')
             ->groupBy('products.name')->orderByDesc('total_revenue')->limit(5)->get();
@@ -142,7 +198,7 @@ class DashboardController extends Controller
 
         $productCount = Product::active()->count();
 
-        $salesTrend = Transaction::where('status', 'completed')
+        $salesTrend = Transaction::where('status', 'paid')
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->selectRaw('DATE(transaction_date) as date, SUM(total) as total')
             ->groupBy('date')->orderBy('date')->get();

@@ -30,14 +30,19 @@
         <button type="button" onclick="setDateRange(365)" class="flex-1 text-center justify-center {{ $activeFilter === 365 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs sm:text-sm">{{ __('messages.year') }}</button>
     </div>
 
-    <div class="flex w-full md:w-auto md:ml-auto gap-2">
-        <a href="{{ route('dashboard.export_pdf', request()->all()) }}" class="flex-1 justify-center btn-ghost flex items-center gap-1.5 !py-2 !px-3 text-[var(--color-critical)] border-[var(--color-critical)]/20 hover:bg-[var(--color-critical)]/10 text-xs sm:text-sm rounded-[var(--radius-md)]">
-            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <div class="flex w-full md:w-auto md:ml-auto gap-2 flex-wrap sm:flex-nowrap">
+        <a href="{{ route('catalog.store.index', ['store' => app('current_store')->slug]) }}" target="_blank" class="flex-1 justify-center btn-primary flex items-center gap-1 !py-1.5 !px-2.5 text-[10px] sm:text-xs rounded-[var(--radius-md)]">
+            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg> <span>{{ app()->getLocale() == 'id' ? 'Lihat Katalog' : 'View Catalog' }}</span>
+        </a>
+        <a href="{{ route('dashboard.export_pdf', request()->all()) }}" class="flex-1 justify-center btn-ghost flex items-center gap-1 !py-1.5 !px-2.5 text-[var(--color-critical)] border-[var(--color-critical)]/20 hover:bg-[var(--color-critical)]/10 text-[10px] sm:text-xs rounded-[var(--radius-md)]">
+            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg> <span>{{ __('messages.export_pdf') }}</span>
         </a>
-        <button type="button" onclick="window.print()" class="flex-1 justify-center btn-ghost flex items-center gap-1.5 !py-2 !px-3 text-xs sm:text-sm rounded-[var(--radius-md)]">
-            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <button type="button" onclick="window.print()" class="flex-1 justify-center btn-ghost flex items-center gap-1 !py-1.5 !px-2.5 text-[10px] sm:text-xs rounded-[var(--radius-md)]">
+            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
             </svg> <span>{{ __('messages.print') }}</span>
         </button>
@@ -249,7 +254,7 @@
                     <tr class="border-b border-[var(--color-hairline-soft)] hover:bg-[var(--color-surface-soft)] transition-colors">
                         <td class="py-3 px-4 type-body-sm text-[var(--color-ink-deep)] font-medium">{{ $item['product_name'] }}</td>
                         <td class="py-3 px-4 type-body-sm text-center">{{ $item['total_qty_sold'] }}</td>
-                        <td class="py-3 px-4 text-center"><span class="badge {{ $item['cluster_label'] === 'fast_moving' ? 'badge-success' : ($item['cluster_label'] === 'medium_moving' ? 'badge-attention' : 'badge-critical') }}">{{ __('messages.' . $item['cluster_label']) }}</span></td>
+                        <td class="py-3 px-4 text-center"><span class="badge {{ $item['cluster_label'] === 'fast_moving' ? 'badge-success' : ($item['cluster_label'] === 'medium_moving' ? 'badge-attention' : ($item['cluster_label'] === 'new_product' ? 'bg-blue-100 text-blue-800' : 'badge-critical')) }}">{{ __('messages.' . $item['cluster_label']) }}</span></td>
                     </tr>
                     @empty
                     <tr><td colspan="3" class="py-8 text-center type-body-sm text-[var(--color-slate)]">{{ __('messages.no_data') }}</td></tr>
@@ -362,178 +367,18 @@
 @endsection
 
 @push('scripts')
-<script>
-function setDateRange(days) {
-    const startInput = document.getElementById('dash-start-date').value;
-    const start = startInput ? new Date(startInput) : new Date();
-    const end = new Date(start);
-    end.setDate(end.getDate() + days);
-    const fmt = d => {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-    };
-    document.getElementById('dash-end-date').value = fmt(end);
-    document.getElementById('dashboard-filter-form').submit();
-}
-
-let trendChartInst = null;
-let topProdChartInst = null;
-let kmeansChartInst = null;
-let smaChartInst = null;
-
-// Trend Data
-let salesData = {!! json_encode($salesTrend) !!};
-let repairData = {!! json_encode($repairTrend) !!};
-let trendDates = [...new Set([...salesData.map(d=>d.date), ...repairData.map(d=>d.date)])].sort();
-let sMap = {}; salesData.forEach(d => sMap[d.date] = d.total);
-let rMap = {}; repairData.forEach(d => rMap[d.date] = d.total_revenue);
-let sVals = trendDates.map(d => sMap[d] || 0);
-let rVals = trendDates.map(d => rMap[d] || 0);
-
-// Top Products Data
-let tpDataRaw = {!! json_encode($topProducts) !!};
-let tpNames = tpDataRaw.map(d => d.name);
-let tpQty = tpDataRaw.map(d => d.total_qty);
-
-// K-Means Data
-let kmDataRaw = {!! json_encode($clusterResults) !!};
-let kmCounts = { 'fast_moving': 0, 'medium_moving': 0, 'slow_moving': 0, 'dead_stock': 0 };
-kmDataRaw.forEach(i => { if(kmCounts[i.cluster_label] !== undefined) kmCounts[i.cluster_label]++; });
-let kmLabels = [
-    '{{ __("messages.fast_moving") }}', 
-    '{{ __("messages.medium_moving") }}', 
-    '{{ __("messages.slow_moving") }}', 
-    '{{ __("messages.dead_stock") }}'
-];
-let kmVals = [kmCounts['fast_moving'], kmCounts['medium_moving'], kmCounts['slow_moving'], kmCounts['dead_stock']];
-
-// SMA Data
-window.rawBiData = {
-    smaData: {!! json_encode($smaResults) !!}
-};
-
-// Colors
-const cPrimary = '#0064E0';
-const cSuccess = '#31A24C';
-const cPalette = ['#0064E0', '#1877F2', '#31A24C', '#F7B928', '#E41E3F'];
-const cKmPalette = ['#31A24C', '#F7B928', '#E41E3F', '#666666'];
-
-function updateTrendChart(type) {
-    if(!document.getElementById('combinedTrendChart')) return;
-    if(trendChartInst) trendChartInst.destroy();
-    trendChartInst = new Chart(document.getElementById('combinedTrendChart'), {
-        type: type,
-        data: {
-            labels: trendDates,
-            datasets: [
-                { label: '{{ __("messages.report_sales") }}', data: sVals, borderColor: cPrimary, backgroundColor: type==='line'?'rgba(0,100,224,0.1)':cPrimary, fill: true, tension: 0.3 },
-                { label: '{{ __("messages.report_repairs") }}', data: rVals, borderColor: cSuccess, backgroundColor: type==='line'?'rgba(49,162,76,0.1)':cSuccess, fill: true, tension: 0.3 }
-            ]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-    });
-}
-
-function updateTopProductsChart(type) {
-    if(!document.getElementById('topProductsChart')) return;
-    if(topProdChartInst) topProdChartInst.destroy();
-    topProdChartInst = new Chart(document.getElementById('topProductsChart'), {
-        type: type,
-        data: { labels: tpNames, datasets: [{ label: 'Total Terjual', data: tpQty, backgroundColor: cPalette }] },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: type !== 'bar', position: 'bottom' }
-            }
-        }
-    });
-}
-
-function updateKmeansChart(type) {
-    if(kmeansChartInst) kmeansChartInst.destroy();
-    kmeansChartInst = new Chart(document.getElementById('kmeansChart'), {
-        type: type,
-        data: { labels: kmLabels, datasets: [{ label: 'Jumlah Produk', data: kmVals, backgroundColor: cKmPalette }] },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: type !== 'bar', position: 'bottom' }
-            }
-        }
-    });
-}
-
-window.updateRestockChart = function(type, metric) {
-    const ctx = document.getElementById('biRestockChart');
-    if (!ctx || !window.rawBiData.smaData.length) return;
-    if (smaChartInst) smaChartInst.destroy();
-    
-    const isStatus = metric === 'status';
-    const isRadial = type === 'doughnut' || type === 'pie';
-    
-    let labels = [];
-    let datasets = [];
-    
-    if (isStatus) {
-        const needsRestockCount = window.rawBiData.smaData.filter(d => d.needs_restock).length;
-        const safeCount = window.rawBiData.smaData.length - needsRestockCount;
-        
-        labels = ['Perlu Isi Ulang Stok', 'Tidak Perlu Isi Ulang Stok'];
-        datasets = [{
-            label: 'Jumlah Produk',
-            data: [needsRestockCount, safeCount],
-            backgroundColor: ['#EF4444', '#10B981'],
-            borderWidth: isRadial ? 2 : 0,
-            borderRadius: isRadial ? 0 : 6,
-            borderColor: isRadial ? '#fff' : 'transparent'
-        }];
-    } else {
-        const productsNeedRestock = window.rawBiData.smaData
-            .filter(d => d.needs_restock && d.restock_recommendation > 0)
-            .sort((a, b) => b.restock_recommendation - a.restock_recommendation)
-            .slice(0, 20);
+    <script>
+        function setDateRange(days) {
+            const startInput = document.getElementById('dash-start-date').value;
+            const start = startInput ? new Date(startInput) : new Date();
+            const end = new Date(start);
+            end.setDate(start.getDate() + days);
             
-        labels = productsNeedRestock.map(p => p.product_name);
-        datasets = [{
-            label: 'Saran Tambah (Unit)',
-            data: productsNeedRestock.map(p => p.restock_recommendation),
-            backgroundColor: '#F59E0B',
-            borderWidth: isRadial ? 2 : 0,
-            borderRadius: isRadial ? 0 : 6,
-            borderColor: isRadial ? '#fff' : 'transparent'
-        }];
-    }
-    
-    const options = {
-        responsive: true, maintainAspectRatio: false, cutout: type === 'doughnut' ? '60%' : 0,
-        plugins: {
-            legend: { display: isRadial, position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } },
-            tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw} ${isStatus ? 'produk' : 'unit'}` } }
-        },
-        scales: isRadial ? { x: { display: false }, y: { display: false } } : {
-            y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,0.12)' }, ticks: { color: '#94A3B8' } },
-            x: { grid: { display: false }, ticks: { color: '#94A3B8', font: { size: 10 } } }
+            document.getElementById('dash-start-date').value = start.toISOString().split('T')[0];
+            document.getElementById('dash-end-date').value = end.toISOString().split('T')[0];
+            document.getElementById('dashboard-filter-form').submit();
         }
-    };
-    
-    smaChartInst = new Chart(ctx, { 
-        type: type, 
-        data: { labels: labels, datasets: datasets }, 
-        options: options 
-    });
-};
-
-document.addEventListener('DOMContentLoaded', function() {
-    updateTrendChart('line');
-    updateTopProductsChart('doughnut');
-    updateKmeansChart('doughnut');
-    updateRestockChart('doughnut', 'status');
-});
-</script>
+    </script>
 <style>
 @media print {
     @page { margin: 5mm; } /* Let user/browser decide orientation */

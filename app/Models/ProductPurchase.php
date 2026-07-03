@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductPurchase extends Model
 {
+    use BelongsToStore;
+
     protected $table = 'product_purchases';
 
     protected $primaryKey = 'product_purchase_code';
@@ -15,16 +18,8 @@ class ProductPurchase extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'product_purchase_code', 'source', 'supplier_code', 'purchase_date', 'estimated_arrival_date',
+        'product_purchase_code', 'store_id', 'purchase_date', 'estimated_arrival_date',
         'total', 'status', 'notes', 'partial_notes', 'created_by',
-        // WA
-        'wa_message_content', 'wa_message_status',
-        // Marketplace
-        'marketplace_name', 'marketplace_seller', 'marketplace_order_id', 'marketplace_notes',
-        // Offline
-        'store_name', 'receipt_number', 'offline_notes',
-        // Other
-        'other_source', 'other_notes',
         // Service — linked to a ServiceRepairItem that requested this purchase
         'repair_item_id',
     ];
@@ -39,11 +34,6 @@ class ProductPurchase extends Model
     }
 
     // ─── Relationships ──────────────────────────────────────────────────────
-
-    public function supplier(): BelongsTo
-    {
-        return $this->belongsTo(Supplier::class, 'supplier_code', 'supplier_code');
-    }
 
     public function creator(): BelongsTo
     {
@@ -83,30 +73,79 @@ class ProductPurchase extends Model
     }
 
     /**
-     * Generate an automatic WhatsApp message content based on purchase items.
+     * Get a list of WhatsApp suppliers involved in this purchase, with their generated messages.
+     * @return array
      */
-    public function generateWaMessageContent(): string
+    public function getWhatsappSuppliers(): array
     {
-        $supplierName = $this->supplier ? $this->supplier->name : 'Supplier';
-        $date = $this->purchase_date->format('d/m/Y');
-        $lines = ["Halo *{$supplierName}*,"];
-        $lines[] = "";
-        $lines[] = "Kami ingin memesan barang berikut (Tanggal: {$date}):";
-        $lines[] = "";
-        foreach ($this->items as $i => $item) {
-            $name = $item->product ? $item->product->name : $item->temp_product_name;
-            $lines[] = ($i + 1) . ". *{$name}* — Qty: {$item->quantity}";
+        $suppliers = [];
+        $whatsappItems = $this->items()->with(['supplier', 'product'])->where('source', 'whatsapp')->whereNotNull('supplier_code')->get();
+
+        $grouped = $whatsappItems->groupBy('supplier_code');
+        foreach ($grouped as $supplierCode => $items) {
+            $supplier = $items->first()->supplier;
+            if (!$supplier) continue;
+            
+            $supplierName = $supplier->name;
+            $date = $this->purchase_date->format('d/m/Y');
+            $lines = ["Halo *{$supplierName}*,"];
+            $lines[] = "";
+            $lines[] = "Kami ingin memesan barang berikut (Tanggal: {$date}):";
+            $lines[] = "";
+            foreach ($items as $i => $item) {
+                $name = $item->product ? $item->product->name : $item->temp_product_name;
+                $lines[] = ($i + 1) . ". *{$name}* — Jumlah: {$item->quantity}";
+            }
+            $lines[] = "";
+            $lines[] = "Mohon konfirmasi ketersediaan dan harga. Terima kasih!";
+            
+            $suppliers[] = [
+                'supplier' => $supplier,
+                'message'  => implode("\n", $lines)
+            ];
         }
-        $lines[] = "";
-        $lines[] = "Mohon konfirmasi ketersediaan dan harga. Terima kasih!";
-        return implode("\n", $lines);
+
+        return $suppliers;
+    }
+
+    public function getSummarySources(): string
+    {
+        $sourceLabels = [
+            'whatsapp'    => 'Supplier',
+            'marketplace' => 'Marketplace',
+            'offline'     => 'Toko Offline',
+            'service'     => 'Dari Servis',
+            'other'       => 'Lainnya',
+        ];
+
+        $sources = $this->items()->select('source')->distinct()->pluck('source')->toArray();
+        if (empty($sources)) return '-';
+        if (count($sources) > 1) return 'Multi-Sumber';
+
+        return $sourceLabels[$sources[0]] ?? $sources[0];
+    }
+
+    public function getSummarySuppliers(): string
+    {
+        $suppliers = $this->items()->with('supplier')
+            ->whereNotNull('supplier_code')
+            ->get()
+            ->pluck('supplier.name')
+            ->filter()
+            ->unique()
+            ->toArray();
+            
+        if (empty($suppliers)) return '-';
+        if (count($suppliers) > 1) return 'Multi-Supplier';
+        
+        return array_values($suppliers)[0];
     }
 
     public static function generateCode(): string
     {
         $today = now()->format('Ymd');
         $prefix = 'PPR' . $today;
-        $last = static::where('product_purchase_code', 'like', $prefix . '%')
+        $last = static::withoutGlobalScope('store')->where('product_purchase_code', 'like', $prefix . '%')
             ->orderBy('product_purchase_code', 'desc')
             ->first();
         $number = $last ? (int) substr($last->product_purchase_code, -4) + 1 : 1;

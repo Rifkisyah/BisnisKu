@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,12 +10,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Transaction extends Model
 {
+    use BelongsToStore;
+
     protected $primaryKey = 'transaction_code';
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
-        'transaction_code', 'cashier_id', 'transaction_date', 'subtotal',
+        'transaction_code', 'store_id', 'cashier_id', 'transaction_date', 'subtotal',
         'discount', 'total', 'payment_method', 'amount_paid',
         'change_amount', 'status', 'notes',
     ];
@@ -76,7 +79,7 @@ class Transaction extends Model
     {
         $today = now()->format('Ymd');
         $prefix = 'TRX' . $today;
-        $last = static::where('transaction_code', 'like', $prefix . '%')
+        $last = static::withoutGlobalScope('store')->where('transaction_code', 'like', $prefix . '%')
             ->orderBy('transaction_code', 'desc')
             ->first();
         $number = $last ? (int) substr($last->transaction_code, -4) + 1 : 1;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('Sign up') }} - BisnisKu</title>
+    <title>{{ __('Sign up') }} - {{ $globalShopName }}</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,39 +88,117 @@
             </div>
             @endif
 
-            <form method="POST" action="{{ route('register.submit') }}" class="space-y-5">
+            <form method="POST" action="{{ route('register.submit') }}" class="space-y-5"
+                  x-data="{
+                    storeName: '{{ old('store_name') }}',
+                    storeSlug: '{{ old('store_slug') }}',
+                    slugAvailable: null,
+                    checkingSlug: false,
+                    generateSlug(name) {
+                        return name.toLowerCase()
+                            .replace(/[^a-z0-9\s-]/g, '')
+                            .replace(/\s+/g, '-')
+                            .replace(/-+/g, '-')
+                            .trim('-');
+                    },
+                    async checkSlug(slug) {
+                        if (!slug) { this.slugAvailable = null; return; }
+                        this.checkingSlug = true;
+                        try {
+                            const res = await fetch(`/api/check-slug?name=${encodeURIComponent(slug)}`);
+                            const data = await res.json();
+                            this.slugAvailable = data.available;
+                        } catch(e) { this.slugAvailable = null; }
+                        this.checkingSlug = false;
+                    }
+                  }"
+                  @submit.prevent="storeSlug = storeSlug || generateSlug(storeName); $el.submit()">
                 @csrf
+
+                {{-- Section: Store Info --}}
+                <p class="type-body-sm-bold text-[var(--color-slate)] uppercase tracking-wider">{{ __('Informasi Toko') }}</p>
+
                 <div>
-                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">{{ __('Username') }}</label>
-                    <input type="text" name="username" value="{{ old('username') }}" required autofocus
-                           class="w-full h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none" placeholder="johndoe">
+                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">{{ __('Nama Toko') }} <span class="text-[var(--color-critical)]">*</span></label>
+                    <input type="text" name="store_name" id="store_name"
+                           x-model="storeName"
+                           @input.debounce.400ms="storeSlug = generateSlug(storeName); checkSlug(storeSlug)"
+                           value="{{ old('store_name') }}" required autofocus
+                           class="w-full h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none"
+                           placeholder="Armal Cellular">
+                </div>
+
+                <div>
+                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">
+                        {{ __('URL Katalog') }}
+                        <span class="text-[var(--color-slate)] font-normal">(opsional, auto-generate)</span>
+                    </label>
+                    <div class="flex items-center gap-0">
+                        <span class="inline-flex items-center h-11 px-3 text-xs text-[var(--color-slate)] bg-[var(--color-surface-soft)] border border-r-0 border-[var(--color-hairline)] rounded-l-[var(--radius-lg)]">bisnisku.app/store/</span>
+                        <input type="text" name="store_slug" id="store_slug"
+                               x-model="storeSlug"
+                               @input.debounce.500ms="checkSlug(storeSlug)"
+                               value="{{ old('store_slug') }}"
+                               class="flex-1 h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-r-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none"
+                               placeholder="armal-cellular">
+                    </div>
+                    <div class="mt-1 h-5">
+                        <p x-show="checkingSlug" class="type-caption text-[var(--color-slate)]">Memeriksa ketersediaan...</p>
+                        <p x-show="!checkingSlug && slugAvailable === true" class="type-caption text-[var(--color-success)]">✓ Slug tersedia</p>
+                        <p x-show="!checkingSlug && slugAvailable === false" class="type-caption text-[var(--color-critical)]">✗ Slug sudah digunakan, coba yang lain</p>
+                    </div>
+                </div>
+
+                <hr class="border-[var(--color-hairline-soft)]">
+
+                {{-- Section: Owner Info --}}
+                <p class="type-body-sm-bold text-[var(--color-slate)] uppercase tracking-wider">{{ __('Informasi Pemilik') }}</p>
+
+                <div>
+                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">{{ __('Nama Lengkap') }} <span class="text-[var(--color-critical)]">*</span></label>
+                    <input type="text" name="owner_name" id="owner_name" value="{{ old('owner_name') }}" required
+                           class="w-full h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none"
+                           placeholder="John Doe">
+                </div>
+
+                <div>
+                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">{{ __('Email') }} <span class="text-[var(--color-critical)]">*</span></label>
+                    <input type="email" name="email" id="email" value="{{ old('email') }}" required
+                           class="w-full h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none"
+                           placeholder="name@company.com">
+                </div>
+
+                <div>
+                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">{{ __('Nomor HP / WhatsApp') }}</label>
+                    <input type="text" name="contact" id="contact" value="{{ old('contact') }}"
+                           class="w-full h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none"
+                           placeholder="08xxxxxxxxxx">
+                </div>
+
+                <div>
+                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">{{ __('Password') }} <span class="text-[var(--color-critical)]">*</span></label>
+                    <input type="password" name="password" id="password" required
+                           class="w-full h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none"
+                           placeholder="Min. 8 karakter">
                 </div>
                 <div>
-                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">{{ __('Email Address') }}</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required
-                           class="w-full h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none" placeholder="name@company.com">
+                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">{{ __('Konfirmasi Password') }} <span class="text-[var(--color-critical)]">*</span></label>
+                    <input type="password" name="password_confirmation" id="password_confirmation" required
+                           class="w-full h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none"
+                           placeholder="••••••••">
                 </div>
-                <div>
-                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">{{ __('Password') }}</label>
-                    <input type="password" name="password" required
-                           class="w-full h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none" placeholder="••••••••">
-                </div>
-                <div>
-                    <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">{{ __('Confirm Password') }}</label>
-                    <input type="password" name="password_confirmation" required
-                           class="w-full h-11 bg-[var(--color-canvas)] text-[var(--color-ink)] border border-[var(--color-hairline)] rounded-[var(--radius-lg)] px-4 type-body-sm transition-colors focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none" placeholder="••••••••">
-                </div>
-                
-                <button type="submit" class="btn-buy w-full shadow-sm hover:-translate-y-0.5 transition-transform mt-2">
-                    {{ __('Sign Up') }}
+
+                <button type="submit" id="btn-register" class="btn-buy w-full shadow-sm hover:-translate-y-0.5 transition-transform mt-2">
+                    {{ __('Daftarkan Toko') }}
                 </button>
             </form>
-            
+
             <div class="mt-8 text-center">
-                <p class="type-body-sm text-[var(--color-slate)]">{{ __('Already have an account?') }} <a href="{{ route('login') }}" class="text-[var(--color-primary)] font-bold hover:underline">{{ __('Log in') }}</a></p>
+                <p class="type-body-sm text-[var(--color-slate)]">{{ __('Sudah punya akun?') }} <a href="{{ route('login') }}" class="text-[var(--color-primary)] font-bold hover:underline">{{ __('Masuk') }}</a></p>
             </div>
         </div>
     </div>
 </div>
 </body>
 </html>
+

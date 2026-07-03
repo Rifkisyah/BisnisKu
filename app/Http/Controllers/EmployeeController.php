@@ -13,17 +13,19 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
+        // Scope employees to the current store only
         $query = User::with('role')
+            ->where('store_id', auth()->user()->store_id)
             ->when($request->search, fn($q, $s) => $q->where('username', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"))
             ->when($request->role, fn($q, $r) => $q->whereHas('role', fn($rq) => $rq->where('name', $r)));
 
         if ($request->get('export') === 'pdf') {
-            $employees = $query->latest()->get();
+            $employees = $query->applySort($request->sort)->get();
             $pdf = Pdf::loadView('employees.pdf', compact('employees'));
             return $pdf->download('laporan-karyawan.pdf');
         }
 
-        $employees = $query->latest()->paginate(15)->withQueryString();
+        $employees = $query->applySort($request->sort)->paginate(15)->withQueryString();
         $roles = Role::all();
 
         return view('employees.index', compact('employees', 'roles'));
@@ -47,6 +49,7 @@ class EmployeeController extends Controller
 
         $validated['password'] = Hash::make($validated['password']);
         $validated['status'] = 'active';
+        $validated['store_id'] = auth()->user()->store_id; // auto-assign to owner's store
 
         User::create($validated);
 

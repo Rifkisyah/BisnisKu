@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymentSetting extends Model
 {
+    use BelongsToStore;
+
     protected $fillable = [
+        'store_id',
         'qris_mode',
         'manual_qris_image',
         'qris_provider',
@@ -14,14 +18,23 @@ class PaymentSetting extends Model
         'client_key',
         'server_key',
         'callback_url',
-        'is_qris_active'
+        'is_qris_active',
     ];
 
-    public static function getSettings()
+    protected $casts = [
+        'is_qris_active' => 'boolean',
+    ];
+
+    /**
+     * Get or create the PaymentSetting for the currently resolved store.
+     */
+    public static function getSettings(): self
     {
-        return self::firstOrCreate([], [
-            'qris_mode' => 'manual',
-            'is_qris_active' => true
-        ]);
+        $storeId = app()->bound('current_store') ? app('current_store')->id : null;
+
+        return self::firstOrCreate(
+            ['store_id' => $storeId],
+            ['qris_mode' => 'manual', 'is_qris_active' => true]
+        );
     }
 }

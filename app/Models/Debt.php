@@ -2,18 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Debt extends Model
 {
+    use BelongsToStore;
+
     protected $primaryKey = 'debt_code';
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
-        'debt_code', 'debtor_name', 'debtor_contact',
+        'debt_code', 'store_id', 'debtor_name', 'debtor_contact',
         'debtor_address', 'total_amount', 'paid_amount', 'remaining_amount',
         'debt_date', 'due_date', 'status', 'notes', 'transaction_code',
     ];
@@ -63,7 +66,7 @@ class Debt extends Model
     public static function generateCode(): string
     {
         $prefix = 'DBT';
-        $last = static::where('debt_code', 'like', $prefix . '%')
+        $last = static::withoutGlobalScope('store')->where('debt_code', 'like', $prefix . '%')
             ->orderBy('debt_code', 'desc')
             ->first();
         $number = $last ? (int) substr($last->debt_code, 3) + 1 : 1;

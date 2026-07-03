@@ -55,7 +55,17 @@
                     <option value="inactive" @selected(request('status') === 'inactive')>Nonaktif</option>
                 </select>
             </div>
-            <div class="w-full sm:w-auto">
+            
+            <div class="w-full sm:w-48">
+                <label class="block type-caption-bold text-[var(--color-slate)] mb-1">Urutkan</label>
+                <select name="sort" class="input-field w-full" onchange="this.form.submit()">
+                    <option value="" {{ !request('sort') || request('sort') == 'created_at_desc' ? 'selected' : '' }}>Dibuat (Terbaru)</option>
+                    <option value="created_at_asc" {{ request('sort') == 'created_at_asc' ? 'selected' : '' }}>Dibuat (Terlama)</option>
+                    <option value="updated_at_desc" {{ request('sort') == 'updated_at_desc' ? 'selected' : '' }}>Diupdate (Terbaru)</option>
+                    <option value="updated_at_asc" {{ request('sort') == 'updated_at_asc' ? 'selected' : '' }}>Diupdate (Terlama)</option>
+                </select>
+            </div>
+<div class="w-full sm:w-auto">
                 <button type="submit" class="btn-primary w-full sm:w-auto px-6 sm:w-auto px-6 !py-2.5">{{ __('messages.search') }}</button>
             </div>
         </form>
@@ -84,10 +94,10 @@
                 @endif
             </td>
             <td class="px-5 py-3 type-body-sm text-[var(--color-slate)] truncate max-w-[200px]">{{ $s->address ?? '-' }}</td>
-            <td class="px-5 py-3"><span class="badge {{ $s->status === 'active' ? 'badge-success' : 'badge-critical' }}">{{ $s->status }}</span></td>
+            <td class="px-5 py-3"><span class="badge {{ $s->is_active ? 'badge-success' : 'badge-critical' }}">{{ $s->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
             <td class="px-5 py-3"><div class="flex items-center gap-1">
                 <a href="{{ route('suppliers.show', $s) }}" onclick="event.stopPropagation()" class="btn-ghost !py-1.5 !px-3 !text-xs">{{ __('messages.detail') }}</a>
-                <button onclick="event.stopPropagation(); $dispatch('open-delete-modal', { url: '{{ route('suppliers.destroy', $s) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                <button @click.stop="$dispatch('open-delete-modal', { url: '{{ route('suppliers.destroy', $s) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
             </div></td>
         </tr>
         @empty<tr><td colspan="6" class="px-5 py-12 text-center type-body-md text-[var(--color-stone)]">{{ __('messages.no_data') }}</td></tr>@endforelse
@@ -115,10 +125,10 @@
                 @endif
             </div>
             <p class="type-caption text-[var(--color-slate)] mb-3 line-clamp-2 px-2">{{ $s->address ?? 'Tidak ada alamat' }}</p>
-            <span class="badge {{ $s->status === 'active' ? 'badge-success' : 'badge-critical' }} !px-2 !py-0.5 !text-[10px] mb-4">{{ $s->status }}</span>
+            <span class="badge {{ $s->is_active ? 'badge-success' : 'badge-critical' }} !px-2 !py-0.5 !text-[10px] mb-4">{{ $s->is_active ? 'Aktif' : 'Nonaktif' }}</span>
             <div class="mt-auto w-full pt-3 border-t border-[var(--color-hairline-soft)] flex justify-center gap-1">
                 <a href="{{ route('suppliers.show', $s) }}" onclick="event.stopPropagation()" class="btn-ghost flex-1 !py-1.5 !text-xs">{{ __('messages.detail') }}</a>
-                <button onclick="event.stopPropagation(); $dispatch('open-delete-modal', { url: '{{ route('suppliers.destroy', $s) }}' })" class="btn-ghost flex-1 !py-1.5 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                <button @click.stop="$dispatch('open-delete-modal', { url: '{{ route('suppliers.destroy', $s) }}' })" class="btn-ghost flex-1 !py-1.5 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
             </div>
         </div>
         @empty

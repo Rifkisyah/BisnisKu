@@ -28,7 +28,7 @@ class SalesRevenueController extends Controller
 
         // ── POS Transactions (only, no service) ───────────────────────────────
         $transactionQuery = Transaction::with('cashier', 'items.product')
-            ->where('status', 'completed')
+            ->where('status', 'paid')
             ->whereBetween('transaction_date', [$startCarbon, $endCarbon])
             ->when($request->payment_method, fn($q, $pm) => $q->where('payment_method', $pm));
 
@@ -40,7 +40,7 @@ class SalesRevenueController extends Controller
 
         // ── Gross Profit & Net Profit ─────────────────────────────────────────
         $grossProfit = TransactionItem::whereHas('transaction',
-                fn($q) => $q->where('status', 'completed')
+                fn($q) => $q->where('status', 'paid')
                              ->whereBetween('transaction_date', [$startCarbon, $endCarbon]))
             ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
             ->selectRaw('SUM((transaction_items.unit_price - products.purchase_price) * transaction_items.quantity) as gp')
@@ -66,7 +66,7 @@ class SalesRevenueController extends Controller
 
         // ── Category Breakdown ────────────────────────────────────────────────
         $categoryBreakdown = TransactionItem::whereHas('transaction',
-                fn ($q) => $q->where('status', 'completed')->whereBetween('transaction_date', [$startCarbon, $endCarbon]))
+                fn ($q) => $q->where('status', 'paid')->whereBetween('transaction_date', [$startCarbon, $endCarbon]))
             ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
             ->join('categories', 'products.category_code', '=', 'categories.category_code')
             ->selectRaw('categories.category_code as id, categories.name,

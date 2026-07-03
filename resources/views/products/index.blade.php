@@ -19,10 +19,12 @@
             </div>
 
             <!-- Add Button: Large on Mobile -->
+            @if(!auth()->user()->isKasir())
             <a href="{{ route('products.create') }}" class="btn-primary w-full sm:w-auto !py-3 sm:!py-2 !px-4 whitespace-nowrap text-center text-lg sm:text-sm order-first sm:order-last mb-2 sm:mb-0">
                 <svg class="h-5 w-5 sm:h-4 sm:w-4 mr-2 sm:mr-1.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span class="inline-block">{{ __('messages.add') }}</span>
             </a>
+            @endif
 
             <!-- Desktop Actions -->
             <div class="hidden sm:flex flex-wrap items-center gap-2">
@@ -50,14 +52,36 @@
             </div>
             <div class="w-full sm:w-48">
                 <label class="block type-caption-bold text-[var(--color-slate)] mb-1">Tipe Produk</label>
-                <select name="type" class="input-field w-full">
-                    <option value="">{{ __('messages.all') }}</option>
-                    <option value="physical" {{ request('type') === 'physical' ? 'selected' : '' }}>{{ __('messages.physical') }}</option>
-                    <option value="digital" {{ request('type') === 'digital' ? 'selected' : '' }}>{{ __('messages.digital') }}</option>
+                <select name="tab" class="input-field w-full" onchange="this.form.submit()">
+                    <option value="" {{ request('tab', '') === '' ? 'selected' : '' }}>{{ __('messages.all') }}</option>
+                    <option value="physical" {{ request('tab') === 'physical' ? 'selected' : '' }}>{{ __('messages.physical') }}</option>
+                    <option value="digital" {{ request('tab') === 'digital' ? 'selected' : '' }}>{{ __('messages.digital') }}</option>
+                    <option value="sparepart" {{ request('tab') === 'sparepart' ? 'selected' : '' }}>Sparepart (Servis)</option>
                 </select>
             </div>
+            
+            <div class="w-full sm:w-48">
+                <label class="block type-caption-bold text-[var(--color-slate)] mb-1">Urutkan</label>
+                <select name="sort" class="input-field w-full" onchange="this.form.submit()">
+                    <option value="" {{ !request('sort') || request('sort') == 'created_at_desc' ? 'selected' : '' }}>Dibuat (Terbaru)</option>
+                    <option value="created_at_asc" {{ request('sort') == 'created_at_asc' ? 'selected' : '' }}>Dibuat (Terlama)</option>
+                    <option value="updated_at_desc" {{ request('sort') == 'updated_at_desc' ? 'selected' : '' }}>Diupdate (Terbaru)</option>
+                    <option value="updated_at_asc" {{ request('sort') == 'updated_at_asc' ? 'selected' : '' }}>Diupdate (Terlama)</option>
+                </select>
+            </div>
+
             <div class="w-full sm:w-auto">
-                <button type="submit" class="btn-primary w-full sm:w-auto px-6 sm:w-auto px-6 !py-2.5">{{ __('messages.search') }}</button>
+                <label class="block type-caption-bold text-transparent mb-1 hidden sm:block">&nbsp;</label>
+                <div class="h-[42px] flex items-center">
+                    <label class="flex items-center gap-2 cursor-pointer bg-[var(--color-canvas)] px-3 py-2 rounded-lg border border-[var(--color-hairline-soft)] hover:border-[var(--color-primary)] transition-colors h-full">
+                        <input type="checkbox" name="show_sparepart" value="1" {{ request('show_sparepart') ? 'checked' : '' }} onchange="this.form.submit()" class="checkbox-field rounded border-gray-300 text-[var(--color-primary)] shadow-sm focus:border-[var(--color-primary)] focus:ring focus:ring-[var(--color-primary)] focus:ring-opacity-50">
+                        <span class="type-body-sm text-[var(--color-ink)] font-medium">Tampilkan Sparepart</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="w-full sm:w-auto">
+                <button type="submit" class="btn-primary w-full sm:w-auto px-6 !py-2.5">{{ __('messages.search') }}</button>
             </div>
         </form>
     </div>
@@ -90,7 +114,9 @@
                     <td class="px-5 py-3">
                         <div class="flex items-center gap-1">
                             <a href="{{ route('products.show', $p) }}" onclick="event.stopPropagation()" class="btn-ghost !py-1.5 !px-3 !text-xs">{{ __('messages.detail') }}</a>
-                            <button onclick="event.stopPropagation(); $dispatch('open-delete-modal', { url: '{{ route('products.destroy', $p) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                            @if(!auth()->user()->isKasir())
+                            <button @click.stop="$dispatch('open-delete-modal', { url: '{{ route('products.destroy', $p) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                            @endif
                         </div>
                     </td>
                 </tr>
@@ -127,7 +153,9 @@
                 </div>
                 <div class="pt-3 mt-3 border-t border-[var(--color-hairline-soft)] flex justify-end gap-1">
                     <a href="{{ route('products.show', $p) }}" onclick="event.stopPropagation()" class="btn-ghost !py-1.5 !px-3 !text-xs">{{ __('messages.detail') }}</a>
-                    <button onclick="event.stopPropagation(); $dispatch('open-delete-modal', { url: '{{ route('products.destroy', $p) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                    @if(!auth()->user()->isKasir())
+                    <button @click.stop="$dispatch('open-delete-modal', { url: '{{ route('products.destroy', $p) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -139,6 +167,3 @@
     <div class="mt-4 border-t border-[var(--color-hairline-soft)] pt-4">{{ $products->links() }}</div>
 </div>
 @endsection
-
-
-

@@ -19,7 +19,7 @@ class DebtController extends Controller
             ->when($request->search, fn($q, $s) => $q->where('debtor_name', 'like', "%{$s}%")->orWhere('debt_code', 'like', "%{$s}%"))
             ->when($request->status, fn($q, $st) => $q->where('status', $st));
 
-        $debts = $query->latest()->paginate(15)->withQueryString();
+        $debts = $query->applySort($request->sort)->paginate(15)->withQueryString();
 
         if ($request->get('export') === 'pdf') {
             $allDebts = $query->get();

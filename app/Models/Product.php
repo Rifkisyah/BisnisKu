@@ -2,18 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
+    use BelongsToStore;
+
     protected $primaryKey = 'product_code';
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
-        'product_code', 'name', 'category_code', 'supplier_code',
+        'product_code', 'store_id', 'name', 'category_code', 'supplier_code',
         'purchase_price', 'selling_price', 'stock', 'minimum_stock',
         'unit', 'description', 'image', 'status', 'type',
     ];
@@ -119,7 +122,8 @@ class Product extends Model
             'sparepart' => 'SPR',
             default     => 'PRD',
         };
-        $last = static::where('product_code', 'like', $prefix . '%')
+        $last = static::withoutGlobalScope('store')
+            ->where('product_code', 'like', $prefix . '%')
             ->orderBy('product_code', 'desc')
             ->first();
         $number = $last ? (int) substr($last->product_code, strlen($prefix)) + 1 : 1;

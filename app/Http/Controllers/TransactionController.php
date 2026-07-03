@@ -24,13 +24,13 @@ class TransactionController extends Controller
               ->when($request->payment_method, fn($q, $pm) => $q->where('payment_method', $pm));
 
         if ($request->get('export') === 'pdf') {
-            $transactions = $query->latest('transaction_date')->get();
+            $transactions = $query->applySort($request->sort, 'transaction_date')->get();
             $totalRevenue = $transactions->sum('total');
             $pdf = Pdf::loadView('transactions.pdf', compact('transactions', 'totalRevenue', 'startDate', 'endDate'));
             return $pdf->download('laporan-transaksi.pdf');
         }
 
-        $transactions = $query->latest('transaction_date')->paginate(15)->withQueryString();
+        $transactions = $query->applySort($request->sort, 'transaction_date')->paginate(15)->withQueryString();
         return view('transactions.index', compact('transactions', 'startDate', 'endDate'));
     }
 

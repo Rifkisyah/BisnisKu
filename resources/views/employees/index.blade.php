@@ -51,10 +51,20 @@
                 <label class="block type-caption-bold text-[var(--color-slate)] mb-1">Role</label>
                 <select name="role" class="input-field w-full">
                     <option value="">Semua Role</option>
-                    @foreach($roles as $r)<option value="{{ $r->name }}" @selected(request('role') === $r->name)>{{ strtoupper($r->name) }}</option>@endforeach
+                    @foreach($roles as $r)<option value="{{ $r->name }}" @selected(request('role') === $r->name)>{{ strtoupper($r->display_name) }}</option>@endforeach
                 </select>
             </div>
-            <div class="w-full sm:w-auto">
+            
+            <div class="w-full sm:w-48">
+                <label class="block type-caption-bold text-[var(--color-slate)] mb-1">Urutkan</label>
+                <select name="sort" class="input-field w-full" onchange="this.form.submit()">
+                    <option value="" {{ !request('sort') || request('sort') == 'created_at_desc' ? 'selected' : '' }}>Dibuat (Terbaru)</option>
+                    <option value="created_at_asc" {{ request('sort') == 'created_at_asc' ? 'selected' : '' }}>Dibuat (Terlama)</option>
+                    <option value="updated_at_desc" {{ request('sort') == 'updated_at_desc' ? 'selected' : '' }}>Diupdate (Terbaru)</option>
+                    <option value="updated_at_asc" {{ request('sort') == 'updated_at_asc' ? 'selected' : '' }}>Diupdate (Terlama)</option>
+                </select>
+            </div>
+<div class="w-full sm:w-auto">
                 <button type="submit" class="btn-primary w-full sm:w-auto px-6 sm:w-auto px-6 !py-2.5">{{ __('messages.search') }}</button>
             </div>
         </form>
@@ -71,7 +81,7 @@
         <tr onclick="window.location='{{ route('employees.show', $e) }}'" class="border-b border-[var(--color-hairline-soft)]/50 hover:bg-[var(--color-surface-soft)] cursor-pointer transition-colors duration-150">
             <td class="px-5 py-3 type-body-sm font-medium text-[var(--color-ink)]">{{ $e->username }}</td>
             <td class="px-5 py-3 type-body-sm text-[var(--color-slate)]">{{ $e->email }}</td>
-            <td class="px-5 py-3"><span class="badge badge-info">{{ $e->role->name }}</span></td>
+            <td class="px-5 py-3"><span class="badge badge-info">{{ $e->role->display_name }}</span></td>
             <td class="px-5 py-3"><span class="badge {{ $e->status === 'active' ? 'badge-success' : 'badge-critical' }}">{{ $e->status }}</span></td>
             <td class="px-5 py-3"><div class="flex items-center gap-1">
                 <a href="{{ route('employees.show', $e) }}" class="btn-ghost !py-1.5 !px-3 !text-xs">{{ __('messages.detail') }}</a>
@@ -92,7 +102,7 @@
             <h4 class="type-body-sm sm:type-body-md font-bold text-[var(--color-ink-deep)] mb-1 truncate w-full">{{ $e->username }}</h4>
             <p class="text-[10px] sm:type-caption text-[var(--color-slate)] mb-2 truncate w-full">{{ $e->email }}</p>
             <div class="flex gap-2 mb-4">
-                <span class="badge badge-info !px-2 !py-0.5 !text-[10px]">{{ strtoupper($e->role->name) }}</span>
+                <span class="badge badge-info !px-2 !py-0.5 !text-[10px]">{{ strtoupper($e->role->display_name) }}</span>
                 <span class="badge {{ $e->status === 'active' ? 'badge-success' : 'badge-critical' }} !px-2 !py-0.5 !text-[10px]">{{ $e->status }}</span>
             </div>
             <div class="mt-auto w-full pt-3 border-t border-[var(--color-hairline-soft)] flex justify-center gap-1">

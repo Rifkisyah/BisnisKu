@@ -99,17 +99,27 @@
                     <label class="type-caption-bold text-[var(--color-slate)]">{{ __('messages.payment_method') }}</label>
                     <select x-model="paymentMethod" class="input-field !h-9 mt-1">
                         <option value="cash">{{ __('messages.cash') }}</option>
-                        <option value="qris">QRIS</option>
+                        <option value="qris">QRIS (DANA / E-Wallet)</option>
                     </select>
                 </div>
                 
+                <div x-show="paymentMethod === 'qris'" class="p-3 bg-blue-50 border border-blue-200 rounded-[var(--radius-md)] mt-2 mb-2 text-center" x-cloak>
+                    <p class="type-caption text-blue-800 mb-2"><b>Scan QRIS DANA</b></p>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QRIS" class="w-32 h-32 mx-auto rounded-lg shadow-sm border border-blue-100">
+                    <p class="type-caption text-blue-800 mt-2 text-[10px]">Silakan scan menggunakan DANA atau e-wallet lainnya.</p>
+                </div>                
                 <div x-show="paymentMethod === 'qris'" class="p-3 bg-purple-50 border border-purple-200 rounded-[var(--radius-md)] mt-2">
                     <p class="type-caption text-purple-800">{{ __('messages.qris_system_info') }}</p>
+                </div>
+
+                <div>
+                    <label class="type-caption-bold text-[var(--color-slate)]">No. WA Pelanggan (Opsional)</label>
+                    <input type="text" x-model="customerContact" class="input-field !h-9 mt-1" placeholder="08..." inputmode="numeric">
                 </div>
                 
                 <div>
                     <label class="type-caption-bold text-[var(--color-slate)]">{{ __('messages.amount_paid') }}</label>
-                    <input type="text" :value="formatInput(amountPaid)" @input="amountPaid = parseInput($event.target.value)" class="input-field !h-9 mt-1">
+                    <input type="text" inputmode="numeric" class="input-field !h-9 mt-1 input-rupiah" :value="formatInput(amountPaid)" @input="amountPaid = parseInput($event.target.value)">
                 </div>
             </div>
             <div x-show="!isDebt && change > 0" class="flex justify-between type-body-sm"><span class="text-[var(--color-slate)]">{{ __('messages.change') }}</span><span class="font-bold text-[var(--color-success)]" x-text="formatRupiah(change)"></span></div>
@@ -228,10 +238,18 @@
                         {{ __('messages.print_receipt') }}
                     </a>
                 </div>
-                <a :href="'https://wa.me/' + ((isDebt ? debtorContact : customerContact).replace(/\D/g, '')) + '?text=' + encodeURIComponent('Halo, ini struk belanja Anda di {{ \App\Models\Setting::get('store_name', 'Toko Kami') }}: ' + receiptUrl)" target="_blank" class="bg-green-500 text-white hover:bg-green-600 rounded-[var(--radius-xl)] font-bold type-body-sm w-full !py-3 text-center flex items-center justify-center gap-2 transition-colors">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12C2 13.91 2.54 15.7 3.46 17.2L2.09 21.9L6.96 20.62C8.47 21.5 10.2 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM17.15 15.86C16.92 16.51 15.93 17.07 15.22 17.21C14.65 17.32 13.88 17.43 11.23 16.33C7.83 14.93 5.6 11.45 5.43 11.23C5.26 11 4.02 9.35 4.02 7.64C4.02 5.92 4.9 5.08 5.25 4.73C5.55 4.43 6.03 4.3 6.46 4.3C6.6 4.3 6.72 4.31 6.83 4.31C7.14 4.33 7.3 4.34 7.53 4.88C7.81 5.57 8.5 7.25 8.58 7.42C8.67 7.59 8.78 7.82 8.65 8.08C8.52 8.35 8.44 8.5 8.24 8.74C8.04 8.98 7.82 9.17 7.65 9.4C7.45 9.61 7.23 9.84 7.46 10.23C7.69 10.61 8.5 11.93 9.7 13.01C11.25 14.4 12.53 14.84 12.95 15.02C13.37 15.2 13.86 15.17 14.15 14.86C14.52 14.45 15.02 13.73 15.51 12.98C15.86 12.44 16.27 12.51 16.66 12.65C17.05 12.79 19.11 13.81 19.5 14.01C19.9 14.21 20.16 14.31 20.26 14.48C20.35 14.66 20.35 15.21 17.15 15.86Z"/></svg>
-                    Kirim WA
-                </a>
+                <template x-if="waSent">
+                    <div class="bg-green-100 text-green-800 rounded-[var(--radius-xl)] font-bold type-body-sm w-full !py-3 text-center flex items-center justify-center gap-2 border border-green-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Struk Otomatis Terkirim ke WA
+                    </div>
+                </template>
+                <template x-if="!waSent">
+                    <a :href="'https://wa.me/' + ((isDebt ? debtorContact : customerContact).replace(/\D/g, '')) + '?text=' + encodeURIComponent('Halo, ini struk belanja Anda di {{ \App\Models\Setting::get('store_name', 'Toko Kami') }}: ' + receiptUrl)" target="_blank" class="bg-green-500 text-white hover:bg-green-600 rounded-[var(--radius-xl)] font-bold type-body-sm w-full !py-3 text-center flex items-center justify-center gap-2 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12C2 13.91 2.54 15.7 3.46 17.2L2.09 21.9L6.96 20.62C8.47 21.5 10.2 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM17.15 15.86C16.92 16.51 15.93 17.07 15.22 17.21C14.65 17.32 13.88 17.43 11.23 16.33C7.83 14.93 5.6 11.45 5.43 11.23C5.26 11 4.02 9.35 4.02 7.64C4.02 5.92 4.9 5.08 5.25 4.73C5.55 4.43 6.03 4.3 6.46 4.3C6.6 4.3 6.72 4.31 6.83 4.31C7.14 4.33 7.3 4.34 7.53 4.88C7.81 5.57 8.5 7.25 8.58 7.42C8.67 7.59 8.78 7.82 8.65 8.08C8.52 8.35 8.44 8.5 8.24 8.74C8.04 8.98 7.82 9.17 7.65 9.4C7.45 9.61 7.23 9.84 7.46 10.23C7.69 10.61 8.5 11.93 9.7 13.01C11.25 14.4 12.53 14.84 12.95 15.02C13.37 15.2 13.86 15.17 14.15 14.86C14.52 14.45 15.02 13.73 15.51 12.98C15.86 12.44 16.27 12.51 16.66 12.65C17.05 12.79 19.11 13.81 19.5 14.01C19.9 14.21 20.16 14.31 20.26 14.48C20.35 14.66 20.35 15.21 17.15 15.86Z"/></svg>
+                        <span x-text="waError ? 'Gagal Kirim (Kirim Manual)' : 'Kirim WA (Manual)'"></span>
+                    </a>
+                </template>
             </div>
         </div>
     </div>
@@ -244,7 +262,7 @@ function cashierSystem() {
         products: @json($products),
         mobileCartOpen: false,
         cart: [], search: '', categoryFilter: '', discountPercent: 0, paymentMethod: 'cash', amountPaid: 0, debtorName: '', debtorContact: '', customerContact: '', dueDate: '', isDebt: false,
-        showReceipt: false, receiptCode: '', receiptTotal: 0, receiptUrl: '',
+        showReceipt: false, receiptCode: '', receiptTotal: 0, receiptUrl: '', waSent: false, waError: null,
         showQris: false, qrisData: null, isLoading: false,
         get filteredProducts() {
             return this.products.filter(p => {
@@ -271,12 +289,13 @@ function cashierSystem() {
         async processCheckout() {
             const res = await fetch('{{ route("cashier.checkout") }}', {
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-                body: JSON.stringify({ items: this.cart.map(i => ({ product_code: i.product_code, quantity: i.qty, unit_price: i.selling_price })), discount: this.discountAmount, payment_method: this.isDebt ? 'debt' : this.paymentMethod, amount_paid: this.isDebt ? 0 : this.amountPaid, debtor_name: this.debtorName, debtor_contact: this.debtorContact, due_date: this.dueDate })
+                body: JSON.stringify({ items: this.cart.map(i => ({ product_code: i.product_code, quantity: i.qty, unit_price: i.selling_price })), discount: this.discountAmount, payment_method: this.isDebt ? 'debt' : this.paymentMethod, amount_paid: this.isDebt ? 0 : this.amountPaid, debtor_name: this.debtorName, debtor_contact: this.debtorContact, customer_contact: this.customerContact, due_date: this.dueDate })
             });
             try {
                 const data = await res.json();
                 if (res.ok) { 
                     this.receiptCode = data.transaction_code; this.receiptTotal = data.total; this.receiptUrl = data.receipt_url; 
+                    this.waSent = data.wa_sent || false; this.waError = data.wa_error || null;
                     
                     if (data.qris_data) {
                         this.qrisData = data.qris_data;

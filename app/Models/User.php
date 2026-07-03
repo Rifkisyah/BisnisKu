@@ -17,6 +17,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'store_id',
         'contact',
         'status',
         'photo_profile',
@@ -38,6 +39,11 @@ class User extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class);
     }
 
     public function transactions(): HasMany

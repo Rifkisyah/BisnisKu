@@ -24,7 +24,17 @@
             <label class="block type-caption-bold text-[var(--color-slate)] mb-1">Pencarian</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search') }}..." class="input-field w-full">
         </div>
-        <div class="w-full sm:w-auto">
+        
+            <div class="w-full sm:w-48">
+                <label class="block type-caption-bold text-[var(--color-slate)] mb-1">Urutkan</label>
+                <select name="sort" class="input-field w-full" onchange="this.form.submit()">
+                    <option value="" {{ !request('sort') || request('sort') == 'created_at_desc' ? 'selected' : '' }}>Dibuat (Terbaru)</option>
+                    <option value="created_at_asc" {{ request('sort') == 'created_at_asc' ? 'selected' : '' }}>Dibuat (Terlama)</option>
+                    <option value="updated_at_desc" {{ request('sort') == 'updated_at_desc' ? 'selected' : '' }}>Diupdate (Terbaru)</option>
+                    <option value="updated_at_asc" {{ request('sort') == 'updated_at_asc' ? 'selected' : '' }}>Diupdate (Terlama)</option>
+                </select>
+            </div>
+<div class="w-full sm:w-auto">
             <button type="submit" class="btn-primary w-full sm:w-auto px-6 sm:w-auto px-6 !py-2.5">{{ __('messages.search') }}</button>
         </div>
     </form>
@@ -42,7 +52,7 @@
             <td class="px-5 py-3"><span class="badge badge-neutral">{{ $c->type }}</span></td>
             <td class="px-5 py-3 type-body-sm text-[var(--color-charcoal)]">{{ $c->products_count }}</td>
             <td class="px-5 py-3"><div class="flex items-center gap-1">
-                <button onclick="event.stopPropagation(); $dispatch('open-delete-modal', { url: '{{ route('categories.destroy', $c) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                <button @click.stop="$dispatch('open-delete-modal', { url: '{{ route('categories.destroy', $c) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
             </div></td>
         </tr>
         @empty<tr><td colspan="5" class="px-5 py-12 text-center type-body-md text-[var(--color-stone)]">{{ __('messages.no_data') }}</td></tr>@endforelse

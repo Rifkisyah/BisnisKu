@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockMovement extends Model
 {
+    use BelongsToStore;
+
     protected $fillable = [
-        'product_code', 'created_by', 'type', 'total_stock',
+        'product_code', 'store_id', 'created_by', 'type', 'total_stock',
         'previous_stock', 'current_stock', 'movement_date',
         'reference_type', 'reference_code', 'notes',
     ];

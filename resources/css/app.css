@@ -54,22 +54,23 @@
 
 .dark {
     /* ── Surface ── */
-    --color-canvas: #000000;
-    --color-surface-soft: #121212;
-    --color-hairline: #27272A;
-    --color-hairline-soft: #18181B;
+    --color-canvas: #111827;
+    --color-surface-soft: #1f2937;
+    --color-hairline: #374151;
+    --color-hairline-soft: #1f2937;
 
     /* ── Text / Ink ── */
-    --color-ink-deep: #FFFFFF;
-    --color-ink: #E4E6EB;
-    --color-charcoal: #B0B3B8;
-    --color-slate: #8A8D91;
-    --color-steel: #65676B;
-    --color-stone: #3A4A54;
+    --color-ink-deep: #f9fafb;
+    --color-ink: #d1d5db;
+    --color-charcoal: #9ca3af;
+    --color-slate: #6b7280;
+    --color-steel: #4b5563;
+    --color-stone: #374151;
 
     /* ── Buttons ── */
-    --color-ink-button: #FFFFFF;
-    --color-on-ink-button: #0A131A;
+    --color-ink-button: #f9fafb;
+    --color-on-ink-button: #111827;
+    --color-primary: #3b82f6;
 }
 
 [x-cloak] { display: none !important; }

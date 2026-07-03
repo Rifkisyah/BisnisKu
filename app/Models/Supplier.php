@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Supplier extends Model
 {
+    use BelongsToStore;
+
     protected $primaryKey = 'supplier_code';
     protected $keyType = 'string';
     public $incrementing = false;
 
-    protected $fillable = ['supplier_code', 'name', 'phone_prefix', 'phone_number', 'email', 'address', 'notes', 'is_active', 'image'];
+    protected $fillable = ['supplier_code', 'store_id', 'name', 'phone_prefix', 'phone_number', 'email', 'address', 'notes', 'is_active', 'image'];
 
     protected function casts(): array
     {
@@ -44,7 +47,7 @@ class Supplier extends Model
     public static function generateCode(): string
     {
         $prefix = 'SUP';
-        $last = static::where('supplier_code', 'like', $prefix . '%')
+        $last = static::withoutGlobalScope('store')->where('supplier_code', 'like', $prefix . '%')
             ->orderBy('supplier_code', 'desc')
             ->first();
         $number = $last ? (int) substr($last->supplier_code, strlen($prefix)) + 1 : 1;

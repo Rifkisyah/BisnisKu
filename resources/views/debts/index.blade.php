@@ -55,7 +55,17 @@
             <label class="block type-caption-bold text-[var(--color-slate)] mb-1">{{ __('messages.end_date') }}</label>
             <input type="date" name="end_date" value="{{ $endDate ?? '' }}" class="input-field w-full">
         </div>
-        <div class="w-full sm:w-auto">
+        
+            <div class="w-full sm:w-48">
+                <label class="block type-caption-bold text-[var(--color-slate)] mb-1">Urutkan</label>
+                <select name="sort" class="input-field w-full" onchange="this.form.submit()">
+                    <option value="" {{ !request('sort') || request('sort') == 'created_at_desc' ? 'selected' : '' }}>Dibuat (Terbaru)</option>
+                    <option value="created_at_asc" {{ request('sort') == 'created_at_asc' ? 'selected' : '' }}>Dibuat (Terlama)</option>
+                    <option value="updated_at_desc" {{ request('sort') == 'updated_at_desc' ? 'selected' : '' }}>Diupdate (Terbaru)</option>
+                    <option value="updated_at_asc" {{ request('sort') == 'updated_at_asc' ? 'selected' : '' }}>Diupdate (Terlama)</option>
+                </select>
+            </div>
+<div class="w-full sm:w-auto">
             <button type="submit" class="btn-primary w-full sm:w-auto px-6 sm:w-auto px-6 !py-2.5">{{ __('messages.search') }}</button>
         </div>
     </form>
@@ -67,7 +77,7 @@
         <th class="px-5 py-3 text-left table-header">{{ __('messages.status') }}</th><th class="px-5 py-3 text-left table-header">{{ __('messages.actions') }}</th>
     </tr></thead><tbody>
     @forelse($debts as $d)
-    <tr class="border-b border-[var(--color-hairline-soft)]/50 hover:bg-[var(--color-surface-soft)] transition-colors duration-150">
+    <tr onclick="window.location='{{ route('debts.show', $d) }}'" class="border-b border-[var(--color-hairline-soft)]/50 hover:bg-[var(--color-surface-soft)] transition-colors duration-150 cursor-pointer">
         <td class="px-5 py-3 type-body-sm font-medium text-[var(--color-ink)]">{{ $d->debtor_name }}</td>
         <td class="px-5 py-3 type-body-sm text-[var(--color-charcoal)]">Rp {{ number_format($d->total_amount, 0, ',', '.') }}</td>
         <td class="px-5 py-3 type-body-sm font-bold text-[var(--color-critical)]">Rp {{ number_format($d->remaining_amount, 0, ',', '.') }}</td>

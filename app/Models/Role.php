@@ -13,4 +13,15 @@ class Role extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function getDisplayNameAttribute(): string
+    {
+        $names = [
+            'owner' => 'Pemilik / Owner',
+            'kasir' => 'Staff Kasir / Cashier',
+            'teknisi' => 'Teknisi / Technician',
+            'gudang' => 'Staf Gudang / Warehouse',
+        ];
+        return $names[$this->name] ?? ucfirst($this->name);
+    }
 }

@@ -29,9 +29,6 @@ class PaymentSettingController extends Controller
             'manual_qris_image' => 'nullable|image|max:2048',
             'qris_provider' => 'nullable|string|max:255',
             'merchant_id' => 'nullable|string|max:255',
-            'client_key' => 'nullable|string|max:255',
-            'server_key' => 'nullable|string|max:255',
-            'callback_url' => 'nullable|url|max:255',
         ]);
 
         $setting = PaymentSetting::getSettings();
@@ -42,8 +39,8 @@ class PaymentSettingController extends Controller
                 return back()->withErrors(['manual_qris_image' => 'Gambar QRIS statis wajib diunggah untuk mode manual.']);
             }
         } else {
-            if (empty($validated['qris_provider']) || empty($validated['merchant_id']) || empty($validated['server_key'])) {
-                return back()->withErrors(['qris_provider' => 'Kredensial provider wajib diisi untuk mode dinamis.']);
+            if (empty($validated['qris_provider']) || empty($validated['merchant_id'])) {
+                return back()->withErrors(['qris_provider' => 'Provider dan Merchant ID wajib diisi untuk mode dinamis.']);
             }
         }
 

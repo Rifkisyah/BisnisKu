@@ -6,7 +6,7 @@
 {{-- HEADER & FILTER                                         --}}
 {{-- ═══════════════════════════════════════════════════════ --}}
 <div class="mb-6 flex items-center justify-between">
-    <a href="javascript:void(0)" onclick="if(window.history.length > 2) { window.history.back(); } else { window.location.href = '{{ route('dashboard') }}'; }" class="btn-ghost"><svg class="w-4 h-4 inline-block -mt-0.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>{{ __('messages.back') ?? 'Kembali' }}</a>
+    <a href="{{ route('reports.index') }}" class="btn-ghost"><svg class="w-4 h-4 inline-block -mt-0.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>{{ __('messages.back') ?? 'Kembali' }}</a>
 </div>
 
 <div class="mb-6 card-feature p-5">
@@ -371,8 +371,8 @@ window.rawBiData = {
     smaData: @json($smaResults)
 };
 
-const CLUSTER_COLORS = { fast_moving: '#10B981', medium_moving: '#F59E0B', slow_moving: '#F97316', dead_stock: '#EF4444' };
-const CLUSTER_LABELS = { fast_moving: 'Sangat Laris', medium_moving: 'Cukup Laris', slow_moving: 'Kurang Laris', dead_stock: 'Stok Mati' };
+const CLUSTER_COLORS = { fast_moving: '#10B981', medium_moving: '#F59E0B', slow_moving: '#F97316', dead_stock: '#EF4444', new_product: '#3B82F6' };
+const CLUSTER_LABELS = { fast_moving: 'Sangat Laris', medium_moving: 'Cukup Laris', slow_moving: 'Kurang Laris', dead_stock: 'Stok Mati', new_product: 'Produk Baru' };
 const KEYS = Object.keys(window.rawBiData.clusterSummary);
 
 window.updateClusterChart = function(type, metric) {

@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ServiceRepair extends Model
 {
+    use BelongsToStore;
+
     protected $primaryKey = 'repair_code';
     protected $keyType = 'string';
     public $incrementing = false;
@@ -23,7 +26,7 @@ class ServiceRepair extends Model
     const STATUS_CANCELLED      = 'cancelled';
 
     protected $fillable = [
-        'repair_code', 'technician_id', 'customer_name', 'customer_phone',
+        'repair_code', 'store_id', 'technician_id', 'customer_name', 'customer_phone',
         'service_fee', 'component_cost', 'total_cost', 'payment_method',
         'down_payment', 'status', 'start_date', 'completion_date', 'notes', 'images',
     ];
@@ -73,13 +76,11 @@ class ServiceRepair extends Model
 
     public function isFinal(): bool         { return $this->isDone() || $this->isCancelled(); }
 
-    /** Whether this ticket allows editing by technician */
     public function isTechEditable(): bool
     {
         return in_array($this->status, [
             self::STATUS_DIAGNOSING,
             self::STATUS_WAITING_PARTS,
-            self::STATUS_REPAIRING,
         ]);
     }
 
@@ -114,6 +115,16 @@ class ServiceRepair extends Model
             ->count();
 
         return $pendingCount === 0;
+    }
+
+    /**
+     * Check if all device items have diagnosis filled.
+     */
+    public function isDiagnosisFilled(): bool
+    {
+        return $this->deviceItems()->where(function($q) {
+            $q->whereNull('diagnosis_result')->orWhere('diagnosis_result', '');
+        })->count() === 0;
     }
 
     /**
@@ -175,7 +186,7 @@ class ServiceRepair extends Model
     {
         $today = now()->format('Ymd');
         $prefix = 'SRV' . $today;
-        $last = static::where('repair_code', 'like', $prefix . '%')
+        $last = static::withoutGlobalScope('store')->where('repair_code', 'like', $prefix . '%')
             ->orderBy('repair_code', 'desc')
             ->first();
         $number = $last ? (int) substr($last->repair_code, -4) + 1 : 1;

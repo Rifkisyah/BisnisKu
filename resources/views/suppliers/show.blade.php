@@ -3,7 +3,7 @@
 @section('content')
 <div class="mx-auto max-w-2xl">
     <div class="mb-6 flex items-center justify-between">
-        <a href="javascript:void(0)" onclick="if(window.history.length > 2) { window.history.back(); } else { window.location.href = '{{ route('dashboard') }}'; }" class="btn-ghost"><svg class="w-4 h-4 inline-block -mt-0.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>{{ __('messages.back') ?? 'Kembali' }}</a>
+        <a href="{{ route('suppliers.index') }}" class="btn-ghost"><svg class="w-4 h-4 inline-block -mt-0.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>{{ __('messages.back') ?? 'Kembali' }}</a>
     </div>
     <div class="card-feature p-6">
         <div class="flex items-center justify-between mb-4">
@@ -12,13 +12,13 @@
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="name" value="{{ $supplier->name }}">
-                <input type="hidden" name="whatsapp_number" value="{{ $supplier->whatsapp_number }}">
+                
                 <input type="hidden" name="email" value="{{ $supplier->email }}">
                 <input type="hidden" name="address" value="{{ $supplier->address }}">
                 
-                <input type="hidden" name="status" value="{{ $supplier->status === 'active' ? 'inactive' : 'active' }}">
-                <button type="submit" class="badge hover:opacity-80 transition-opacity {{ $supplier->status === 'active' ? 'badge-success' : 'badge-critical' }}" title="Klik untuk mengubah status">
-                    {{ $supplier->status }} <svg class="w-3 h-3 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                <input type="hidden" name="is_active" value="{{ $supplier->is_active ? 0 : 1 }}">
+                <button type="submit" class="badge hover:opacity-80 transition-opacity {{ $supplier->is_active ? 'badge-success' : 'badge-critical' }}" title="Klik untuk mengubah status">
+                    {{ $supplier->is_active ? 'Aktif' : 'Nonaktif' }} <svg class="w-3 h-3 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
                 </button>
             </form>
         </div>
@@ -58,7 +58,8 @@
             </div>
         </div>
 
-        <div class="mt-8 flex justify-end">
+        <div class="mt-8 flex justify-end gap-2">
+            <button onclick="$dispatch('open-delete-modal', { url: '{{ route('suppliers.destroy', $supplier) }}' })" class="btn-ghost !text-[var(--color-critical)] !border-[var(--color-critical)]/20 !px-5 text-sm">{{ __('messages.delete') }}</button>
             <a href="{{ route('suppliers.edit', $supplier) }}" class="btn-primary !px-5 text-sm">{{ __('messages.edit') }}</a>
         </div>
     </div>

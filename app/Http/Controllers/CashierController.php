@@ -13,8 +13,8 @@ class CashierController extends Controller
 {
     public function index()
     {
-        $products = Product::active()
-            ->where('stock', '>', 0)
+        $products = Product::available()
+            ->where('stock', '>', 0)->where('type', '!=', 'sparepart')
             ->whereHas('category', function($q) {
                 $q->where('type', 'product')->where('slug', '!=', 'sparepart');
             })
@@ -30,8 +30,8 @@ class CashierController extends Controller
     public function searchProducts(Request $request)
     {
         $search = $request->get('q', '');
-        $products = Product::active()
-            ->where('stock', '>', 0)
+        $products = Product::available()
+            ->where('stock', '>', 0)->where('type', '!=', 'sparepart')
             ->whereHas('category', function($q) {
                 $q->where('type', 'product')->where('slug', '!=', 'sparepart');
             })
@@ -55,6 +55,7 @@ class CashierController extends Controller
             'amount_paid'        => 'required|numeric|min:0',
             'debtor_name'        => 'required_if:payment_method,debt|nullable|string',
             'debtor_contact'     => 'nullable|string',
+            'customer_contact'   => 'nullable|string',
             'due_date'           => 'nullable|date',
             'notes'              => 'nullable|string',
         ]);
@@ -62,7 +63,7 @@ class CashierController extends Controller
         $stockService = new StockService();
 
         try {
-            return DB::transaction(function () use ($validated, $stockService) {
+            $transactionData = DB::transaction(function () use ($validated, $stockService) {
                 $subtotal = 0;
                 $items    = [];
 
@@ -155,15 +156,51 @@ class CashierController extends Controller
                     $qrisData = $qrisService->createPayment($transaction);
                 }
 
-                return response()->json([
-                    'success'          => true,
-                    'transaction_code' => $transaction->transaction_code,
-                    'total'            => $transaction->total,
-                    'receipt_url'      => route('transactions.receipt', $transaction),
-                    'message'          => __('messages.transaction_success'),
-                    'qris_data'        => $qrisData
-                ]);
+                return [
+                    'transaction'      => $transaction,
+                    'items'            => $items,
+                    'isQris'           => $isQris,
+                    'qrisData'         => $qrisData,
+                ];
             });
+            
+            $result = $transactionData;
+            $transaction = $result['transaction'];
+            
+            // Send WA Receipt if contact is provided
+            $waSent = false;
+            $waError = null;
+            if (!empty($validated['customer_contact'])) {
+                $waService = new \App\Services\WhatsAppService();
+                $phone = \App\Services\WhatsAppService::formatPhone($validated['customer_contact']);
+                
+                $storeName = \App\Models\Setting::get('store_name', 'Toko Kami');
+                $receiptUrl = route('transactions.receipt', $transaction->transaction_code);
+                
+                $message = "Halo, ini struk belanja Anda di *{$storeName}*.\n\n";
+                $message .= "No. Transaksi: {$transaction->transaction_code}\n";
+                foreach ($result['items'] as $item) {
+                    $message .= "- {$item['product']->name}: {$item['quantity']} x Rp " . number_format($item['unit_price'], 0, ',', '.') . "\n";
+                }
+                $message .= "\nTotal: *Rp " . number_format($transaction->total, 0, ',', '.') . "*\n";
+                $message .= "Metode: " . strtoupper($transaction->payment_method) . "\n\n";
+                $message .= "Lihat struk lengkap: {$receiptUrl}\n\nTerima kasih atas kunjungan Anda!";
+                
+                $waResult = $waService->send($phone, $message);
+                $waSent = $waResult['success'];
+                if (!$waSent) $waError = $waResult['message'];
+            }
+
+            return response()->json([
+                'success'          => true,
+                'transaction_code' => $transaction->transaction_code,
+                'total'            => $transaction->total,
+                'receipt_url'      => route('transactions.receipt', $transaction),
+                'message'          => __('messages.transaction_success'),
+                'qris_data'        => $result['qrisData'],
+                'wa_sent'          => $waSent,
+                'wa_error'         => $waError
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

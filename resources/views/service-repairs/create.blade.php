@@ -45,8 +45,8 @@
                             </div>
                             <div class="col-span-2">
                                 <label class="block text-xs font-semibold text-[var(--color-slate)] mb-1">Keluhan / Kerusakan *</label>
-                                <textarea :name="'items['+idx+'][complaint]'" rows="2" required minlength="10" maxlength="1000" class="input-field !h-auto !py-2" placeholder="Tuliskan keluhan atau kerusakan yang dilaporkan pelanggan (min. 10 karakter)..."></textarea>
-                                <p class="mt-1 text-xs text-gray-400">10–1000 karakter</p>
+                                <textarea :name="'items['+idx+'][complaint]'" rows="2" required maxlength="1000" class="input-field !h-auto !py-2" placeholder="Tuliskan keluhan atau kerusakan yang dilaporkan pelanggan..."></textarea>
+                                <p class="mt-1 text-xs text-gray-400">Maks. 1000 karakter</p>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-[var(--color-slate)] mb-1">Biaya Jasa (opsional)</label>
@@ -67,9 +67,9 @@
                 </button>
             </div>
 
-            <div class="flex gap-3 pt-2 justify-center">
-                <button type="submit" class="btn-primary">{{ __('messages.save') }}</button>
-                <a href="javascript:void(0)" onclick="if(window.history.length > 2) { window.history.back(); } else { window.location.href = '{{ route('dashboard') }}'; }" class="btn-ghost"><svg class="w-4 h-4 inline-block -mt-0.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>{{ __('messages.back') ?? 'Kembali' }}</a>
+            <div class="flex flex-col sm:flex-row gap-3 pt-4 mt-6 border-t border-[var(--color-hairline-soft)] w-full">
+                <a href="{{ route('service-repairs.index') }}" class="btn-ghost w-full sm:flex-1 text-center order-2 sm:order-1 flex justify-center items-center"><svg class="w-4 h-4 inline-block -mt-0.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>{{ __('messages.back') ?? 'Kembali' }}</a>
+                <button type="submit" class="btn-primary w-full sm:flex-1 text-center order-1 sm:order-2 flex justify-center items-center">{{ __('messages.save') }}</button>
             </div>
         </form>
     </div>

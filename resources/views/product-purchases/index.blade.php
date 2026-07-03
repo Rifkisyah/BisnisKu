@@ -56,22 +56,35 @@
             <label class="block type-caption-bold text-[var(--color-slate)] mb-1">{{ __('messages.end_date') }}</label>
             <input type="date" name="end_date" value="{{ $endDate ?? '' }}" class="input-field w-full">
         </div>
-        <div class="w-full sm:w-auto">
+        
+            <div class="w-full sm:w-48">
+                <label class="block type-caption-bold text-[var(--color-slate)] mb-1">Urutkan</label>
+                <select name="sort" class="input-field w-full" onchange="this.form.submit()">
+                    <option value="" {{ !request('sort') || request('sort') == 'created_at_desc' ? 'selected' : '' }}>Dibuat (Terbaru)</option>
+                    <option value="created_at_asc" {{ request('sort') == 'created_at_asc' ? 'selected' : '' }}>Dibuat (Terlama)</option>
+                    <option value="updated_at_desc" {{ request('sort') == 'updated_at_desc' ? 'selected' : '' }}>Diupdate (Terbaru)</option>
+                    <option value="updated_at_asc" {{ request('sort') == 'updated_at_asc' ? 'selected' : '' }}>Diupdate (Terlama)</option>
+                </select>
+            </div>
+<div class="w-full sm:w-auto">
             <button type="submit" class="btn-primary w-full sm:w-auto px-6 sm:w-auto px-6 !py-2.5">{{ __('messages.search') }}</button>
         </div>
     </form>
 </div>
 <div class="card overflow-hidden"><div class="overflow-x-auto"><table class="w-full">
     <thead><tr class="border-b border-[var(--color-hairline-soft)] bg-[var(--color-surface-soft)]">
-        <th class="px-5 py-3 text-left table-header">{{ __('messages.code') }}</th><th class="px-5 py-3 text-left table-header">Supplier</th>
+        <th class="px-5 py-3 text-left table-header">{{ __('messages.code') }}</th><th class="px-5 py-3 text-left table-header">Sumber & Supplier</th>
         <th class="px-5 py-3 text-left table-header">{{ __('messages.date') }}</th><th class="px-5 py-3 text-left table-header">{{ __('messages.status') }}</th>
         <th class="px-5 py-3 text-left table-header">{{ __('messages.total') }}</th><th class="px-5 py-3 text-left table-header">{{ __('messages.actions') }}</th>
     </tr></thead><tbody>
     @php $sc=['draft'=>'badge-neutral','ordered'=>'badge-info','received'=>'badge-success','canceled'=>'badge-critical']; @endphp
     @forelse($productPurchases as $p)
-    <tr class="border-b border-[var(--color-hairline-soft)]/50 hover:bg-[var(--color-surface-soft)] transition-colors duration-150">
+    <tr onclick="window.location='{{ route('product-purchases.show', $p) }}'" class="border-b border-[var(--color-hairline-soft)]/50 hover:bg-[var(--color-surface-soft)] transition-colors duration-150 cursor-pointer">
         <td class="px-5 py-3 type-caption-bold text-[var(--color-primary)]">{{ $p->product_purchase_code }}</td>
-        <td class="px-5 py-3 type-body-sm font-medium text-[var(--color-ink)]">{{ $p->supplier->name ?? '-' }}</td>
+        <td class="px-5 py-3 type-body-sm text-[var(--color-ink)]">
+            <div class="font-medium">{{ $p->getSummarySources() }}</div>
+            <div class="text-xs text-[var(--color-slate)] mt-0.5">Supplier: {{ $p->getSummarySuppliers() }}</div>
+        </td>
         <td class="px-5 py-3 type-body-sm text-[var(--color-slate)]">
             Tgl: {{ $p->purchase_date ? $p->purchase_date->format('d/m/Y') : '-' }}<br>
             @if($p->estimated_arrival_date)<span class="text-xs text-indigo-500">Est. Tiba: {{ $p->estimated_arrival_date->format('d/m/Y') }}</span>@endif
@@ -80,8 +93,11 @@
         <td class="px-5 py-3 type-body-sm font-bold text-[var(--color-ink)]">Rp {{ number_format($p->total, 0, ',', '.') }}</td>
         <td class="px-5 py-3"><div class="flex items-center gap-1">
                 <a href="{{ route('product-purchases.show', $p) }}" class="btn-ghost !py-1.5 !px-3 !text-xs">{{ __('messages.detail') }}</a>
-                @if(auth()->user()->isOwner())
-                <button @click="$dispatch('open-delete-modal', { url: '{{ route('product-purchases.destroy', $p) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                @if($p->status === 'draft' && in_array(auth()->user()->role->name, ['owner', 'gudang']))
+                <a href="{{ route('product-purchases.edit', $p) }}" class="btn-ghost !py-1.5 !px-3 !text-xs !text-blue-600 !border-blue-600/20">Ubah</a>
+                @endif
+                @if($p->status !== 'cancelled' && in_array(auth()->user()->role->name, ['owner', 'gudang']))
+                <button @click.stop="$dispatch('open-delete-modal', { url: '{{ route('product-purchases.destroy', $p) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
                 @endif
             </div></td>
     </tr>
@@ -90,5 +106,3 @@
     <div class="border-t border-[var(--color-hairline-soft)] px-5 py-3">{{ $productPurchases->links() }}</div>
 </div>
 @endsection
-
-

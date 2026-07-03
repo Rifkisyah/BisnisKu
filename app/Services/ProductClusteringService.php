@@ -20,6 +20,7 @@ class ProductClusteringService
         'medium_moving' => 'Monitor tren, restock sesuai estimasi SMA',
         'slow_moving'   => 'Kurangi frekuensi pembelian, pertimbangkan promosi',
         'dead_stock'    => 'Tidak terjual 90+ hari — pertimbangkan diskon clearance atau retur ke supplier',
+        'new_product'   => 'Produk baru, belum ada riwayat penjualan. Lakukan promosi awal.',
     ];
 
     /**
@@ -82,8 +83,11 @@ class ProductClusteringService
         $deadStock = array_filter($data, fn ($item) =>
             $item['days_without_sale'] >= $this->deadStockDays && $item['total_qty_sold'] === 0
         );
+        $newProduct = array_filter($data, fn ($item) =>
+            $item['days_without_sale'] < $this->deadStockDays && $item['total_qty_sold'] === 0
+        );
         $activeData = array_values(array_filter($data, fn ($item) =>
-            !($item['days_without_sale'] >= $this->deadStockDays && $item['total_qty_sold'] === 0)
+            $item['total_qty_sold'] > 0
         ));
 
         // Assign dead_stock label
@@ -92,6 +96,13 @@ class ProductClusteringService
             'cluster_id'      => 3,
             'recommendation'  => $this->recommendations['dead_stock'],
         ]), $deadStock);
+        
+        // Assign new_product label
+        $newProductLabeled = array_map(fn ($item) => array_merge($item, [
+            'cluster_label'   => 'new_product',
+            'cluster_id'      => 4,
+            'recommendation'  => $this->recommendations['new_product'],
+        ]), $newProduct);
 
         // ─── K-Means on remaining active products ────────────────────────────
         if (count($activeData) < $this->k) {
@@ -115,8 +126,8 @@ class ProductClusteringService
             }
         }
 
-        // Merge results: active first, dead stock appended
-        $results = array_merge($labeled, array_values($deadStockLabeled));
+        // Merge results: active first, dead stock appended, then new products
+        $results = array_merge($labeled, array_values($deadStockLabeled), array_values($newProductLabeled));
 
         // Save to database
         $this->saveResults($results, $endDate);

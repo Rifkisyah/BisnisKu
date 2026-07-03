@@ -44,10 +44,12 @@ $statusLabels = [
             </div>
 
             <!-- Add Button: Large on Mobile -->
+            @if(!auth()->user()->isTeknisi())
             <a href="{{ route('service-repairs.create') }}" class="btn-primary w-full sm:w-auto !py-3 sm:!py-2 !px-4 whitespace-nowrap text-center text-lg sm:text-sm order-first sm:order-last mb-2 sm:mb-0">
                 <svg class="h-5 w-5 sm:h-4 sm:w-4 mr-2 sm:mr-1.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span class="inline-block">{{ __('messages.add') }}</span>
             </a>
+            @endif
 
             <!-- Desktop Actions -->
             <div class="hidden sm:flex flex-wrap items-center gap-2">
@@ -133,7 +135,9 @@ $statusLabels = [
                     <td class="px-5 py-3">
                         <div class="flex items-center gap-1">
                             <a href="{{ route('service-repairs.show', $sr) }}" onclick="event.stopPropagation()" class="btn-ghost !py-1.5 !px-3 !text-xs">{{ __('messages.detail') }}</a>
-                            <button onclick="event.stopPropagation(); $dispatch('open-delete-modal', { url: '{{ route('service-repairs.destroy', $sr) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                            @if(!auth()->user()->isTeknisi())
+                            <button @click.stop="$dispatch('open-delete-modal', { url: '{{ route('service-repairs.destroy', $sr) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                            @endif
                         </div>
                     </td>
                 </tr>
@@ -181,7 +185,9 @@ $statusLabels = [
                 </div>
                 <div class="flex justify-end gap-1">
                     <a href="{{ route('service-repairs.show', $sr) }}" onclick="event.stopPropagation()" class="btn-ghost flex-1 text-center !py-1.5 !px-3 !text-xs">{{ __('messages.detail') }}</a>
-                    <button onclick="event.stopPropagation(); $dispatch('open-delete-modal', { url: '{{ route('service-repairs.destroy', $sr) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                    @if(!auth()->user()->isTeknisi())
+                    <button @click.stop="$dispatch('open-delete-modal', { url: '{{ route('service-repairs.destroy', $sr) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -193,6 +199,33 @@ $statusLabels = [
 
     <div class="mt-4 border-t border-[var(--color-hairline-soft)] pt-4">{{ $serviceRepairs->links() }}</div>
 </div>
+
+{{-- Delete Modal --}}
+<div x-data="{ open: false, url: '' }" 
+     @open-delete-modal.window="open = true; url = $event.detail.url" 
+     x-show="open" x-cloak 
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div @click.away="open = false" class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100">
+        <div class="p-5 text-center">
+            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-1">Hapus Data Perbaikan?</h3>
+            <p class="text-sm text-gray-500 mb-6">Data yang dihapus tidak dapat dikembalikan. Apakah Anda yakin?</p>
+            <div class="flex gap-2 justify-center">
+                <button type="button" @click="open = false" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200">Batal</button>
+                <form :action="url" method="POST" class="inline-block">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700">Ya, Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 

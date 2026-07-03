@@ -14,6 +14,11 @@ class ProductPurchaseItem extends Model
         'is_resolved', 'resolved_product_code',
         'quantity', 'quantity_received', 'quantity_rejected', 'rejection_notes',
         'purchase_price', 'subtotal',
+        // Source
+        'source', 'supplier_code',
+        'marketplace_name', 'marketplace_seller', 'marketplace_order_id', 'marketplace_notes',
+        'store_name', 'receipt_number', 'offline_notes',
+        'other_source', 'other_notes',
     ];
 
     protected function casts(): array
@@ -42,6 +47,11 @@ class ProductPurchaseItem extends Model
     public function resolvedProduct(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'resolved_product_code', 'product_code');
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_code', 'supplier_code');
     }
 
     // ─── Computed attributes ────────────────────────────────────────────────

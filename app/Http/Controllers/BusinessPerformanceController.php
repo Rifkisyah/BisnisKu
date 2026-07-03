@@ -41,7 +41,7 @@ class BusinessPerformanceController extends Controller
         // ─────────────────────────────────────────────────────────────────────
 
         $topProducts = TransactionItem::whereHas('transaction',
-                fn ($q) => $q->where('status', 'completed')->whereBetween('transaction_date', [$startDate, $endDate]))
+                fn ($q) => $q->where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate]))
             ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
             ->when($categoryFilter, fn($q) => $q->where('products.category_code', $categoryFilter))
             ->selectRaw('products.name, products.product_code,
@@ -89,14 +89,14 @@ class BusinessPerformanceController extends Controller
             ->when($categoryFilter, fn($q) => $q->where('category_code', $categoryFilter))
             ->whereDoesntHave('transactionItems', function ($q) {
                 $q->whereHas('transaction', fn ($tq) =>
-                    $tq->where('status', 'completed')
+                    $tq->where('status', 'paid')
                        ->where('transaction_date', '>=', now()->subDays(90)));
             })
             ->with('category')
             ->get()
             ->map(function ($p) {
                 $lastSale = TransactionItem::where('product_code', $p->product_code)
-                    ->whereHas('transaction', fn ($q) => $q->where('status', 'completed'))
+                    ->whereHas('transaction', fn ($q) => $q->where('status', 'paid'))
                     ->join('transactions', 'transaction_items.transaction_code', '=', 'transactions.transaction_code')
                     ->max('transactions.transaction_date');
 
@@ -223,7 +223,7 @@ class BusinessPerformanceController extends Controller
         $serviceRevenue = ServiceRepair::completedInPeriod($startDate, $endDate)->sum('total_cost');
         
         $topProducts    = TransactionItem::whereHas('transaction',
-                fn ($q) => $q->where('status', 'completed')->whereBetween('transaction_date', [$startDate, $endDate]))
+                fn ($q) => $q->where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate]))
             ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
             ->when($categoryFilter, fn($q) => $q->where('products.category_code', $categoryFilter))
             ->selectRaw('products.name, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.subtotal) as total_revenue')

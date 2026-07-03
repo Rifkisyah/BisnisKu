@@ -15,12 +15,12 @@ class SupplierController extends Controller
             ->when($request->status, fn($q, $st) => $q->where('status', $st));
 
         if ($request->get('export') === 'pdf') {
-            $suppliers = $query->latest()->get();
+            $suppliers = $query->applySort($request->sort)->get();
             $pdf = Pdf::loadView('suppliers.pdf', compact('suppliers'));
             return $pdf->download('laporan-supplier.pdf');
         }
 
-        $suppliers = $query->latest()->paginate(15)->withQueryString();
+        $suppliers = $query->applySort($request->sort)->paginate(15)->withQueryString();
         return view('suppliers.index', compact('suppliers'));
     }
 
@@ -34,7 +34,7 @@ class SupplierController extends Controller
         $validated = $request->validate([
             'name'         => 'required|string|min:3|max:100',
             'phone_prefix' => 'nullable|string|max:10',
-            'phone_number' => 'nullable|string|min:7|max:20',
+            'phone_number' => 'nullable|string|min:10|max:13|regex:/^[0-9]+$/',
             'email'        => 'nullable|email|max:150',
             'address'      => 'nullable|string|max:300',
             'notes'        => 'nullable|string|max:500',
@@ -69,7 +69,7 @@ class SupplierController extends Controller
         $validated = $request->validate([
             'name'         => 'required|string|min:3|max:100',
             'phone_prefix' => 'nullable|string|max:10',
-            'phone_number' => 'nullable|string|min:7|max:20',
+            'phone_number' => 'nullable|string|min:10|max:13|regex:/^[0-9]+$/',
             'email'        => 'nullable|email|max:150',
             'address'      => 'nullable|string|max:300',
             'notes'        => 'nullable|string|max:500',

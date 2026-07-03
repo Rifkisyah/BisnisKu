@@ -10,17 +10,28 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+
     public function index(Request $request)
     {
-        $tab = $request->get('tab', 'physical');
+        $tab = $request->get('tab', '');
+        $showSparepart = $request->boolean('show_sparepart');
 
         $products = Product::with('category', 'supplier')
-            ->where('type', $tab)
+            ->when($tab, function ($q) use ($tab, $showSparepart) {
+                if ($showSparepart && $tab !== 'sparepart') {
+                    $q->whereIn('type', [$tab, 'sparepart']);
+                } else {
+                    $q->where('type', $tab);
+                }
+            })
+            ->when(!$tab && !$showSparepart, function ($q) {
+                $q->where('type', '!=', 'sparepart');
+            })
             ->when($request->search, fn($q, $s) => $q->where(fn($sq) => $sq->where('name', 'like', "%{$s}%")->orWhere('product_code', 'like', "%{$s}%")))
             ->when($request->category, fn($q, $c) => $q->where('category_code', $c))
             ->when($request->low_stock, fn($q) => $q->lowStock())
             ->when($request->status, fn($q, $s) => $q->where('status', $s))
-            ->latest()
+            ->applySort($request->sort)
             ->paginate(15)
             ->withQueryString();
 
@@ -31,6 +42,7 @@ class ProductController extends Controller
 
     public function create(Request $request)
     {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat memodifikasi data produk.');
         $categories = Category::active()->get();
         $suppliers  = Supplier::active()->get();
         $type       = $request->get('type', 'physical');
@@ -40,6 +52,7 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat memodifikasi data produk.');
         $validated = $request->validate([
             'name'           => 'required|string|min:3|max:100',
             'category_code'  => 'required|exists:categories,category_code',
@@ -116,6 +129,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat memodifikasi data produk.');
         $categories = Category::active()->get();
         $suppliers  = Supplier::active()->get();
         return view('products.edit', compact('product', 'categories', 'suppliers'));
@@ -123,6 +137,7 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat memodifikasi data produk.');
         $validated = $request->validate([
             'name'           => 'required|string|min:3|max:100',
             'category_code'  => 'required|exists:categories,category_code',
@@ -151,7 +166,8 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->transactionItems()->count() > 0) {
+        if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat memodifikasi data produk.');
+        if ($product->transactionItems()->exists() || $product->purchaseItems()->exists()) {
             return back()->with('error', __('messages.cannot_delete_has_relation', ['item' => __('messages.product')]));
         }
 

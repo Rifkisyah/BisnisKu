@@ -2,17 +2,20 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Category extends Model
 {
+    use BelongsToStore;
+
     protected $primaryKey = 'category_code';
     protected $keyType = 'string';
     public $incrementing = false;
 
-    protected $fillable = ['category_code', 'name', 'slug', 'description', 'type', 'is_active'];
+    protected $fillable = ['category_code', 'store_id', 'name', 'slug', 'description', 'type', 'is_active'];
 
     protected function casts(): array
     {
@@ -32,7 +35,7 @@ class Category extends Model
     public static function generateCode(): string
     {
         $prefix = 'CAT';
-        $last = static::where('category_code', 'like', $prefix . '%')
+        $last = static::withoutGlobalScope('store')->where('category_code', 'like', $prefix . '%')
             ->orderBy('category_code', 'desc')
             ->first();
         $number = $last ? (int) substr($last->category_code, strlen($prefix)) + 1 : 1;

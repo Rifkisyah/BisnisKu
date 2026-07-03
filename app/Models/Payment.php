@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
+    use BelongsToStore;
+
     protected $fillable = [
         'payment_code',
+        'store_id',
         'transaction_code',
         'payment_method',
         'qris_mode',
