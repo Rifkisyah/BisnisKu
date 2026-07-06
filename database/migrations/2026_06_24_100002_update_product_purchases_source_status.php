@@ -11,16 +11,22 @@ return new class extends Migration
     {
         // Step 1: Expand enum to include BOTH 'canceled' (old) and 'cancelled' (new) + new values
         // This prevents data truncation error during the transition
-        DB::statement("ALTER TABLE product_purchases MODIFY COLUMN status ENUM('draft', 'ordered', 'partial_received', 'received', 'canceled', 'cancelled') DEFAULT 'draft'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE product_purchases MODIFY COLUMN status ENUM('draft', 'ordered', 'partial_received', 'received', 'canceled', 'cancelled') DEFAULT 'draft'");
+        }
 
         // Step 2: Migrate old 'canceled' data to 'cancelled'
         DB::statement("UPDATE product_purchases SET status = 'cancelled' WHERE status = 'canceled'");
 
         // Step 3: Now narrow the enum to remove old 'canceled'
-        DB::statement("ALTER TABLE product_purchases MODIFY COLUMN status ENUM('draft', 'ordered', 'partial_received', 'received', 'cancelled') DEFAULT 'draft'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE product_purchases MODIFY COLUMN status ENUM('draft', 'ordered', 'partial_received', 'received', 'cancelled') DEFAULT 'draft'");
+        }
 
         // Step 4: Update source enum to include 'service'
-        DB::statement("ALTER TABLE product_purchases MODIFY COLUMN source ENUM('whatsapp', 'marketplace', 'offline', 'other', 'service') DEFAULT 'other'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE product_purchases MODIFY COLUMN source ENUM('whatsapp', 'marketplace', 'offline', 'other', 'service') DEFAULT 'other'");
+        }
 
         // Add estimated_arrival_date if not already there (may exist from prior migration)
         if (!Schema::hasColumn('product_purchases', 'estimated_arrival_date')) {
@@ -48,8 +54,10 @@ return new class extends Migration
     public function down(): void
     {
         DB::statement("UPDATE product_purchases SET status = 'canceled' WHERE status = 'cancelled'");
-        DB::statement("ALTER TABLE product_purchases MODIFY COLUMN status ENUM('draft', 'ordered', 'received', 'canceled') DEFAULT 'draft'");
-        DB::statement("ALTER TABLE product_purchases MODIFY COLUMN source ENUM('whatsapp', 'marketplace', 'offline', 'other') DEFAULT 'other'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE product_purchases MODIFY COLUMN status ENUM('draft', 'ordered', 'received', 'canceled') DEFAULT 'draft'");
+            DB::statement("ALTER TABLE product_purchases MODIFY COLUMN source ENUM('whatsapp', 'marketplace', 'offline', 'other') DEFAULT 'other'");
+        }
 
         if (Schema::hasColumn('product_purchases', 'partial_notes')) {
             Schema::table('product_purchases', function (Blueprint $table) {

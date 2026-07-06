@@ -15,13 +15,17 @@ return new class extends Migration
         });
 
         // Change status enum to include 'temporary'
-        DB::statement("ALTER TABLE products MODIFY COLUMN status ENUM('active', 'inactive', 'temporary') DEFAULT 'active'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE products MODIFY COLUMN status ENUM('active', 'inactive', 'temporary') DEFAULT 'active'");
+        }
     }
 
     public function down(): void
     {
         // Revert status enum
-        DB::statement("ALTER TABLE products MODIFY COLUMN status ENUM('active', 'inactive') DEFAULT 'active'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE products MODIFY COLUMN status ENUM('active', 'inactive') DEFAULT 'active'");
+        }
 
         Schema::table('products', function (Blueprint $table) {
             $table->dropColumn('unit');

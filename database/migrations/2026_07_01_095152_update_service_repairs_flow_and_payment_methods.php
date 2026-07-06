@@ -15,9 +15,11 @@ return new class extends Migration
         });
 
         // Change default status to 'diagnosing'
-        DB::statement("ALTER TABLE service_repairs MODIFY COLUMN status ENUM(
-            'draft','waiting_dp','diagnosing','waiting_parts','repairing','ready','done','cancelled'
-        ) DEFAULT 'diagnosing'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE service_repairs MODIFY COLUMN status ENUM(
+                'draft','waiting_dp','diagnosing','waiting_parts','repairing','ready','done','cancelled'
+            ) DEFAULT 'diagnosing'");
+        }
     }
 
     public function down(): void
@@ -26,8 +28,10 @@ return new class extends Migration
             $table->dropColumn('final_payment_method');
         });
 
-        DB::statement("ALTER TABLE service_repairs MODIFY COLUMN status ENUM(
-            'draft','waiting_dp','diagnosing','waiting_parts','repairing','ready','done','cancelled'
-        ) DEFAULT 'draft'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE service_repairs MODIFY COLUMN status ENUM(
+                'draft','waiting_dp','diagnosing','waiting_parts','repairing','ready','done','cancelled'
+            ) DEFAULT 'draft'");
+        }
     }
 };

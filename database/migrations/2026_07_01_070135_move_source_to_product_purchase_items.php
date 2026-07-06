@@ -51,27 +51,33 @@ return new class extends Migration
 
         // 3. Drop columns from product_purchases
         Schema::table('product_purchases', function (Blueprint $table) {
-            $table->dropForeign(['supplier_code']);
-            $table->dropColumn([
-                'source',
-                'supplier_code',
-                'wa_message_content',
-                'wa_message_status',
-                'marketplace_name',
-                'marketplace_seller',
-                'marketplace_order_id',
-                'marketplace_notes',
-                'store_name',
-                'receipt_number',
-                'offline_notes',
-                'other_source',
-                'other_notes'
-            ]);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['supplier_code']);
+            }
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropColumn([
+                    'source',
+                    'supplier_code',
+                    'wa_message_content',
+                    'wa_message_status',
+                    'marketplace_name',
+                    'marketplace_seller',
+                    'marketplace_order_id',
+                    'marketplace_notes',
+                    'store_name',
+                    'receipt_number',
+                    'offline_notes',
+                    'other_source',
+                    'other_notes'
+                ]);
+            }
         });
         
         // 4. Add foreign key to product_purchase_items
         Schema::table('product_purchase_items', function (Blueprint $table) {
-            $table->foreign('supplier_code')->references('supplier_code')->on('suppliers')->nullOnDelete();
+            if (DB::getDriverName() !== 'sqlite' && Schema::hasColumn('product_purchase_items', 'supplier_code')) {
+                $table->foreign('supplier_code')->references('supplier_code')->on('suppliers')->nullOnDelete();
+            }
         });
     }
 
@@ -124,20 +130,24 @@ return new class extends Migration
 
         // 3. Drop columns from product_purchase_items
         Schema::table('product_purchase_items', function (Blueprint $table) {
-            $table->dropForeign(['supplier_code']);
-            $table->dropColumn([
-                'source',
-                'supplier_code',
-                'marketplace_name',
-                'marketplace_seller',
-                'marketplace_order_id',
-                'marketplace_notes',
-                'store_name',
-                'receipt_number',
-                'offline_notes',
-                'other_source',
-                'other_notes'
-            ]);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['supplier_code']);
+            }
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropColumn([
+                    'source',
+                    'supplier_code',
+                    'marketplace_name',
+                    'marketplace_seller',
+                    'marketplace_order_id',
+                    'marketplace_notes',
+                    'store_name',
+                    'receipt_number',
+                    'offline_notes',
+                    'other_source',
+                    'other_notes'
+                ]);
+            }
         });
     }
 };

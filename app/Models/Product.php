@@ -44,6 +44,11 @@ class Product extends Model
         return $this->hasMany(TransactionItem::class, 'product_code', 'product_code');
     }
 
+    public function purchaseItems(): HasMany
+    {
+        return $this->hasMany(ProductPurchaseItem::class, 'product_code', 'product_code');
+    }
+
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class, 'product_code', 'product_code');
