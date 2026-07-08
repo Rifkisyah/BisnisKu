@@ -70,11 +70,9 @@ class DebtController extends Controller
         DB::transaction(function () use ($validated, $debt) {
             $validated['debt_code'] = $debt->debt_code;
             DebtPayment::create($validated);
-            $debt->remaining_amount -= $validated['amount'];
-            $debt->status = $debt->remaining_amount <= 0 ? 'paid' : 'partial';
-            $debt->save();
+            $debt->updateStatus();
         });
-        return back()->with('success', __('messages.created', ['item' => __('messages.payment')]));
+        return back()->with('success', 'Pembayaran hutang berhasil dicatat.');
     }
 
     public function destroy(Debt $debt)

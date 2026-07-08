@@ -63,7 +63,7 @@ class DiskonBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckoutWithDiskon($browser, -1);
 
@@ -81,7 +81,7 @@ class DiskonBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckoutWithDiskon($browser, 0);
 
@@ -99,7 +99,7 @@ class DiskonBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckoutWithDiskon($browser, 1);
 
@@ -117,7 +117,7 @@ class DiskonBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             // Diskon = 75000, total = 0, amount_paid = 0
             $result = $browser->script("
@@ -156,7 +156,7 @@ class DiskonBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckoutWithDiskon($browser, 75001);
 

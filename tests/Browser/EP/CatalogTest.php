@@ -24,7 +24,7 @@ class CatalogTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/store/dusk-test-store')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1500)
                     ->screenshot('EP-CAT-001');
 
@@ -45,7 +45,7 @@ class CatalogTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/store/toko-yang-tidak-ada-xyz-9999')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000)
                     ->screenshot('EP-CAT-002');
 
@@ -63,7 +63,7 @@ class CatalogTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/store/dusk-test-store')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1500);
 
             // Klik produk pertama yang ada di katalog

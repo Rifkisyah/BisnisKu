@@ -32,7 +32,7 @@ class LoginTest extends DuskTestCase
                     ->waitFor('input[name="email"]', 5)
                     ->type('input[name="email"]', $this->ownerEmail)
                     ->type('input[name="password"]', $this->defaultPassword)
-                    ->press('button[type="submit"]')
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser 
                     ->waitForLocation('/dashboard', 10)
                     ->assertPathIs('/dashboard')
                     ->screenshot('EP-LOGIN-001');
@@ -50,10 +50,10 @@ class LoginTest extends DuskTestCase
                     ->waitFor('input[name="email"]', 5)
                     ->type('input[name="email"]', $this->ownerEmail)
                     ->type('input[name="password"]', 'passwordSALAH123')
-                    ->press('button[type="submit"]')
-                    ->waitForText('', 3)
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser 
+                    ->waitFor('.text-\\[var\\(--color-critical\\)\\]', 3)
                     ->assertPathIs('/login')
-                    ->assertSee('login')
+                    
                     ->screenshot('EP-LOGIN-002');
         });
     }
@@ -66,9 +66,18 @@ class LoginTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/login')
-                    ->waitFor('input[name="email"]', 5)
-                    ->press('button[type="submit"]')
-                    ->pause(1000)
+                    ->waitFor('input[name="email"]', 10)
+                    ->pause(500)
+                    ->script("
+                        // Trigger form submit melalui JS untuk bypass HTML5 native validation
+                        const form = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"])');
+                        if (form) {
+                            // Disable native HTML5 validation, lalu submit
+                            form.setAttribute('novalidate', '');
+                            form.querySelector('button[type=\"submit\"]').click();
+                        }
+                    ");
+            $browser->pause(2000)
                     ->assertPathIs('/login')
                     ->screenshot('EP-LOGIN-003');
         });
@@ -85,7 +94,7 @@ class LoginTest extends DuskTestCase
                     ->waitFor('input[name="email"]', 5)
                     ->type('input[name="email"]', $this->inactiveEmail)
                     ->type('input[name="password"]', $this->defaultPassword)
-                    ->press('button[type="submit"]')
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser 
                     ->pause(2000)
                     ->assertPathIs('/login')
                     ->screenshot('EP-LOGIN-004');
@@ -103,10 +112,12 @@ class LoginTest extends DuskTestCase
                     ->waitFor('input[name="email"]', 5)
                     ->type('input[name="email"]', 'tidakterdaftar@example.com')
                     ->type('input[name="password"]', 'password123')
-                    ->press('button[type="submit"]')
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser 
                     ->pause(2000)
                     ->assertPathIs('/login')
                     ->screenshot('EP-LOGIN-005');
         });
     }
 }
+
+

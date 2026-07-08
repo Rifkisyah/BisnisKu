@@ -31,8 +31,8 @@ class HargaBeliBVATest extends DuskTestCase
         $hargaJual = max($hargaBeli, 1);
 
         $browser->visit('/products/create?type=physical')
-                ->waitFor('#name', 5)
-                ->type('#name', 'Produk BVA Beli ' . $hargaBeli)
+                ->waitFor('input[name="name"]', 5)
+                ->type('input[name="name"]', 'Produk BVA Beli ' . $hargaBeli)
                 ->type('input[name="purchase_price"]', (string) $hargaBeli)
                 ->type('input[name="selling_price"]', (string) $hargaJual)
                 ->type('input[name="minimum_stock"]', '1');
@@ -44,7 +44,7 @@ class HargaBeliBVATest extends DuskTestCase
             }
         ");
 
-        $browser->press('button[type="submit"]')
+        $browser->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                 ->pause(2000);
     }
 
@@ -116,3 +116,4 @@ class HargaBeliBVATest extends DuskTestCase
         });
     }
 }
+

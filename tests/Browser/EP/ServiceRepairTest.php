@@ -34,8 +34,8 @@ class ServiceRepairTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/service-repairs/create')
-                    ->waitFor('#customer_name', 5)
-                    ->type('#customer_name', 'Pelanggan Servis EP 001')
+                    ->waitFor('input[name="customer_name"]', 5)
+                    ->type('input[name="customer_name"]', 'Pelanggan Servis EP 001')
                     ->type('input[name="customer_phone"]', '08123456789')
                     ->pause(500);
 
@@ -43,9 +43,9 @@ class ServiceRepairTest extends DuskTestCase
             $browser->type('input[name="items[0][name]"]', 'iPhone 13 Pro')
                     ->type('input[name="items[0][brand]"]', 'Apple')
                     ->type('input[name="items[0][series]"]', 'A2483')
-                    ->type('textarea[name="items[0][complaint]"]', 'Layar berkedip dan baterai cepat habis')
+                    ->type('textarea[name^="items"][name$="[complaint]"]', 'Layar berkedip dan baterai cepat habis')
                     ->type('input[name="items[0][service_fee]"]', '150000')
-                    ->press('button[type="submit"]')
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(3000)
                     ->assertPathIs('/service-repairs')
                     ->screenshot('EP-SERVIS-001');
@@ -82,16 +82,16 @@ class ServiceRepairTest extends DuskTestCase
 
             // Buat service repair dulu
             $browser->visit('/service-repairs/create')
-                    ->waitFor('#customer_name', 5)
-                    ->type('#customer_name', 'Pelanggan Servis EP 003')
-                    ->type('textarea[name="items[0][complaint]"]', 'Layar pecah')
+                    ->waitFor('input[name="customer_name"]', 5)
+                    ->type('input[name="customer_name"]', 'Pelanggan Servis EP 003')
+                    ->type('textarea[name^="items"][name$="[complaint]"]', 'Layar pecah')
                     ->type('input[name="items[0][name]"]', 'Samsung A52')
-                    ->press('button[type="submit"]')
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(3000);
 
             // Ambil service repair terbaru dan buka detail
             $browser->visit('/service-repairs')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -112,7 +112,7 @@ class ServiceRepairTest extends DuskTestCase
             ");
 
             $browser->pause(1000)
-                    ->press('button[type="submit"]')
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000)
                     ->screenshot('EP-SERVIS-003');
         });
@@ -128,7 +128,7 @@ class ServiceRepairTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/service-repairs')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000)
                     ->screenshot('EP-SERVIS-004');
         });
@@ -145,16 +145,16 @@ class ServiceRepairTest extends DuskTestCase
 
             // Buat service repair dulu
             $browser->visit('/service-repairs/create')
-                    ->waitFor('#customer_name', 5)
-                    ->type('#customer_name', 'Pelanggan Spare EP 005')
-                    ->type('textarea[name="items[0][complaint]"]', 'Baterai bocor')
+                    ->waitFor('input[name="customer_name"]', 5)
+                    ->type('input[name="customer_name"]', 'Pelanggan Spare EP 005')
+                    ->type('textarea[name^="items"][name$="[complaint]"]', 'Baterai bocor')
                     ->type('input[name="items[0][name]"]', 'Xiaomi Redmi Note 10')
-                    ->press('button[type="submit"]')
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(3000);
 
             // Buka detail service repair terbaru
             $browser->visit('/service-repairs')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -193,11 +193,11 @@ class ServiceRepairTest extends DuskTestCase
             $this->loginAsKasir($browser);
 
             $browser->visit('/service-repairs/create')
-                    ->waitFor('#customer_name', 5)
-                    ->type('#customer_name', 'Pelanggan Kasir EP 006')
+                    ->waitFor('input[name="customer_name"]', 5)
+                    ->type('input[name="customer_name"]', 'Pelanggan Kasir EP 006')
                     ->type('input[name="items[0][name]"]', 'Oppo A54')
-                    ->type('textarea[name="items[0][complaint]"]', 'Tidak bisa charging')
-                    ->press('button[type="submit"]')
+                    ->type('textarea[name^="items"][name$="[complaint]"]', 'Tidak bisa charging')
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(3000)
                     ->screenshot('EP-SERVIS-006');
         });
@@ -214,7 +214,7 @@ class ServiceRepairTest extends DuskTestCase
 
             // Buka daftar service repair
             $browser->visit('/service-repairs')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000)
                     ->assertPathIs('/service-repairs')
                     ->screenshot('EP-SERVIS-007');
@@ -232,11 +232,12 @@ class ServiceRepairTest extends DuskTestCase
 
             $browser->visit('/service-repairs/create')
                     ->waitFor('button[type="submit"]', 5)
-                    ->type('textarea[name="items[0][complaint]"]', 'Masalah tanpa nama pelanggan')
+                    ->type('textarea[name^="items"][name$="[complaint]"]', 'Masalah tanpa nama pelanggan')
                     ->type('input[name="items[0][name]"]', 'Device Test')
-                    ->press('button[type="submit"]')
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000)
                     ->screenshot('EP-SERVIS-008');
         });
     }
 }
+

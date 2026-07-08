@@ -28,8 +28,8 @@ class MinimumStokBVATest extends DuskTestCase
     private function submitProductWithMinStok(Browser $browser, int $minStok): void
     {
         $browser->visit('/products/create?type=physical')
-                ->waitFor('#name', 5)
-                ->type('#name', 'Produk BVA MinStok ' . $minStok)
+                ->waitFor('input[name="name"]', 5)
+                ->type('input[name="name"]', 'Produk BVA MinStok ' . $minStok)
                 ->type('input[name="purchase_price"]', '10000')
                 ->type('input[name="selling_price"]', '15000')
                 ->type('input[name="minimum_stock"]', (string) $minStok);
@@ -41,7 +41,7 @@ class MinimumStokBVATest extends DuskTestCase
             }
         ");
 
-        $browser->press('button[type="submit"]')
+        $browser->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                 ->pause(2000);
     }
 
@@ -113,3 +113,4 @@ class MinimumStokBVATest extends DuskTestCase
         });
     }
 }
+

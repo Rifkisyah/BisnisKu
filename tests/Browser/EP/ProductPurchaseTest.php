@@ -32,7 +32,7 @@ class ProductPurchaseTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/product-purchases/create')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1500);
 
             // Isi tanggal pengadaan
@@ -60,7 +60,7 @@ class ProductPurchaseTest extends DuskTestCase
                 if (sourceSelect) sourceSelect.value = 'offline';
             ");
 
-            $browser->press('button[type="submit"]')
+            $browser; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(3000)
                     ->screenshot('EP-PENGAD-001');
         });
@@ -76,7 +76,7 @@ class ProductPurchaseTest extends DuskTestCase
             $this->loginAsGudang($browser);
 
             $browser->visit('/product-purchases/create')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1500);
 
             $browser->script("
@@ -99,7 +99,7 @@ class ProductPurchaseTest extends DuskTestCase
                         if (sourceSelect) sourceSelect.value = 'offline';
                     ");
 
-            $browser->press('button[type="submit"]')
+            $browser; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(3000)
                     ->screenshot('EP-PENGAD-002');
         });
@@ -115,7 +115,7 @@ class ProductPurchaseTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/product-purchases')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             // Buka detail pengadaan pertama
@@ -154,7 +154,7 @@ class ProductPurchaseTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/product-purchases/create')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -163,7 +163,7 @@ class ProductPurchaseTest extends DuskTestCase
             ");
 
             // Submit tanpa mengisi item
-            $browser->press('button[type="submit"]')
+            $browser; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000)
                     ->screenshot('EP-PENGAD-004');
         });
@@ -211,3 +211,4 @@ class ProductPurchaseTest extends DuskTestCase
         });
     }
 }
+

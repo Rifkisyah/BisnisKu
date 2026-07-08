@@ -30,7 +30,7 @@ class SettingTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/settings')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             // Update username / nama profil
@@ -52,7 +52,7 @@ class SettingTest extends DuskTestCase
             $this->loginAsKasir($browser);
 
             $browser->visit('/settings')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             // Isi form password
@@ -83,7 +83,7 @@ class SettingTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/settings')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -113,7 +113,7 @@ class SettingTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/settings')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             // Ubah nama toko

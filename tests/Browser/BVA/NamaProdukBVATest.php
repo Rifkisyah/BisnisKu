@@ -38,7 +38,7 @@ class NamaProdukBVATest extends DuskTestCase
             }
         ");
 
-        $browser->press('button[type="submit"]')
+        $browser->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                 ->pause(2000);
     }
 
@@ -115,3 +115,4 @@ class NamaProdukBVATest extends DuskTestCase
         });
     }
 }
+

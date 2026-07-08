@@ -31,6 +31,8 @@ class RegisterController extends Controller
             'email'            => 'required|string|email|max:255|unique:users',
             'password'         => ['required', 'confirmed', Password::defaults()],
             'contact'          => 'nullable|string|max:30',
+        ], [
+            'store_slug.unique' => 'URL Katalog Toko telah digunakan.',
         ]);
 
         $slug = $request->filled('store_slug')

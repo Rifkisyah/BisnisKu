@@ -61,7 +61,7 @@
             <div>
                 <label class="type-caption-bold text-[var(--color-slate)]">{{ __('messages.discount') }} (%)</label>
                 <div class="relative">
-                    <input type="number" x-model.number="discountPercent" min="0" max="100" class="input-field !h-9 mt-1 pr-8">
+                    <input type="number" x-model.number="discountPercent" @input="if(discountPercent > 100) discountPercent = 100; if(discountPercent < 0) discountPercent = 0;" min="0" max="100" class="input-field !h-9 mt-1 pr-8">
                     <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-slate)] mt-0.5">%</span>
                 </div>
             </div>

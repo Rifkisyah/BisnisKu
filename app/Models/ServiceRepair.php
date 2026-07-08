@@ -80,6 +80,7 @@ class ServiceRepair extends Model
     {
         return in_array($this->status, [
             self::STATUS_DIAGNOSING,
+            self::STATUS_WAITING_DP,
             self::STATUS_WAITING_PARTS,
         ]);
     }

@@ -61,7 +61,7 @@ class KuantitasPengadaanBVATest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/product-purchases/create')
-                    ->waitFor('body', 5)
+                    
                     ->pause(500);
 
             $browser->script("
@@ -84,7 +84,7 @@ class KuantitasPengadaanBVATest extends DuskTestCase
                         if (sourceSelect) sourceSelect.value = 'offline';
                     ");
 
-            $browser->press('button[type="submit"]')
+            $browser->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(2000)
                     ->screenshot('BVA-KUAN-001');
         });
@@ -100,7 +100,7 @@ class KuantitasPengadaanBVATest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/product-purchases/create')
-                    ->waitFor('body', 5)
+                    
                     ->pause(500);
 
             $browser->script("
@@ -123,7 +123,7 @@ class KuantitasPengadaanBVATest extends DuskTestCase
                         if (sourceSelect) sourceSelect.value = 'offline';
                     ");
 
-            $browser->press('button[type="submit"]')
+            $browser->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(2000)
                     ->screenshot('BVA-KUAN-002');
         });
@@ -139,7 +139,7 @@ class KuantitasPengadaanBVATest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/product-purchases/create')
-                    ->waitFor('body', 5)
+                    
                     ->pause(500);
 
             $browser->script("
@@ -162,7 +162,7 @@ class KuantitasPengadaanBVATest extends DuskTestCase
                         if (sourceSelect) sourceSelect.value = 'offline';
                     ");
 
-            $browser->press('button[type="submit"]')
+            $browser->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(2000)
                     ->screenshot('BVA-KUAN-003');
         });
@@ -178,7 +178,7 @@ class KuantitasPengadaanBVATest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/product-purchases/create')
-                    ->waitFor('body', 5)
+                    
                     ->pause(500);
 
             $browser->script("
@@ -201,9 +201,10 @@ class KuantitasPengadaanBVATest extends DuskTestCase
                         if (sourceSelect) sourceSelect.value = 'offline';
                     ");
 
-            $browser->press('button[type="submit"]')
+            $browser->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(2000)
                     ->screenshot('BVA-KUAN-004');
         });
     }
 }
+

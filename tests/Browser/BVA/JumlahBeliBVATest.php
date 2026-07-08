@@ -44,7 +44,7 @@ class JumlahBeliBVATest extends DuskTestCase
                     payment_method: 'cash',
                     amount_paid: " . ($qty * 75000 + 1) . "
                 })
-            }).then(r => r.json()).catch(e => ({ error: e.message, success: false }));
+            }).then(async r => { let j = await r.json(); if(!r.ok) j.success = false; return j; }).catch(e => ({ error: e.message, success: false }));
         ");
 
         return $result[0] ?? [];
@@ -58,7 +58,7 @@ class JumlahBeliBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckout($browser, 0);
 
@@ -76,7 +76,7 @@ class JumlahBeliBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckout($browser, 1);
 
@@ -94,7 +94,7 @@ class JumlahBeliBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckout($browser, 2);
 
@@ -113,7 +113,7 @@ class JumlahBeliBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             // Beli sejumlah stok yang tersisa (misal 90 agar tidak menguras habis)
             $result = $this->postCheckout($browser, 90);
@@ -132,7 +132,7 @@ class JumlahBeliBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckout($browser, 101);
 
@@ -142,3 +142,4 @@ class JumlahBeliBVATest extends DuskTestCase
         });
     }
 }
+

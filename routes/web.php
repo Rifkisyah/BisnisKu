@@ -52,6 +52,14 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 // Locale switch
 Route::post('/locale', [SettingController::class, 'switchLocale'])->name('locale.switch');
 
+// ─── Public API ────────────────────────────────────────────────────────────────
+Route::get('/api/check-slug', function (\Illuminate\Http\Request $request) {
+    $slug = \Illuminate\Support\Str::slug($request->query('name', ''));
+    $exists = \App\Models\Store::where('slug', $slug)->exists();
+    return response()->json(['slug' => $slug, 'available' => !$exists]);
+})->name('api.check_slug');
+
+
 // ─── Authenticated POS Internal Routes ────────────────────────────────────────
 Route::middleware(['auth', 'locale', 'set.tenant'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -154,11 +162,5 @@ Route::middleware(['auth', 'locale', 'set.tenant'])->group(function () {
         Route::get('/settings/payment', [\App\Http\Controllers\PaymentSettingController::class, 'index'])->name('settings.payment');
         Route::post('/settings/payment', [\App\Http\Controllers\PaymentSettingController::class, 'update'])->name('settings.payment.update');
 
-        // QRIS Slug check API (for register form)
-        Route::get('/api/check-slug', function (\Illuminate\Http\Request $request) {
-            $slug = \Illuminate\Support\Str::slug($request->query('name', ''));
-            $exists = \App\Models\Store::where('slug', $slug)->exists();
-            return response()->json(['slug' => $slug, 'available' => !$exists]);
-        })->name('api.check_slug')->withoutMiddleware(['role:owner']);
     });
 });

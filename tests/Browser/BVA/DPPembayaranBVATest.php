@@ -37,7 +37,7 @@ class DPPembayaranBVATest extends DuskTestCase
                 ->type('input[name="items[0][name]"]', 'Perangkat Test')
                 ->type('textarea[name="items[0][complaint]"]', 'Test DP BVA')
                 ->type('input[name="items[0][service_fee"]', '150000')
-                ->press('button[type="submit"]')
+                ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                 ->pause(3000);
     }
 
@@ -55,12 +55,12 @@ class DPPembayaranBVATest extends DuskTestCase
                     ->type('#customer_name', 'DP BVA Negatif')
                     ->type('input[name="items[0][name]"]', 'Device Test DP')
                     ->type('textarea[name="items[0][complaint]"]', 'Test keluhan')
-                    ->press('button[type="submit"]')
+                    ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(3000);
 
             // Buka edit service repair dan set DP = -1
             $browser->visit('/service-repairs')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -70,7 +70,7 @@ class DPPembayaranBVATest extends DuskTestCase
 
             $browser->pause(2000)
                     ->type('input[name="down_payment"]', '-1')
-                    ->press('button[type="submit"]')
+                    ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(2000)
                     ->screenshot('BVA-DP-001');
         });
@@ -90,11 +90,11 @@ class DPPembayaranBVATest extends DuskTestCase
                     ->type('#customer_name', 'DP BVA Nol')
                     ->type('input[name="items[0][name]"]', 'Device DP Nol')
                     ->type('textarea[name="items[0][complaint]"]', 'Test keluhan')
-                    ->press('button[type="submit"]')
+                    ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(3000);
 
             $browser->visit('/service-repairs')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -104,7 +104,7 @@ class DPPembayaranBVATest extends DuskTestCase
 
             $browser->pause(2000)
                     ->type('input[name="down_payment"]', '0')
-                    ->press('button[type="submit"]')
+                    ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(2000)
                     ->screenshot('BVA-DP-002');
         });
@@ -124,11 +124,11 @@ class DPPembayaranBVATest extends DuskTestCase
                     ->type('#customer_name', 'DP BVA Satu')
                     ->type('input[name="items[0][name]"]', 'Device DP Satu')
                     ->type('textarea[name="items[0][complaint]"]', 'Test keluhan')
-                    ->press('button[type="submit"]')
+                    ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(3000);
 
             $browser->visit('/service-repairs')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -138,7 +138,7 @@ class DPPembayaranBVATest extends DuskTestCase
 
             $browser->pause(2000)
                     ->type('input[name="down_payment"]', '1')
-                    ->press('button[type="submit"]')
+                    ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(2000)
                     ->screenshot('BVA-DP-003');
         });
@@ -159,11 +159,11 @@ class DPPembayaranBVATest extends DuskTestCase
                     ->type('input[name="items[0][name]"]', 'Device DP Total')
                     ->type('input[name="items[0][service_fee"]', '150000')
                     ->type('textarea[name="items[0][complaint]"]', 'Test keluhan DP max')
-                    ->press('button[type="submit"]')
+                    ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(3000);
 
             $browser->visit('/service-repairs')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -173,7 +173,7 @@ class DPPembayaranBVATest extends DuskTestCase
 
             $browser->pause(2000)
                     ->type('input[name="down_payment"]', '150000')
-                    ->press('button[type="submit"]')
+                    ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(2000)
                     ->screenshot('BVA-DP-004');
         });
@@ -194,11 +194,11 @@ class DPPembayaranBVATest extends DuskTestCase
                     ->type('input[name="items[0][name]"]', 'Device DP Lebih')
                     ->type('input[name="items[0][service_fee"]', '150000')
                     ->type('textarea[name="items[0][complaint]"]', 'Test keluhan DP over')
-                    ->press('button[type="submit"]')
+                    ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(3000);
 
             $browser->visit('/service-repairs')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -208,9 +208,10 @@ class DPPembayaranBVATest extends DuskTestCase
 
             $browser->pause(2000)
                     ->type('input[name="down_payment"]', '150001')
-                    ->press('button[type="submit"]')
+                    ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                     ->pause(2000)
                     ->screenshot('BVA-DP-005');
         });
     }
 }
+

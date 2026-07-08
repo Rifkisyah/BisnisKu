@@ -64,8 +64,12 @@ trait AuthHelper
             ->type('input[name="email"]', $email)
             ->clear('input[name="password"]')
             ->type('input[name="password"]', $password)
-            ->press('button[type="submit"]')
-            ->waitForLocation('/dashboard', 10);
+            ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
+            ->pause(2000);
+            if ($browser->driver->getCurrentURL() !== url('/dashboard')) {
+                throw new \Exception('Login failed! URL is: ' . $browser->driver->getCurrentURL() . ' Text: ' . $browser->text('body'));
+            }
+            return $browser;
     }
 
     /**
@@ -79,3 +83,7 @@ trait AuthHelper
             ->waitForLocation('/login', 5);
     }
 }
+
+
+
+

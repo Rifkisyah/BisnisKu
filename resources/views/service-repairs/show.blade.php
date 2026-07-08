@@ -56,7 +56,7 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
 </div>
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-    <div class="lg:col-span-2 space-y-6">
+    <div class="lg:col-span-2 space-y-6"{{ $st === 'waiting_dp' ? ' x-data="{ editMode: false }"' : '' }}>
 
         {{-- ── Header / Customer Info ────────────────────────────────── --}}
         <div class="card-feature p-6">
@@ -166,16 +166,18 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                         @elseif($st === 'waiting_dp')
                             <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 space-y-2">
                                 <p class="text-xs font-bold text-blue-800">Jika pembayaran DP sudah selesai, mulai perbaikan.</p>
-                                @if($dpOk || $serviceRepair->total_cost == 0)
+                                @if($dpOk && $serviceRepair->down_payment > 0)
                                 <form method="POST" action="{{ route('service-repairs.update-status', $serviceRepair) }}" @submit.prevent="$dispatch('open-confirm-modal', { form: $event.target, title: 'Mulai Perbaikan?', text: 'Apakah Anda yakin ingin memulai proses perbaikan?', confirmText: 'Ya, Mulai Perbaikan', color: 'gray' })">@csrf @method('PATCH')
                                     <input type="hidden" name="status" value="repairing">
                                     <button type="submit" class="w-full rounded-full bg-black px-6 py-3 text-sm font-bold text-white hover:bg-gray-800 transition-colors flex justify-center items-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                        Mulai Perbaikan (→ Diproses)
+                                        Mulai Perbaikan (&#8594; Diproses)
                                     </button>
                                 </form>
+                                @elseif(!$dpOk && $serviceRepair->down_payment > 0)
+                                <p class="text-xs text-red-600 bg-red-50 border border-red-200 p-2 rounded-lg">⚠️ DP belum mencukupi (min 50%: Rp {{ number_format($serviceRepair->total_cost * 0.5, 0, ',', '.') }}). Kasir perlu menambah DP terlebih dahulu.</p>
                                 @else
-                                <p class="text-xs text-blue-600 bg-blue-100 p-2 rounded">DP belum mencukupi (min 50%: Rp {{ number_format($serviceRepair->total_cost * 0.5, 0, ',', '.') }}). Tunggu Kasir memproses DP terlebih dahulu.</p>
+                                <p class="text-xs text-gray-500 bg-gray-100 p-2 rounded-lg">⏳ Menunggu kasir mencatat pembayaran DP dari pelanggan.</p>
                                 @endif
                             </div>
                         @endif
@@ -342,7 +344,41 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
 
         {{-- ── Device Items ────────────────────────────────────────────── --}}
         <div class="card-feature p-6">
-            <h3 class="type-subtitle-lg text-[var(--color-ink-deep)] mb-4 flex items-center gap-2"><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg> Detail Perbaikan & Diagnosa</h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="type-subtitle-lg text-[var(--color-ink-deep)] flex items-center gap-2"><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg> Detail Perbaikan & Diagnosa</h3>
+                @if($st === 'waiting_dp' && (auth()->user()->isTeknisi() || auth()->user()->isOwner()))
+                {{-- Lock/Unlock toggle button --}}
+                <button type="button" @click="editMode = !editMode"
+                    :class="editMode ? 'bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200' : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200'"
+                    class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors">
+                    <template x-if="!editMode">
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            Aktifkan Edit
+                        </span>
+                    </template>
+                    <template x-if="editMode">
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                            Kunci Kembali
+                        </span>
+                    </template>
+                </button>
+                @endif
+            </div>
+
+            {{-- Edit mode info banner (waiting_dp only) --}}
+            @if($st === 'waiting_dp' && (auth()->user()->isTeknisi() || auth()->user()->isOwner()))
+            <div x-show="!editMode" class="mb-4 flex items-center gap-2.5 rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-xs text-gray-500">
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Form edit terkunci. Klik <strong class="text-gray-700 mx-1">Aktifkan Edit</strong> untuk mengubah diagnosa, biaya jasa, atau sparepart.
+            </div>
+            <div x-show="editMode" x-cloak class="mb-4 flex items-center gap-2.5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-700">
+                <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                Mode edit aktif. Ubah data di bawah lalu tekan <strong class="mx-1">Simpan Perubahan</strong> di bagian paling bawah.
+            </div>
+            @endif
+
             <div class="space-y-6">
                 @foreach($serviceRepair->items->whereNull('parent_id') as $idx => $item)
                 <div class="rounded-xl border border-[var(--color-hairline-soft)] p-4 space-y-4">
@@ -380,19 +416,30 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                     </div>
                     @endif
 
-                    {{-- Diagnosis form --}}
-                    @if(($serviceRepair->isTechEditable() || $serviceRepair->isDiagnosing()) && (auth()->user()->isTeknisi() || auth()->user()->isOwner()))
-                    <div class="space-y-3">
-                        <input type="hidden" name="items[{{ $idx }}][id]" value="{{ $item->id }}" form="diagnosis-form">
+                    {{-- Diagnosis / Edit form per item --}}
+                    @if($serviceRepair->isTechEditable() && (auth()->user()->isTeknisi() || auth()->user()->isOwner()))
+                    @php $editFormId = $st === 'diagnosing' ? 'diagnosis-form' : 'waiting-dp-form'; @endphp
+                    <div class="space-y-3 bg-[var(--color-surface-soft)] rounded-xl p-3 border border-[var(--color-hairline-soft)]"
+                         {{ $st === 'waiting_dp' ? 'x-show="editMode" x-cloak' : '' }}>
+                        <p class="text-xs font-bold text-[var(--color-slate)] flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            Detail &amp; Diagnosa Item
+                        </p>
+                        <input type="hidden" name="items[{{ $idx }}][id]" value="{{ $item->id }}" form="{{ $editFormId }}">
                         <div>
-                            <label class="block text-xs font-semibold text-[var(--color-slate)] mb-1">Hasil Diagnosa *</label>
-                            <textarea name="items[{{ $idx }}][diagnosis_result]" form="diagnosis-form" required rows="2" class="input-field !h-auto !py-2" placeholder="Tuliskan hasil diagnosa...">{{ $item->diagnosis_result }}</textarea>
+                            <label class="block text-xs font-semibold text-[var(--color-slate)] mb-1">Hasil Diagnosa</label>
+                            <textarea name="items[{{ $idx }}][diagnosis_result]" form="{{ $editFormId }}" rows="2" class="input-field !h-auto !py-2" placeholder="Tuliskan hasil diagnosa...">{{ $item->diagnosis_result }}</textarea>
                         </div>
-                        <div class="grid grid-cols-1 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-[var(--color-slate)] mb-1">Tambah Foto Bukti (Opsional)</label>
-                                <input type="file" name="items[{{ $idx }}][images][]" form="diagnosis-form" multiple accept="image/*" class="input-field !py-1.5 text-xs">
+                        <div>
+                            <label class="block text-xs font-semibold text-[var(--color-slate)] mb-1">Biaya Jasa</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-xs font-bold text-gray-500 pointer-events-none">Rp</span>
+                                <input type="text" name="items[{{ $idx }}][service_fee]" form="{{ $editFormId }}" value="{{ $item->service_fee > 0 ? (int)$item->service_fee : '' }}" class="input-field !pl-9 input-rupiah" placeholder="0">
                             </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-[var(--color-slate)] mb-1">Tambah Foto Bukti (Opsional)</label>
+                            <input type="file" name="items[{{ $idx }}][images][]" form="{{ $editFormId }}" multiple accept="image/*" class="input-field !py-1.5 text-xs">
                         </div>
                     </div>
                     @elseif($item->diagnosis_result)
@@ -449,9 +496,11 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                                     <td class="py-2 text-right font-medium flex items-center justify-end gap-2">
                                         <span>Rp {{ number_format($part->subtotal, 0, ',', '.') }}</span>
                                         @if($serviceRepair->isTechEditable() && (auth()->user()->isTeknisi() || auth()->user()->isOwner()) && $part->sparepart_status !== 'used')
-                                        <form method="POST" action="{{ route('service-repairs.delete-part', [$serviceRepair, $part]) }}" @submit.prevent="$dispatch('open-confirm-modal', { form: $event.target, title: 'Hapus Sparepart?', text: 'Apakah Anda yakin ingin menghapus sparepart ini?', confirmText: 'Ya, Hapus', color: 'red' })">@csrf @method('DELETE')
-                                            <button type="submit" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1 rounded transition-colors" title="Hapus"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-                                        </form>
+                                        <div x-show="$st === 'waiting_dp' ? editMode : true">
+                                            <form method="POST" action="{{ route('service-repairs.delete-part', [$serviceRepair, $part]) }}" @submit.prevent="$dispatch('open-confirm-modal', { form: $event.target, title: 'Hapus Sparepart?', text: 'Apakah Anda yakin ingin menghapus sparepart ini?', confirmText: 'Ya, Hapus', color: 'red' })">@csrf @method('DELETE')
+                                                <button type="submit" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1 rounded transition-colors" title="Hapus"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                            </form>
+                                        </div>
                                         @endif
                                     </td>
                                 </tr>
@@ -464,7 +513,7 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
 
                             {{-- Add sparepart form — only when tech editable --}}
                             @if($serviceRepair->isTechEditable() && (auth()->user()->isTeknisi() || auth()->user()->isOwner()))
-                            <div class="border-t border-[var(--color-hairline-soft)] pt-3 space-y-3" x-data="{
+                            <div class="border-t border-[var(--color-hairline-soft)] pt-3 space-y-3" {{ $st === 'waiting_dp' ? 'x-show="editMode" x-cloak' : '' }} x-data="{
                                 mode: 'from_stock',
                                 selectedCode: '',
                                 itemName: '',
@@ -524,23 +573,24 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                                         <button type="submit" class="w-full rounded-lg bg-purple-600 hover:bg-purple-700 text-white !py-2 !text-xs font-medium">+ Tambah Pengajuan</button>
                                     </form>
 
-                                    {{-- After adding requested part, show "Ajukan ke Pengadaan" --}}
-                                    @php $requestedParts = $item->children->where('sparepart_type','requested')->where('sparepart_status', null); @endphp
-                                    @if($requestedParts->count() > 0 && auth()->user()->role->name !== 'gudang')
-                                    <div class="mt-2 border border-purple-200 rounded-lg p-3 bg-purple-50 space-y-2">
-                                        <p class="text-xs font-bold text-purple-800">Sparepart belum diajukan ke pengadaan:</p>
-                                        @foreach($requestedParts as $rPart)
-                                        <div class="flex items-center justify-between text-xs">
-                                            <span class="font-medium">{{ $rPart->name }} ({{ $rPart->quantity }}x)</span>
-                                            <form method="POST" action="{{ route('service-repairs.request-part', $serviceRepair) }}">@csrf
-                                                <input type="hidden" name="sparepart_item_id" value="{{ $rPart->id }}">
-                                                <button type="submit" class="text-xs bg-purple-600 text-white rounded px-2 py-1 hover:bg-purple-700 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg> Ajukan Pengadaan</button>
-                                            </form>
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                    @endif
                                 </div>
+
+                                {{-- After adding requested part, show "Ajukan ke Pengadaan" (always visible if there are pending parts) --}}
+                                @php $requestedParts = $item->children->where('sparepart_type','requested')->where('sparepart_status', null); @endphp
+                                @if($requestedParts->count() > 0 && auth()->user()->role->name !== 'gudang')
+                                <div class="mt-2 border border-purple-200 rounded-lg p-3 bg-purple-50 space-y-2">
+                                    <p class="text-xs font-bold text-purple-800">Sparepart belum diajukan ke pengadaan:</p>
+                                    @foreach($requestedParts as $rPart)
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="font-medium">{{ $rPart->name }} ({{ $rPart->quantity }}x)</span>
+                                        <form method="POST" action="{{ route('service-repairs.request-part', $serviceRepair) }}">@csrf
+                                            <input type="hidden" name="sparepart_item_id" value="{{ $rPart->id }}">
+                                            <button type="submit" class="text-xs bg-purple-600 text-white rounded px-2 py-1 hover:bg-purple-700 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg> Ajukan Pengadaan</button>
+                                        </form>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                @endif
                             </div>
                             @endif
                         </div>
@@ -550,19 +600,41 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
             </div>
         </div>
 
-        {{-- NEW BUTTON PLACEMENT FOR DIAGNOSIS SUBMISSION --}}
+        {{-- Save section: Diagnosing → simpan diagnosa & lanjut ke waiting_dp --}}
         @if($st === 'diagnosing' && (auth()->user()->isTeknisi() || auth()->user()->isOwner()))
             <div class="card-feature p-6 text-center space-y-3">
                 <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">Konfirmasi Diagnosa & Sparepart</h3>
-                <p class="text-sm text-gray-500">Pastikan semua hasil diagnosa, foto bukti, dan pengajuan/penambahan sparepart dari stok sudah dimasukkan dengan benar. Setelah disimpan, form sparepart tidak dapat diubah (menunggu pembayaran DP dari Kasir).</p>
-                
-                <form id="diagnosis-form" method="POST" action="{{ route('service-repairs.update-status', $serviceRepair) }}" enctype="multipart/form-data" 
+                <p class="text-sm text-gray-500">Pastikan semua hasil diagnosa, biaya jasa, foto bukti, dan sparepart sudah dimasukkan dengan benar. Setelah disimpan, kasir akan diminta membayar DP.</p>
+                <form id="diagnosis-form" method="POST" action="{{ route('service-repairs.update-status', $serviceRepair) }}" enctype="multipart/form-data"
                       x-data="{ confirmed: false }"
-                      @submit="if(!confirmed) { $event.preventDefault(); $dispatch('open-confirm-modal', { onConfirm: () => { confirmed = true; setTimeout(() => $el.requestSubmit(), 50); }, title: 'Simpan Diagnosa?', text: 'Apakah Anda yakin semua data diagnosa dan estimasi sparepart sudah final?', confirmText: 'Ya, Simpan & Lanjut', color: 'gray' }); }">@csrf @method('PATCH')
+                      @submit="if(!confirmed) { $event.preventDefault(); $dispatch('open-confirm-modal', { onConfirm: () => { confirmed = true; setTimeout(() => $el.requestSubmit(), 50); }, title: 'Simpan Diagnosa?', text: 'Apakah Anda yakin semua data diagnosa, biaya jasa, dan sparepart sudah final?', confirmText: 'Ya, Simpan & Lanjut', color: 'gray' }); }">@csrf @method('PATCH')
                     <input type="hidden" name="status" value="waiting_dp">
                     <button type="submit" class="btn-buy w-full justify-center text-base py-3 mt-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         Simpan Hasil Diagnosa & Lanjut
+                    </button>
+                </form>
+            </div>
+        @endif
+
+        {{-- Save section: Waiting DP → perbarui diagnosa, biaya jasa, & sparepart --}}
+        @if($st === 'waiting_dp' && (auth()->user()->isTeknisi() || auth()->user()->isOwner()))
+            <div class="card-feature p-6 space-y-3">
+                <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">Perbarui Diagnosa & Estimasi Biaya</h3>
+                        <p class="text-sm text-gray-500 mt-0.5">Ubah hasil diagnosa, biaya jasa, atau tambah/hapus sparepart di atas, lalu simpan. Kasir akan melihat estimasi terbaru.</p>
+                    </div>
+                </div>
+                <form id="waiting-dp-form" method="POST" action="{{ route('service-repairs.update-status', $serviceRepair) }}" enctype="multipart/form-data"
+                      @submit.prevent="$dispatch('open-confirm-modal', { form: $event.target, title: 'Simpan Perubahan?', text: 'Perubahan diagnosa dan estimasi biaya akan disimpan. Lanjutkan?', confirmText: 'Ya, Simpan', color: 'amber' })">@csrf @method('PATCH')
+                    <input type="hidden" name="status" value="waiting_dp">
+                    <button type="submit" class="w-full rounded-full bg-amber-600 hover:bg-amber-700 px-6 py-3 text-sm font-bold text-white transition-colors flex justify-center items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                        Simpan Perubahan Diagnosa & Biaya
                     </button>
                 </form>
             </div>

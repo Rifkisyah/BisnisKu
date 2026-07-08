@@ -13,6 +13,11 @@
 <div class="row"><span>{{ $transaction->transaction_code }}</span><span>{{ $transaction->transaction_date->format('d/m/Y H:i') }}</span></div>
 <div>Kasir: {{ $transaction->user->name }}</div>
 @if($transaction->customer_name)<div>Pelanggan: {{ $transaction->customer_name }}</div>@endif
+@if($transaction->payment_method === 'debt' && $transaction->debt)
+<div>Jenis Transaksi: Hutang</div>
+<div>Nama Penghutang: {{ $transaction->debt->debtor_name }}</div>
+<div>Jatuh Tempo: {{ $transaction->debt->due_date ? $transaction->debt->due_date->format('d/m/Y') : '-' }}</div>
+@endif
 <div class="line"></div>
 @foreach($transaction->items as $item)
 <div>{{ $item->product->name }}</div>

@@ -54,22 +54,12 @@ class ServiceRepairController extends Controller
 
     public function create()
     {
-        // Hanya kasir dan owner yang boleh membuat data perbaikan baru
-        if (auth()->user()->isTeknisi()) {
-            abort(403, 'Teknisi tidak dapat membuat data perbaikan baru.');
-        }
-
         $products = Product::available()->where('type', 'sparepart')->where('stock', '>', 0)->get();
         return view('service-repairs.create', compact('products'));
     }
 
     public function store(Request $request)
     {
-        // Hanya kasir dan owner yang boleh menyimpan data perbaikan baru
-        if (auth()->user()->isTeknisi()) {
-            abort(403, 'Teknisi tidak dapat membuat data perbaikan baru.');
-        }
-
         $validated = $request->validate([
             'customer_name'       => 'required|string|min:3|max:100',
             'customer_phone'      => 'nullable|string|min:7|max:20',
@@ -87,7 +77,7 @@ class ServiceRepairController extends Controller
 
             $serviceRepair = ServiceRepair::create([
                 'repair_code'    => $repairCode,
-                'technician_id'  => auth()->user()->isTeknisi() ? auth()->id() : null, // Assign to teknisi if they create it
+                'technician_id'  => auth()->user()->isTeknisi() ? auth()->id() : null,
                 'customer_name'  => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'] ?? null,
                 'service_fee'    => 0,
@@ -309,6 +299,12 @@ class ServiceRepairController extends Controller
                 }
             }
 
+            // ── Recalculate total cost if items were updated ──────────────
+            if (!empty($validated['items'])) {
+                $serviceRepair->calculateTotalCost();
+                $serviceRepair->refresh();
+            }
+
             // ── Validate DP before moving to repairing ───────────────────
             if ($newStatus === ServiceRepair::STATUS_REPAIRING
                 && in_array($oldStatus, [ServiceRepair::STATUS_WAITING_DP, ServiceRepair::STATUS_DIAGNOSING])) {
@@ -493,6 +489,7 @@ class ServiceRepairController extends Controller
             ProductPurchaseItem::create([
                 'product_purchase_code' => $code,
                 'product_code'          => $sparepartItem->component_code,
+                'source'                => 'service',
                 'temp_product_name'     => $sparepartItem->component_code ? null : $sparepartItem->name,
                 'is_resolved'           => !is_null($sparepartItem->component_code),
                 'resolved_product_code' => $sparepartItem->component_code,

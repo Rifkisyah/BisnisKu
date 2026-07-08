@@ -30,7 +30,7 @@ class TransactionTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/transactions')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000)
                     ->assertPathIs('/transactions')
                     ->screenshot('EP-TRANS-001');
@@ -47,7 +47,7 @@ class TransactionTest extends DuskTestCase
             $this->loginAsKasir($browser);
 
             $browser->visit('/transactions')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000)
                     ->assertPathIs('/transactions')
                     ->screenshot('EP-TRANS-002');
@@ -64,7 +64,7 @@ class TransactionTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/transactions')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             // Klik detail transaksi pertama
@@ -98,7 +98,7 @@ class TransactionTest extends DuskTestCase
             // Kasir tidak punya akses ke POST /transactions/{id}/cancel
             // Coba navigate ke transaksi detail dan cari tombol cancel
             $browser->visit('/transactions')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             // Verifikasi: tidak ada tombol cancel di UI kasir

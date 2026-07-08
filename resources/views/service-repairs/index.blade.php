@@ -44,12 +44,10 @@ $statusLabels = [
             </div>
 
             <!-- Add Button: Large on Mobile -->
-            @if(!auth()->user()->isTeknisi())
             <a href="{{ route('service-repairs.create') }}" class="btn-primary w-full sm:w-auto !py-3 sm:!py-2 !px-4 whitespace-nowrap text-center text-lg sm:text-sm order-first sm:order-last mb-2 sm:mb-0">
                 <svg class="h-5 w-5 sm:h-4 sm:w-4 mr-2 sm:mr-1.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span class="inline-block">{{ __('messages.add') }}</span>
             </a>
-            @endif
 
             <!-- Desktop Actions -->
             <div class="hidden sm:flex flex-wrap items-center gap-2">

@@ -41,7 +41,7 @@ return [
     'login_title' => 'Masuk ke BisnisKu',
     'login_subtitle' => 'Sistem Informasi Toko Armal Cellular',
     'login_failed' => 'Email atau kata sandi salah.',
-    'account_inactive' => 'Akun Anda tidak aktif. Hubungi admin.',
+    'account_inactive' => 'Akun Anda tidak aktif. Hubungi admin / pemilik toko.',
     'welcome' => 'Selamat Datang',
     'total_revenue' => 'Total Pendapatan',
     'total_transactions' => 'Total Transaksi',

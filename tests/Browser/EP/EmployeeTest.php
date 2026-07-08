@@ -31,12 +31,11 @@ class EmployeeTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/employees/create')
-                    ->waitFor('#username', 5)
-                    ->type('#username', 'Karyawan Baru EP')
+                    ->waitFor('input[name="username"]', 5)
+                    ->type('input[name="username"]', 'Karyawan Baru EP')
                     ->type('input[name="email"]', 'karyawan_ep_' . time() . '@test.dusk')
                     ->type('input[name="password"]', 'Password123!')
-                    ->type('#password_confirmation', 'Password123!');
-
+                    ->type('input[name="password_confirmation"]', 'Password123!');
             // Pilih role kasir
             $browser->script("
                 const roleSelect = document.querySelector('select[name=\"role_id\"]');
@@ -46,7 +45,7 @@ class EmployeeTest extends DuskTestCase
                 }
             ");
 
-            $browser->press('button[type="submit"]')
+            $browser; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000)
                     ->assertPathIs('/employees')
                     ->screenshot('EP-KAR-001');
@@ -66,9 +65,7 @@ class EmployeeTest extends DuskTestCase
                     ->pause(2000)
                     ->screenshot('EP-KAR-002');
 
-            $url = $browser->driver->getCurrentURL();
-            $this->assertStringNotContainsString('/employees/create', $url,
-                'Kasir tidak boleh akses halaman tambah karyawan');
+            $browser->assertSee('Akses Ditolak');
         });
     }
 
@@ -82,7 +79,7 @@ class EmployeeTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/employees')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             // Klik edit pada karyawan pertama yang bukan diri sendiri
@@ -95,9 +92,9 @@ class EmployeeTest extends DuskTestCase
 
             $url = $browser->driver->getCurrentURL();
             if (str_contains($url, '/edit')) {
-                $browser->clear('#username')
-                        ->type('#username', 'Karyawan Updated EP')
-                        ->press('button[type="submit"]')
+                $browser->clear('input[name="username"]')
+                        ->type('input[name="username"]', 'Karyawan Updated EP')
+                        ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                         ->pause(2000);
             }
 
@@ -116,7 +113,7 @@ class EmployeeTest extends DuskTestCase
 
             // Ambil ID user owner yang sedang login
             $ownerId = $browser->visit('/employees')
-                               ->waitFor('body', 5)
+                               
                                ->script("
                                     // Cari row karyawan dengan email owner@test.dusk
                                     const rows = document.querySelectorAll('tbody tr');
@@ -161,12 +158,11 @@ class EmployeeTest extends DuskTestCase
 
             // Buat karyawan baru dulu yang akan dihapus
             $browser->visit('/employees/create')
-                    ->waitFor('#username', 5)
-                    ->type('#username', 'Karyawan Hapus EP')
+                    ->waitFor('input[name="username"]', 5)
+                    ->type('input[name="username"]', 'Karyawan Hapus EP')
                     ->type('input[name="email"]', 'hapus_ep_' . time() . '@test.dusk')
                     ->type('input[name="password"]', 'Password123!')
-                    ->type('#password_confirmation', 'Password123!');
-
+                    ->type('input[name="password_confirmation"]', 'Password123!');
             $browser->script("
                 const roleSelect = document.querySelector('select[name=\"role_id\"]');
                 if (roleSelect && roleSelect.options.length > 1) {
@@ -174,12 +170,12 @@ class EmployeeTest extends DuskTestCase
                 }
             ");
 
-            $browser->press('button[type="submit"]')
+            $browser; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000);
 
             // Cari dan hapus karyawan yang baru dibuat
             $browser->visit('/employees')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             // Submit form delete untuk karyawan dengan nama 'Karyawan Hapus EP'
@@ -198,3 +194,4 @@ class EmployeeTest extends DuskTestCase
         });
     }
 }
+

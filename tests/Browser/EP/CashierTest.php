@@ -33,7 +33,7 @@ class CashierTest extends DuskTestCase
             $this->loginAsKasir($browser);
 
             $browser->visit('/cashier')
-                    ->waitFor('body', 5)
+                    
                     ->pause(2000);
 
             // Tambah produk ke keranjang via klik produk / tombol +
@@ -61,7 +61,7 @@ class CashierTest extends DuskTestCase
             $this->loginAsKasir($browser);
 
             $browser->visit('/cashier')
-                    ->waitFor('body', 5)
+                    
                     ->pause(2000)
                     ->screenshot('EP-KASIR-002');
         });
@@ -77,7 +77,7 @@ class CashierTest extends DuskTestCase
             $this->loginAsKasir($browser);
 
             $browser->visit('/cashier')
-                    ->waitFor('body', 5)
+                    
                     ->pause(2000)
                     ->screenshot('EP-KASIR-003');
         });
@@ -94,17 +94,17 @@ class CashierTest extends DuskTestCase
             $this->loginAsKasir($browser);
 
             // Gunakan fetch API untuk POST langsung ke endpoint
-            $csrfToken = $browser->visit('/cashier')
-                                  ->waitFor('body', 5)
-                                  ->value('meta[name="csrf-token"]', '');
+            $browser->visit('/cashier')->pause(1500);
 
             // POST dengan kuantitas 9999 (melebihi stok 100)
             $result = $browser->script("
+                const tokenMeta = document.querySelector('meta[name=\"csrf-token\"]');
+                const token = tokenMeta ? tokenMeta.content : '';
                 return fetch('/cashier/checkout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').content,
+                        'X-CSRF-TOKEN': token,
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
@@ -136,7 +136,7 @@ class CashierTest extends DuskTestCase
             $this->loginAsKasir($browser);
 
             $browser->visit('/cashier')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             // POST ke endpoint checkout dengan diskon > subtotal
@@ -174,17 +174,17 @@ class CashierTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
 
-            $browser->visit('/cashier')
-                    ->waitFor('body', 5)
-                    ->pause(1000);
+            $browser->visit('/cashier')->pause(1500);
 
             // POST tanpa items
             $result = $browser->script("
+                const tokenMeta = document.querySelector('meta[name=\"csrf-token\"]');
+                const token = tokenMeta ? tokenMeta.content : '';
                 return fetch('/cashier/checkout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').content,
+                        'X-CSRF-TOKEN': token,
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({

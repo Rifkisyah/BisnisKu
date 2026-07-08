@@ -62,7 +62,7 @@ class StokBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckoutWithQty($browser, 0);
 
@@ -80,7 +80,7 @@ class StokBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckoutWithQty($browser, 1);
 
@@ -98,7 +98,7 @@ class StokBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckoutWithQty($browser, 2);
 
@@ -116,7 +116,7 @@ class StokBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckoutWithQty($browser, 99);
 
@@ -134,7 +134,7 @@ class StokBVATest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->loginAsKasir($browser);
-            $browser->visit('/cashier')->waitFor('body', 5)->pause(500);
+            $browser->visit('/cashier')->pause(500);
 
             $result = $this->postCheckoutWithQty($browser, 10000);
 

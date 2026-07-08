@@ -34,7 +34,7 @@ class BayarHutangBVATest extends DuskTestCase
                 ->type('#debtor_name', $name)
                 ->type('input[name="total_amount"]', '500000')
                 ->type('input[name="debt_date"]', now()->format('Y-m-d'))
-                ->press('button[type="submit"]')
+                ->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                 ->pause(2000);
     }
 
@@ -44,7 +44,7 @@ class BayarHutangBVATest extends DuskTestCase
     private function payDebt(Browser $browser, int $amount): void
     {
         $browser->visit('/debts')
-                ->waitFor('body', 5)
+                
                 ->pause(1000);
 
         $browser->script("
@@ -65,7 +65,7 @@ class BayarHutangBVATest extends DuskTestCase
                     if (methodSelect) methodSelect.value = 'cash';
                 ");
 
-        $browser->press('button[type="submit"]')
+        $browser->click('form:not([action*="locale"]):not([action$="logout"]) button[type="submit"]')
                 ->pause(2000);
     }
 
@@ -144,3 +144,4 @@ class BayarHutangBVATest extends DuskTestCase
         });
     }
 }
+

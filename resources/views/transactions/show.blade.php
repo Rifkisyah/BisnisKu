@@ -23,6 +23,17 @@
             <div><p class="type-caption-bold text-[var(--color-slate)]">{{ __('messages.amount_paid') }}</p><p class="type-body-sm font-medium text-[var(--color-ink)]">Rp {{ number_format($transaction->amount_paid, 0, ',', '.') }}</p></div>
             <div><p class="type-caption-bold text-[var(--color-slate)]">{{ __('messages.change') }}</p><p class="type-body-sm font-medium text-[var(--color-success)]">Rp {{ number_format($transaction->change, 0, ',', '.') }}</p></div>
         </div>
+        
+        @if($transaction->payment_method === 'debt' && $transaction->debt)
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+            <h4 class="font-bold text-amber-800 mb-2">Informasi Hutang</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><p class="type-caption-bold text-amber-700">Nama Penghutang</p><p class="type-body-sm font-medium text-amber-900">{{ $transaction->debt->debtor_name }}</p></div>
+                <div><p class="type-caption-bold text-amber-700">Jatuh Tempo</p><p class="type-body-sm font-medium text-amber-900">{{ $transaction->debt->due_date ? $transaction->debt->due_date->format('d/m/Y') : '-' }}</p></div>
+            </div>
+        </div>
+        @endif
+
         <table class="w-full"><thead><tr class="border-b border-[var(--color-hairline-soft)]">
             <th class="pb-3 text-left table-header">{{ __('messages.product') }}</th><th class="pb-3 text-left table-header">Qty</th>
             <th class="pb-3 text-left table-header">{{ __('messages.price') }}</th><th class="pb-3 text-left table-header">{{ __('messages.subtotal') }}</th>

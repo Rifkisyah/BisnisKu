@@ -30,7 +30,7 @@ class BusinessPerformanceTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/reports/business-performance')
-                    ->waitFor('body', 5)
+                    
                     ->pause(2000)
                     ->assertPathIs('/reports/business-performance')
                     ->screenshot('EP-BI-001');
@@ -66,7 +66,7 @@ class BusinessPerformanceTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/reports/business-performance/clusters')
-                    ->waitFor('body', 5)
+                    
                     ->pause(2000)
                     ->screenshot('EP-BI-003');
         });
@@ -82,7 +82,7 @@ class BusinessPerformanceTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/reports/business-performance/sma')
-                    ->waitFor('body', 5)
+                    
                     ->pause(2000)
                     ->screenshot('EP-BI-004');
         });

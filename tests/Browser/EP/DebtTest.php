@@ -31,12 +31,12 @@ class DebtTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/debts/create')
-                    ->waitFor('#debtor_name', 5)
-                    ->type('#debtor_name', 'Pelanggan Hutang EP 001')
+                    ->waitFor('input[name="debtor_name"]', 5)
+                    ->script("document.querySelector('form').setAttribute('novalidate', '');"); $browser->type('input[name="debtor_name"]', 'Pelanggan Hutang EP 001')
                     ->type('input[name="debtor_contact"]', '081234567890')
                     ->type('input[name="total_amount"]', '500000')
-                    ->type('input[name="debt_date"]', now()->format('Y-m-d'))
-                    ->press('button[type="submit"]')
+                    ; $browser->script("document.querySelector('input[name=\"debt_date\"]').value = '".now()->format('Y-m-d')."';"); $browser
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000)
                     ->assertPathIs('/debts')
                     ->screenshot('EP-HUTANG-001');
@@ -53,10 +53,10 @@ class DebtTest extends DuskTestCase
             $this->loginAsOwner($browser);
 
             $browser->visit('/debts/create')
-                    ->waitFor('button[type="submit"]', 5)
+                    ->pause(1500)
                     ->type('input[name="total_amount"]', '500000')
-                    ->type('input[name="debt_date"]', now()->format('Y-m-d'))
-                    ->press('button[type="submit"]')
+                    ; $browser->script("document.querySelector('input[name=\"debt_date\"]').value = '".now()->format('Y-m-d')."';"); $browser
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000)
                     ->assertPathIs('/debts/create')
                     ->screenshot('EP-HUTANG-002');
@@ -74,16 +74,16 @@ class DebtTest extends DuskTestCase
 
             // Buat hutang baru dulu
             $browser->visit('/debts/create')
-                    ->waitFor('#debtor_name', 5)
-                    ->type('#debtor_name', 'Pelanggan Lunas EP 003')
+                    ->waitFor('input[name="debtor_name"]', 5)
+                    ->type('input[name="debtor_name"]', 'Pelanggan Lunas EP 003')
                     ->type('input[name="total_amount"]', '200000')
-                    ->type('input[name="debt_date"]', now()->format('Y-m-d'))
-                    ->press('button[type="submit"]')
+                    ; $browser->script("document.querySelector('input[name=\"debt_date\"]').value = '".now()->format('Y-m-d')."';"); $browser
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000);
 
             // Cari hutang dan buka detail
             $browser->visit('/debts')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -107,7 +107,7 @@ class DebtTest extends DuskTestCase
                 if (methodSelect) methodSelect.value = 'cash';
             ");
 
-            $browser->press('button[type="submit"]')
+            $browser; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000)
                     ->screenshot('EP-HUTANG-003');
         });
@@ -124,16 +124,16 @@ class DebtTest extends DuskTestCase
 
             // Buat hutang baru dulu
             $browser->visit('/debts/create')
-                    ->waitFor('#debtor_name', 5)
-                    ->type('#debtor_name', 'Pelanggan Partial EP 004')
+                    ->waitFor('input[name="debtor_name"]', 5)
+                    ->type('input[name="debtor_name"]', 'Pelanggan Partial EP 004')
                     ->type('input[name="total_amount"]', '300000')
-                    ->type('input[name="debt_date"]', now()->format('Y-m-d'))
-                    ->press('button[type="submit"]')
+                    ; $browser->script("document.querySelector('input[name=\"debt_date\"]').value = '".now()->format('Y-m-d')."';"); $browser
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000);
 
             // Buka detail hutang terbaru
             $browser->visit('/debts')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -156,7 +156,7 @@ class DebtTest extends DuskTestCase
                 if (methodSelect) methodSelect.value = 'cash';
             ");
 
-            $browser->press('button[type="submit"]')
+            $browser; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000)
                     ->screenshot('EP-HUTANG-004');
         });
@@ -173,16 +173,16 @@ class DebtTest extends DuskTestCase
 
             // Buat hutang baru dulu
             $browser->visit('/debts/create')
-                    ->waitFor('#debtor_name', 5)
-                    ->type('#debtor_name', 'Pelanggan Lebih EP 005')
+                    ->waitFor('input[name="debtor_name"]', 5)
+                    ->type('input[name="debtor_name"]', 'Pelanggan Lebih EP 005')
                     ->type('input[name="total_amount"]', '150000')
-                    ->type('input[name="debt_date"]', now()->format('Y-m-d'))
-                    ->press('button[type="submit"]')
+                    ; $browser->script("document.querySelector('input[name=\"debt_date\"]').value = '".now()->format('Y-m-d')."';"); $browser
+                    ; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000);
 
             // Buka detail hutang terbaru
             $browser->visit('/debts')
-                    ->waitFor('body', 5)
+                    
                     ->pause(1000);
 
             $browser->script("
@@ -205,9 +205,10 @@ class DebtTest extends DuskTestCase
                 if (methodSelect) methodSelect.value = 'cash';
             ");
 
-            $browser->press('button[type="submit"]')
+            $browser; $browser->script("const btn = document.querySelector('form:not([action*=\"locale\"]):not([action$=\"logout\"]) button[type=\"submit\"]'); if (btn) btn.click();"); $browser
                     ->pause(2000)
                     ->screenshot('EP-HUTANG-005');
         });
     }
 }
+
