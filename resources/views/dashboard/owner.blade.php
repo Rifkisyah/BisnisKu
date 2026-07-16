@@ -207,62 +207,7 @@
         </div>
     </div>
 
-    {{-- K-Means Widget --}}
-    <div class="card-feature flex flex-col" x-data="{ view: 'table', chartType: 'doughnut' }" x-init="$watch('chartType', val => updateKmeansChart(val))">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 md:p-5 border-b border-[var(--color-hairline-soft)]">
-            <div class="flex items-center gap-3">
-                <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">
-                    <svg class="w-5 h-5 inline-block -mt-1 mr-1 text-[var(--color-fb-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
-                    {{ __('messages.kmeans_classification') }}
-                </h3>
-            </div>
-            <div class="flex flex-col sm:flex-row w-full md:w-auto gap-2 mt-2 md:mt-0">
-                <a href="{{ route('reports.business_performance.clusters', request()->all()) }}" class="w-full sm:w-auto text-center justify-center pill-tab !bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:!bg-[var(--color-primary)]/20 !text-xs sm:mr-2">{{ __('messages.kmeans_report') }} </a>
-                <div class="flex w-full sm:w-auto gap-2">
-                    <button @click="view = 'chart'" :class="view === 'chart' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('messages.chart') }}</button>
-                    <button @click="view = 'table'" :class="view === 'table' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('messages.table') }}</button>
-                </div>
-            </div>
-        </div>
-        
-        <div x-show="view === 'chart'" class="p-5 flex-1 flex flex-col" style="display: none;">
-            <div class="flex flex-col sm:flex-row sm:justify-end gap-2 mb-4 w-full">
-                <select x-model="chartType" class="input-field w-full sm:w-auto text-xs !py-1.5">
-                    <option value="doughnut">{{ __('messages.doughnut_chart') }}</option>
-                    <option value="pie">{{ __('messages.pie_chart') }}</option>
-                    <option value="bar">{{ __('messages.bar_chart') }}</option>
-                </select>
-            </div>
-            @if(count($clusterResults) > 0)
-            <div style="height:250px;" class="flex items-center justify-center relative"><canvas id="kmeansChart"></canvas></div>
-            @else
-            <div style="height:250px;" class="text-center text-[var(--color-slate)] w-full flex items-center justify-center">{{ __('messages.no_data') }}</div>
-            @endif
-        </div>
 
-        <div x-show="view === 'table'" class="p-0 overflow-x-auto flex-1">
-            <table class="w-full">
-                <thead>
-                    <tr class="bg-[var(--color-surface-soft)] border-b border-[var(--color-hairline-soft)]">
-                        <th class="py-3 px-4 text-left type-caption-bold">{{ __('messages.product') }}</th>
-                        <th class="py-3 px-4 text-center type-caption-bold">{{ __('messages.quantity') }}</th>
-                        <th class="py-3 px-4 text-center type-caption-bold">{{ __('messages.product_classification') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse(array_slice($clusterResults, 0, 5) as $item)
-                    <tr class="border-b border-[var(--color-hairline-soft)] hover:bg-[var(--color-surface-soft)] transition-colors">
-                        <td class="py-3 px-4 type-body-sm text-[var(--color-ink-deep)] font-medium">{{ $item['product_name'] }}</td>
-                        <td class="py-3 px-4 type-body-sm text-center">{{ $item['total_qty_sold'] }}</td>
-                        <td class="py-3 px-4 text-center"><span class="badge {{ $item['cluster_label'] === 'fast_moving' ? 'badge-success' : ($item['cluster_label'] === 'medium_moving' ? 'badge-attention' : ($item['cluster_label'] === 'new_product' ? 'bg-blue-100 text-blue-800' : 'badge-critical')) }}">{{ __('messages.' . $item['cluster_label']) }}</span></td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="3" class="py-8 text-center type-body-sm text-[var(--color-slate)]">{{ __('messages.no_data') }}</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
 
 {{-- 3. SMA Restock Widget --}}

@@ -168,7 +168,7 @@ class ServiceRepairController extends Controller
             'customer_phone' => 'nullable|string|min:7|max:20',
             'notes'          => 'nullable|string|max:500',
             'down_payment'   => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|in:cash,qris',
+            'payment_method' => 'nullable|in:cash,qris,transfer',
         ]);
 
                 DB::transaction(function () use ($request, $validated, $serviceRepair) {
@@ -231,7 +231,7 @@ class ServiceRepairController extends Controller
                 $validated = $request->validate([
             'status'               => 'required|string',
             'down_payment'         => 'nullable|numeric|min:0',
-            'final_payment_method' => 'nullable|in:cash,qris',
+            'final_payment_method' => 'nullable|in:cash,qris,transfer',
             'items'                => 'nullable|array',
             'items.*.id'           => 'nullable|integer',
             'items.*.service_fee'  => 'nullable',

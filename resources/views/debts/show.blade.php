@@ -48,7 +48,7 @@
                 </div>
                 <div class="md:col-span-1">
                     <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Metode</label>
-                    <select name="payment_method" class="input-field"><option value="cash">{{ __('messages.cash') }}</option><option value="qris">QRIS</option></select>
+                    <select name="payment_method" class="input-field"><option value="cash">{{ __('messages.cash') }}</option><option value="qris">QRIS</option><option value="transfer">Transfer Bank</option></select>
                 </div>
                 <div class="md:col-span-1"><button type="submit" class="btn-primary w-full !py-2.5">+ Bayar</button></div>
             </form>@endif

@@ -68,6 +68,28 @@
                 </div>
             </div>
 
+            {{-- Bank Config --}}
+            <div class="space-y-4 pt-6 border-t border-[var(--color-hairline-soft)] mt-6">
+                <h3 class="type-subtitle-lg text-[var(--color-ink-deep)] mb-2 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-[var(--color-primary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>
+                    Pengaturan Rekening Bank (Transfer)
+                </h3>
+                <p class="type-caption text-[var(--color-slate)] mb-4">Informasi rekening bank yang akan ditampilkan saat kasir memilih metode pembayaran Transfer.</p>
+                
+                <div>
+                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Nama Bank</label>
+                    <input type="text" name="bank_name" value="{{ old('bank_name', $paymentSetting->bank_name) }}" class="input-field" placeholder="Contoh: BCA / Mandiri / BRI">
+                </div>
+                <div>
+                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Nomor Rekening</label>
+                    <input type="text" name="bank_account_number" value="{{ old('bank_account_number', $paymentSetting->bank_account_number) }}" class="input-field" placeholder="Contoh: 1234567890">
+                </div>
+                <div>
+                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Atas Nama</label>
+                    <input type="text" name="bank_account_name" value="{{ old('bank_account_name', $paymentSetting->bank_account_name) }}" class="input-field" placeholder="Contoh: Toko BisnisKu">
+                </div>
+            </div>
+
             <button type="submit" class="btn-primary !py-2.5 !px-5 w-full mt-4">{{ __('messages.save') }} Pengaturan</button>
         </form>
     </div>

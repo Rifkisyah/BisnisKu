@@ -19,6 +19,9 @@ class PaymentSetting extends Model
         'server_key',
         'callback_url',
         'is_qris_active',
+        'bank_name',
+        'bank_account_number',
+        'bank_account_name',
     ];
 
     protected $casts = [

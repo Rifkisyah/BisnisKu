@@ -38,20 +38,25 @@ class CatalogController extends Controller
 
         $categories = Category::orderBy('name')->get();
 
-        $clusteringService = new \App\Services\ProductClusteringService();
-        $clusterResults = $clusteringService->cluster(now()->subMonths(3), now());
-        $bestSellerCodes = collect($clusterResults)
-            ->where('cluster_label', 'fast_moving')
-            ->pluck('product_code')
-            ->toArray();
+        $startDate = now()->subMonths(3);
+        $endDate = now();
+        
+        $kmeansService = new \App\Services\KMeansService();
+        $bestSellerCodes = $kmeansService->getTopSellerCodes($startDate, $endDate, 4);
 
-        $topSellers = Product::active()
-            ->where('stock', '>', 0)
-            ->with('category')
-            ->whereIn('product_code', $bestSellerCodes)
-            ->where('type', 'physical')
-            ->limit(4)
-            ->get();
+        if (empty($bestSellerCodes)) {
+            // Fallback if no transactions exist yet
+            $topSellers = Product::active()->physical()->limit(4)->get();
+        } else {
+            // Fetch products ensuring the order from K-Means is preserved if possible, or just normal fetch
+            $topSellers = Product::active()
+                ->where('stock', '>', 0)
+                ->with('category')
+                ->whereIn('product_code', $bestSellerCodes)
+                ->where('type', 'physical')
+                ->limit(4)
+                ->get();
+        }
 
         return view('catalog.index', compact('store', 'products', 'categories', 'bestSellerCodes', 'topSellers'));
     }

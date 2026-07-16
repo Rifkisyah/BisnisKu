@@ -65,23 +65,6 @@
         ];
         $tpChartUrl = 'https://quickchart.io/chart?w=400&h=250&c=' . urlencode(json_encode($tpChartConfig));
 
-        // 3. K-Means Chart
-        $kmCounts = ['fast_moving' => 0, 'medium_moving' => 0, 'slow_moving' => 0, 'dead_stock' => 0, 'new_product' => 0];
-        foreach($clusterResults as $i) {
-            if(isset($kmCounts[$i['cluster_label']])) $kmCounts[$i['cluster_label']]++;
-        }
-        $kmLabelsStr = [__('messages.fast_moving'), __('messages.medium_moving'), __('messages.slow_moving'), __('messages.dead_stock'), __('messages.new_product')];
-        $kmChartConfig = [
-            'type' => 'doughnut',
-            'data' => [
-                'labels' => $kmLabelsStr,
-                'datasets' => [['data' => array_values($kmCounts), 'backgroundColor' => ['#31A24C', '#F7B928', '#E41E3F', '#666666', '#0064E0']]]
-            ],
-            'options' => [
-                'plugins' => ['datalabels' => ['display' => true, 'color' => '#fff']]
-            ]
-        ];
-        $kmChartUrl = 'https://quickchart.io/chart?w=400&h=250&c=' . urlencode(json_encode($kmChartConfig));
 
         // 4. SMA Restock Chart
         $smaCounts = ['restock' => 0, 'ok' => 0];
@@ -133,7 +116,7 @@
         <img src="{{ $trendChartUrl }}" alt="Trend Chart" />
     </div>
 
-    <div class="section-title">5 Produk Terlaris (Berdasarkan Volume)</div>
+    <div class="section-title">Produk Terlaris (Berdasarkan Volume)</div>
     <div class="chart-container">
         <img src="{{ $tpChartUrl }}" alt="Top Products Chart" />
     </div>
@@ -158,32 +141,6 @@
         </tbody>
     </table>
 
-    <div style="page-break-before: always;"></div>
-
-    <div class="section-title">Klasifikasi Pergerkan Stok Produk</div>
-    <div class="chart-container">
-        <img src="{{ $kmChartUrl }}" alt="K-Means Chart" />
-    </div>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Produk</th>
-                <th class="text-center">Terjual</th>
-                <th>Kategori Pergerakan Stok Produk</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($clusterResults as $item)
-            <tr>
-                <td>{{ $item['product_name'] }}</td>
-                <td class="text-center">{{ $item['total_qty_sold'] }}</td>
-                <td>{{ __('messages.' . $item['cluster_label']) }}</td>
-            </tr>
-            @empty
-            <tr><td colspan="3" class="text-center">Tidak ada data.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
 
     <div class="section-title">Rekomendasi isi ulang Stok</div>
     <div class="chart-container">

@@ -24,7 +24,9 @@ class CashierController extends Controller
 
         $categories = \App\Models\Category::where('type', 'product')->where('slug', '!=', 'sparepart')->orderBy('name')->get();
 
-        return view('cashier.index', compact('products', 'categories'));
+        $paymentSetting = \App\Models\PaymentSetting::getSettings();
+
+        return view('cashier.index', compact('products', 'categories', 'paymentSetting'));
     }
 
     public function searchProducts(Request $request)
@@ -51,10 +53,11 @@ class CashierController extends Controller
             'items.*.quantity'   => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',
             'discount'           => 'nullable|numeric|min:0',
-            'payment_method'     => 'required|in:cash,qris,debt',
+            'payment_method'     => 'required|in:cash,qris,debt,transfer',
             'amount_paid'        => 'required|numeric|min:0',
             'debtor_name'        => 'required_if:payment_method,debt|nullable|string',
             'debtor_contact'     => 'nullable|string',
+            'customer_name'      => 'nullable|string',
             'customer_contact'   => 'nullable|string',
             'due_date'           => 'nullable|date',
             'notes'              => 'nullable|string',
@@ -109,6 +112,8 @@ class CashierController extends Controller
                     'change_amount'    => $change,
                     'status'           => $isQris ? 'unpaid' : 'paid',
                     'notes'            => $validated['notes'] ?? null,
+                    'customer_name'    => $validated['customer_name'] ?? null,
+                    'customer_contact' => $validated['customer_contact'] ?? null,
                 ]);
 
                 if ($validated['payment_method'] === 'debt') {

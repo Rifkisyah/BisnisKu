@@ -64,7 +64,7 @@ class DebtController extends Controller
         $validated = $request->validate([
             'amount'         => 'required|numeric|min:1|max:' . $debt->remaining_amount,
             'payment_date'   => 'required|date',
-            'payment_method' => 'required|in:cash,qris',
+            'payment_method' => 'required|in:cash,qris,transfer',
             'notes'          => 'nullable|string|max:500',
         ]);
         DB::transaction(function () use ($validated, $debt) {

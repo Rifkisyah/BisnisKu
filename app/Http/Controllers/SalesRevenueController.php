@@ -48,39 +48,7 @@ class SalesRevenueController extends Controller
             
         $netProfit = $grossProfit - $totalDiscount;
 
-        // ── Top Products ──────────────────────────────────────────────────────
-        $topProducts = TransactionItem::whereHas('transaction', fn($q) => $q->where($this->transactionStatusColumn(), 'completed')
-                ->whereBetween('transaction_date', [$startCarbon, $endCarbon]))
-            ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
-            ->selectRaw('products.product_code, products.name, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.subtotal) as total_revenue')
-            ->groupBy('products.product_code', 'products.name')
-            ->orderByDesc('total_qty')
-            ->limit($limit)
-            ->get();
 
-        $totalProductRev = $topProducts->sum('total_revenue') ?: 1;
-        $topProducts->transform(function ($p) use ($totalProductRev) {
-            $p->revenue_pct = round(($p->total_revenue / $totalProductRev) * 100, 1);
-            return $p;
-        });
-
-        // ── Category Breakdown ────────────────────────────────────────────────
-        $categoryBreakdown = TransactionItem::whereHas('transaction',
-                fn ($q) => $q->where('status', 'paid')->whereBetween('transaction_date', [$startCarbon, $endCarbon]))
-            ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
-            ->join('categories', 'products.category_code', '=', 'categories.category_code')
-            ->selectRaw('categories.category_code as id, categories.name,
-                SUM(transaction_items.subtotal) as total_revenue,
-                SUM(transaction_items.quantity) as total_qty')
-            ->groupBy('categories.category_code', 'categories.name')
-            ->orderByDesc('total_revenue')
-            ->get();
-
-        $totalCatRev = $categoryBreakdown->sum('total_revenue') ?: 1;
-        $categoryBreakdown->transform(function ($c) use ($totalCatRev) {
-            $c->revenue_pct = round(($c->total_revenue / $totalCatRev) * 100, 1);
-            return $c;
-        });
 
         // ── Sales Trend (Daily) ───────────────────────────────────────────────
         $salesTrendDaily = Transaction::completed()
@@ -132,14 +100,14 @@ class SalesRevenueController extends Controller
         if ($request->get('export') === 'pdf') {
             $totalRevenue = $salesRevenue;
             $pdf = Pdf::loadView('reports.pdf.sales-revenue', compact(
-                'transactions', 'salesRevenue', 'totalRevenue', 'topProducts', 'startDate', 'endDate'
+                'transactions', 'salesRevenue', 'totalRevenue', 'startDate', 'endDate'
             ));
             return $pdf->download('laporan-penjualan-pendapatan.pdf');
         }
 
         return view('reports.sales-revenue.index', compact(
             'transactions', 'salesRevenue', 'totalTransactions', 'grossProfit', 'netProfit',
-            'topProducts', 'categoryBreakdown', 'startDate', 'endDate', 'limit',
+            'startDate', 'endDate', 'limit',
             'salesTrendDaily',
             'paymentBreakdown', 'cashierBreakdown',
             'debts', 'totalDebts', 'totalDebtAmt', 'overdueDebts', 'paidDebtAmt',

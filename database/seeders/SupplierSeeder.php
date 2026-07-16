@@ -39,6 +39,22 @@ class SupplierSeeder extends Seeder
             );
         }
 
+        // Generate additional suppliers to reach at least 100
+        for ($i = 21; $i <= 100; $i++) {
+            Supplier::firstOrCreate(
+                ['supplier_code' => 'SUP' . str_pad($i, 4, '0', STR_PAD_LEFT)],
+                [
+                    'store_id'     => $store?->id,
+                    'name'         => $faker->company . ' ' . $faker->companySuffix,
+                    'phone_prefix' => '+62',
+                    'phone_number' => $faker->numerify('8##########'),
+                    'email'        => $faker->unique()->safeEmail(),
+                    'address'      => $faker->address(),
+                    'is_active'    => true,
+                ]
+            );
+        }
+
         app()->forgetInstance('current_store');
     }
 }

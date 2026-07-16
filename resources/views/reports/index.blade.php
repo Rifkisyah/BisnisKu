@@ -6,8 +6,8 @@
         [
             'route'=>'reports.business_performance',
             'icon'=>'<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>',
-            'title'=>'Laporan Analisis Bisnis',
-            'desc'=>'Laporan analisis pergerakan produk dan Rekomendasi pengisian ulang stok',
+            'title'=>'Laporan Perputaran Stok Produk',
+            'desc'=>'Laporan analisis produk populer, kategori, dan pengadaan stok',
             'accent'=>'var(--color-primary)',
             'bg'=>'rgba(0,100,224,0.1)'
         ],

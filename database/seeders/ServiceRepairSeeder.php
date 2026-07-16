@@ -30,35 +30,44 @@ class ServiceRepairSeeder extends Seeder
             'Tombol power keras/rusak', 'Bootloop/Stuck logo'
         ];
 
-        for ($i = 1; $i <= 20; $i++) {
-            $repairCode = 'SRV' . now()->format('Ymd') . str_pad($i, 4, '0', STR_PAD_LEFT);
-            $fee = $faker->numberBetween(10, 50) * 10000;
-            $status = $faker->randomElement(['diagnosing', 'repairing', 'done', 'cancelled']);
-            ServiceRepair::firstOrCreate(['repair_code' => $repairCode], [
-                'technician_id' => $teknisiUser->id,
-                'customer_name' => $faker->name(),
-                'customer_phone' => $faker->numerify('08##########'),
-                'service_fee' => $fee,
-                'component_cost' => 0,
-                'total_cost' => $fee,
-                'payment_method' => 'cash',
-                'down_payment' => 0,
-                'status' => $status,
-                'start_date' => $faker->dateTimeBetween('-1 month', 'now'),
-                'completion_date' => $status === 'done' ? now() : null,
-            ]);
-            $brand = $faker->randomElement($brands);
-            ServiceRepairItem::firstOrCreate([
-                'repair_code' => $repairCode,
-                'name' => $brand . ' ' . $faker->randomElement($series),
-            ], [
-                'brand' => $brand,
-                'series' => $faker->randomElement($series),
-                'complaint' => $faker->randomElement($complaints),
-                'quantity' => 1,
-                'service_fee' => $fee,
-                'subtotal' => $fee,
-            ]);
+        $startDate = now()->subDays(90);
+        $repairCounter = 1;
+
+        for ($d = 0; $d <= 90; $d++) {
+            $currentDate = (clone $startDate)->addDays($d);
+            $dailyRepairCount = $faker->numberBetween(2, 5); // Increase from 0-3 to 2-5 to add more data
+            
+            for ($i = 0; $i < $dailyRepairCount; $i++) {
+                $repairTime = (clone $currentDate)->setTime(rand(9, 20), rand(0, 59), rand(0, 59));
+                $repairCode = 'SRV' . $repairTime->format('Ymd') . str_pad($repairCounter++, 4, '0', STR_PAD_LEFT);
+                $fee = $faker->numberBetween(5, 25) * 10000;
+                $status = $faker->randomElement(['diagnosing', 'repairing', 'done', 'cancelled']);
+                ServiceRepair::firstOrCreate(['repair_code' => $repairCode], [
+                    'technician_id' => $teknisiUser->id,
+                    'customer_name' => $faker->name(),
+                    'customer_phone' => $faker->numerify('08##########'),
+                    'service_fee' => $fee,
+                    'component_cost' => 0,
+                    'total_cost' => $fee,
+                    'payment_method' => 'cash',
+                    'down_payment' => 0,
+                    'status' => $status,
+                    'start_date' => $repairTime,
+                    'completion_date' => $status === 'done' ? (clone $repairTime)->modify('+' . rand(1, 5) . ' days') : null,
+                ]);
+                $brand = $faker->randomElement($brands);
+                ServiceRepairItem::firstOrCreate([
+                    'repair_code' => $repairCode,
+                    'name' => $brand . ' ' . $faker->randomElement($series),
+                ], [
+                    'brand' => $brand,
+                    'series' => $faker->randomElement($series),
+                    'complaint' => $faker->randomElement($complaints),
+                    'quantity' => 1,
+                    'service_fee' => $fee,
+                    'subtotal' => $fee,
+                ]);
+            }
         }
     }
 }

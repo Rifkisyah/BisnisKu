@@ -208,7 +208,7 @@ return [
     'kmeans_report' => 'K-Means Report',
     'prediction_report' => 'Prediction Report',
     'sales_trend_repair' => 'Sales & Service Trend',
-    'top_5_products' => 'Top 5 Products',
+    'top_5_products' => 'Top Products',
     'kmeans_classification' => 'Product Movement Classification',
     'stock_sma_warning' => 'Restock Recommendation',
     'all_categories' => 'All Categories',

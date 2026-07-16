@@ -6,11 +6,8 @@ use App\Models\Product;
 use App\Models\ServiceRepair;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
-use App\Services\ProductClusteringService;
-use App\Services\SmaForecastService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -50,7 +47,15 @@ class DashboardController extends Controller
         $topProducts = TransactionItem::whereHas('transaction', fn($q) => $q->where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate]))
             ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
             ->selectRaw('products.name, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.subtotal) as total_revenue')
-            ->groupBy('products.name')->orderByDesc('total_revenue')->limit(5)->get();
+            ->groupBy('products.name')->orderByDesc('total_revenue')->limit(10)->get();
+
+        // Payment method breakdown
+        $paymentBreakdown = Transaction::where('status', 'paid')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->selectRaw('payment_method, COUNT(*) as count, SUM(total) as total')
+            ->groupBy('payment_method')
+            ->orderByDesc('count')
+            ->get();
 
         // 2. SERVICE ANALYSIS METRICS
         $serviceRevenue = ServiceRepair::whereIn('status', ['completed', 'picked_up'])->whereBetween('completion_date', [$startDate, $endDate])->sum('total_cost');
@@ -61,22 +66,78 @@ class DashboardController extends Controller
             ->selectRaw('DATE(completion_date) as date, COUNT(*) as ticket_count, SUM(total_cost) as total_revenue')
             ->groupByRaw('DATE(completion_date)')->orderBy('date')->get();
 
-        // 3. BUSINESS PERFORMANCE METRICS (K-Means & SMA)
-        $clusteringService = new ProductClusteringService();
-        $clusterResults = $clusteringService->cluster($startDate, $endDate);
-        
-        $smaService = new SmaForecastService();
-        $diffDays = (int) $startDate->diffInDays($endDate) ?: 1;
-        $smaResults = $smaService->calculateAll($diffDays, $endDate);
-        $restockRecommendations = array_filter($smaResults, fn($r) => $r['needs_restock']);
+        // Service monthly trend for chart
+        $serviceTrend = ServiceRepair::whereIn('status', ['completed', 'picked_up'])
+            ->whereBetween('completion_date', [$startDate, $endDate])
+            ->selectRaw("DATE_FORMAT(completion_date, '%Y-%m') as month, COUNT(*) as count, SUM(total_cost) as revenue")
+            ->groupByRaw("DATE_FORMAT(completion_date, '%Y-%m')")
+            ->orderBy('month')
+            ->get();
+
+        // Top spareparts used
+        $topSpareparts = \App\Models\ServiceRepairItem::whereHas('serviceRepair', fn($q) =>
+                $q->whereIn('status', ['completed', 'picked_up'])->whereBetween('completion_date', [$startDate, $endDate]))
+            ->whereNotNull('component_code')
+            ->join('products', 'service_repair_items.component_code', '=', 'products.product_code')
+            ->selectRaw('products.name, service_repair_items.component_code, SUM(service_repair_items.quantity) as total_qty, SUM(service_repair_items.subtotal) as total_cost')
+            ->groupBy('products.name', 'service_repair_items.component_code')
+            ->orderByDesc('total_qty')
+            ->limit(5)
+            ->get();
+
+        // 3. POPULAR PRODUCTS (SQL query based on frequency & qty)
+        $clusterResults = Product::active()->physical()
+            ->leftJoin('transaction_items', 'products.product_code', '=', 'transaction_items.product_code')
+            ->leftJoin('transactions', function($join) use ($startDate, $endDate) {
+                $join->on('transaction_items.transaction_code', '=', 'transactions.transaction_code')
+                     ->where('transactions.status', 'paid')
+                     ->whereBetween('transactions.transaction_date', [$startDate, $endDate]);
+            })
+            ->selectRaw('products.product_code, products.name as product_name, 
+                         COALESCE(SUM(transaction_items.quantity), 0) as total_qty_sold, 
+                         COALESCE(SUM(transaction_items.subtotal), 0) as total_revenue')
+            ->groupBy('products.product_code', 'products.name')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'product_code'          => $item->product_code,
+                    'product_name'          => $item->product_name,
+                    'total_qty_sold'        => (int) $item->total_qty_sold,
+                    'total_revenue'         => (float) $item->total_revenue,
+                ];
+            })
+            ->toArray();
+
+        // Sort by total_revenue + total_qty_sold
+        usort($clusterResults, function ($a, $b) {
+            $scoreA = ($a['total_revenue'] ?? 0) * 2 + ($a['total_qty_sold'] ?? 0);
+            $scoreB = ($b['total_revenue'] ?? 0) * 2 + ($b['total_qty_sold'] ?? 0);
+            return $scoreB <=> $scoreA;
+        });
+
+        // 4. STOCK PROCUREMENT DATA
+        $procurements = \App\Models\ProductPurchase::whereBetween('purchase_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->with(['items', 'creator'])
+            ->orderByDesc('purchase_date')
+            ->get();
+
+        $totalProcurementValue = $procurements->sum('total');
+        $receivedProcurements  = $procurements->where('status', 'received')->count();
+        $pendingProcurements   = $procurements->whereIn('status', ['draft', 'ordered', 'partial_received'])->count();
 
         $productCount = Product::active()->count();
 
+        $smaService = new \App\Services\SmaForecastService();
+        $diffDays = (int) $startDate->diffInDays($endDate);
+        if ($diffDays === 0) $diffDays = 1;
+        $smaResults = $smaService->calculateAll($diffDays, $endDate, null);
+
         return view('dashboard.owner', compact(
-            'totalRevenue', 'transactionCount', 'salesTrend', 'topProducts',
-            'serviceRevenue', 'activeRepairs', 'repairTrend',
-            'clusterResults', 'smaResults', 'restockRecommendations', 'productCount',
-            'startDate', 'endDate'
+            'totalRevenue', 'transactionCount', 'salesTrend', 'topProducts', 'paymentBreakdown',
+            'serviceRevenue', 'activeRepairs', 'repairTrend', 'serviceTrend', 'topSpareparts',
+            'clusterResults', 'smaResults',
+            'procurements', 'totalProcurementValue', 'receivedProcurements', 'pendingProcurements',
+            'productCount', 'startDate', 'endDate'
         ));
     }
 
@@ -183,18 +244,77 @@ class DashboardController extends Controller
         $topProducts = TransactionItem::whereHas('transaction', fn($q) => $q->where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate]))
             ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
             ->selectRaw('products.name, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.subtotal) as total_revenue')
-            ->groupBy('products.name')->orderByDesc('total_revenue')->limit(5)->get();
+            ->groupBy('products.name')->orderByDesc('total_revenue')->limit(10)->get();
+
+        // Payment method breakdown
+        $paymentBreakdown = Transaction::where('status', 'paid')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->selectRaw('payment_method, COUNT(*) as count, SUM(total) as total')
+            ->groupBy('payment_method')
+            ->orderByDesc('count')
+            ->get();
 
         $serviceRevenue = ServiceRepair::whereIn('status', ['completed', 'picked_up'])->whereBetween('completion_date', [$startDate, $endDate])->sum('total_cost');
         $activeRepairs = ServiceRepair::whereNotIn('status', ['completed', 'canceled', 'picked_up'])->count();
         
-        $clusteringService = new ProductClusteringService();
-        $clusterResults = $clusteringService->cluster($startDate, $endDate);
-        
-        $smaService = new SmaForecastService();
-        $diffDays = (int) $startDate->diffInDays($endDate) ?: 1;
-        $smaResults = $smaService->calculateAll($diffDays, $endDate);
-        $restockRecommendations = array_filter($smaResults, fn($r) => $r['needs_restock']);
+        // Service monthly trend
+        $serviceTrend = ServiceRepair::whereIn('status', ['completed', 'picked_up'])
+            ->whereBetween('completion_date', [$startDate, $endDate])
+            ->selectRaw("DATE_FORMAT(completion_date, '%Y-%m') as month, COUNT(*) as count, SUM(total_cost) as revenue")
+            ->groupByRaw("DATE_FORMAT(completion_date, '%Y-%m')")
+            ->orderBy('month')
+            ->get();
+
+        // Top spareparts used
+        $topSpareparts = \App\Models\ServiceRepairItem::whereHas('serviceRepair', fn($q) =>
+                $q->whereIn('status', ['completed', 'picked_up'])->whereBetween('completion_date', [$startDate, $endDate]))
+            ->whereNotNull('component_code')
+            ->join('products', 'service_repair_items.component_code', '=', 'products.product_code')
+            ->selectRaw('products.name, service_repair_items.component_code, SUM(service_repair_items.quantity) as total_qty, SUM(service_repair_items.subtotal) as total_cost')
+            ->groupBy('products.name', 'service_repair_items.component_code')
+            ->orderByDesc('total_qty')
+            ->limit(5)
+            ->get();
+
+        // 3. POPULAR PRODUCTS
+        $clusterResults = Product::active()->physical()
+            ->leftJoin('transaction_items', 'products.product_code', '=', 'transaction_items.product_code')
+            ->leftJoin('transactions', function($join) use ($startDate, $endDate) {
+                $join->on('transaction_items.transaction_code', '=', 'transactions.transaction_code')
+                     ->where('transactions.status', 'paid')
+                     ->whereBetween('transactions.transaction_date', [$startDate, $endDate]);
+            })
+            ->selectRaw('products.product_code, products.name as product_name, 
+                         COALESCE(SUM(transaction_items.quantity), 0) as total_qty_sold, 
+                         COALESCE(SUM(transaction_items.subtotal), 0) as total_revenue')
+            ->groupBy('products.product_code', 'products.name')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'product_code'          => $item->product_code,
+                    'product_name'          => $item->product_name,
+                    'total_qty_sold'        => (int) $item->total_qty_sold,
+                    'total_revenue'         => (float) $item->total_revenue,
+                ];
+            })
+            ->toArray();
+
+        // Sort by popularity score
+        usort($clusterResults, function ($a, $b) {
+            $scoreA = ($a['total_revenue'] ?? 0) * 2 + ($a['total_qty_sold'] ?? 0);
+            $scoreB = ($b['total_revenue'] ?? 0) * 2 + ($b['total_qty_sold'] ?? 0);
+            return $scoreB <=> $scoreA;
+        });
+
+        // 4. STOCK PROCUREMENT DATA
+        $procurements = \App\Models\ProductPurchase::whereBetween('purchase_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->with(['items', 'creator'])
+            ->orderByDesc('purchase_date')
+            ->get();
+
+        $totalProcurementValue = $procurements->sum('total');
+        $receivedProcurements  = $procurements->where('status', 'received')->count();
+        $pendingProcurements   = $procurements->whereIn('status', ['draft', 'ordered', 'partial_received'])->count();
 
         $productCount = Product::active()->count();
 
@@ -208,11 +328,17 @@ class DashboardController extends Controller
             ->selectRaw('DATE(completion_date) as date, SUM(total_cost) as total_revenue')
             ->groupBy('date')->orderBy('date')->get();
 
+        $smaService = new \App\Services\SmaForecastService();
+        $diffDays = (int) $startDate->diffInDays($endDate);
+        if ($diffDays === 0) $diffDays = 1;
+        $smaResults = $smaService->calculateAll($diffDays, $endDate, null);
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('dashboard.pdf', compact(
-            'totalRevenue', 'transactionCount', 'topProducts',
-            'serviceRevenue', 'activeRepairs',
-            'clusterResults', 'restockRecommendations', 'smaResults', 'productCount',
-            'startDate', 'endDate', 'salesTrend', 'repairTrend'
+            'totalRevenue', 'transactionCount', 'salesTrend', 'topProducts', 'paymentBreakdown',
+            'serviceRevenue', 'activeRepairs', 'repairTrend', 'serviceTrend', 'topSpareparts',
+            'clusterResults', 'smaResults',
+            'procurements', 'totalProcurementValue', 'receivedProcurements', 'pendingProcurements',
+            'productCount', 'startDate', 'endDate'
         ));
 
         return $pdf->download('dashboard-report-' . $startDate->format('Y-m-d') . '-to-' . $endDate->format('Y-m-d') . '.pdf');

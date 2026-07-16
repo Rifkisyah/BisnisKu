@@ -19,7 +19,7 @@ class Transaction extends Model
     protected $fillable = [
         'transaction_code', 'store_id', 'cashier_id', 'transaction_date', 'subtotal',
         'discount', 'total', 'payment_method', 'amount_paid',
-        'change_amount', 'status', 'notes',
+        'change_amount', 'status', 'notes', 'customer_name', 'customer_contact'
     ];
 
     protected function casts(): array
@@ -72,7 +72,7 @@ class Transaction extends Model
 
     public function scopeInPeriod($query, $start, $end)
     {
-        return $query->whereBetween('transaction_date', [$start, $end]);
+        return $query->whereBetween($this->getTable() . '.transaction_date', [$start, $end]);
     }
 
     public static function generateCode(): string

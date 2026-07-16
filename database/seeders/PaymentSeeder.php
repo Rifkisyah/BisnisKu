@@ -22,8 +22,10 @@ class PaymentSeeder extends Seeder
         if ($transactions->isEmpty()) return;
 
         foreach ($transactions as $i => $transaction) {
-            $code = 'PAY-' . now()->format('Ymd') . str_pad($i + 1, 4, '0', STR_PAD_LEFT);
             $method = $transaction->payment_method;
+            if ($method === 'debt') continue;
+            
+            $code = 'PAY-' . now()->format('Ymd') . str_pad($i + 1, 4, '0', STR_PAD_LEFT);
             
             $provider = null;
             if ($method === 'qris') {

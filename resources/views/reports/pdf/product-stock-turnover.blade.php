@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8">@include('components.pdf-styles')</head>
-<body><div class="header"><h1>Business Intelligence Report</h1><p>{{ $startDate->format('d/m/Y') }} - {{ $endDate->format('d/m/Y') }}</p></div>
+<body><div class="header"><h1>Laporan Perputaran Stok Produk</h1><p>{{ $startDate->format('d/m/Y') }} - {{ $endDate->format('d/m/Y') }}</p></div>
 <table class="metric-grid"><tr><td><div class="metric-title">Penjualan</div><div class="metric-value">Rp {{ number_format($totalRevenue,0,',','.') }}</div></td>
 <td><div class="metric-title">Service</div><div class="metric-value">Rp {{ number_format($serviceRevenue,0,',','.') }}</div></td></tr></table>
 <div class="section-title">Top Produk</div>

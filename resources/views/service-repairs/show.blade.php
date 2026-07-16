@@ -141,6 +141,7 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                                             <select name="payment_method" class="input-field !h-9 !py-1 !text-xs w-full">
                                                 <option value="cash" {{ $serviceRepair->payment_method === 'cash' ? 'selected' : '' }}>Cash</option>
                                                 <option value="qris" {{ $serviceRepair->payment_method === 'qris' ? 'selected' : '' }}>QRIS</option>
+                                                <option value="transfer" {{ $serviceRepair->payment_method === 'transfer' ? 'selected' : '' }}>Transfer Bank</option>
                                             </select>
                                         </div>
                                     </div>
@@ -298,6 +299,7 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                                     <option value="">-- Pilih --</option>
                                     <option value="cash">Cash</option>
                                     <option value="qris">QRIS</option>
+                                    <option value="transfer">Transfer Bank</option>
                                 </select>
                             </div>
                         </div>

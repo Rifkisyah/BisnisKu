@@ -80,4 +80,26 @@ class WhatsAppService
         }
         return $phone;
     }
+
+    public function sendReceipt(\App\Models\Transaction $transaction)
+    {
+        if (empty($transaction->customer_contact)) {
+            return false;
+        }
+
+        $phone = self::formatPhone($transaction->customer_contact);
+        $storeName = \App\Models\Setting::get('store_name', 'Toko Kami');
+        $receiptUrl = route('transactions.receipt', $transaction->transaction_code);
+        
+        $message = "Halo, ini struk belanja Anda di *{$storeName}*.\n\n";
+        $message .= "No. Transaksi: {$transaction->transaction_code}\n";
+        foreach ($transaction->items as $item) {
+            $message .= "- {$item->product->name}: {$item->quantity} x Rp " . number_format($item->unit_price, 0, ',', '.') . "\n";
+        }
+        $message .= "\nTotal: *Rp " . number_format($transaction->total, 0, ',', '.') . "*\n";
+        $message .= "Metode: " . strtoupper($transaction->payment_method) . "\n\n";
+        $message .= "Lihat struk lengkap: {$receiptUrl}\n\nTerima kasih atas kunjungan Anda!";
+        
+        return $this->send($phone, $message);
+    }
 }

@@ -29,6 +29,9 @@ class PaymentSettingController extends Controller
             'manual_qris_image' => 'nullable|image|max:2048',
             'qris_provider' => 'nullable|string|max:255',
             'merchant_id' => 'nullable|string|max:255',
+            'bank_name' => 'nullable|string|max:255',
+            'bank_account_number' => 'nullable|string|max:255',
+            'bank_account_name' => 'nullable|string|max:255',
         ]);
 
         $setting = PaymentSetting::getSettings();

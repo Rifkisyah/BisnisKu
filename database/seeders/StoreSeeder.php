@@ -115,7 +115,72 @@ class StoreSeeder extends Seeder
             ['qris_mode' => 'manual', 'is_qris_active' => true]
         );
 
-        // Clear tenant context after seeding
+        // Clear tenant context after seeding static stores
+        app()->forgetInstance('current_store');
+
+        // Generate 98 additional stores to reach 100
+        $faker = \Faker\Factory::create('id_ID');
+        for ($i = 3; $i <= 100; $i++) {
+            $storeName = $faker->company . ' ' . $faker->companySuffix;
+            $storeSlug = \Illuminate\Support\Str::slug($storeName) . '-' . $i;
+            
+            $store = Store::firstOrCreate(
+                ['slug' => $storeSlug],
+                [
+                    'name'            => $storeName,
+                    'address'         => $faker->address,
+                    'phone'           => $faker->phoneNumber,
+                    'email'           => $faker->unique()->safeEmail,
+                    'description'     => $faker->sentence,
+                    'is_active'       => true,
+                    'catalog_enabled' => $faker->boolean(80),
+                ]
+            );
+
+            $shortStoreName = substr($storeName, 0, 30); // Max 30 chars for store name part of username
+
+            $owner = User::firstOrCreate(
+                ['email' => "owner{$i}@{$storeSlug}.test"],
+                [
+                    'username' => 'Owner ' . $shortStoreName,
+                    'password' => Hash::make('password'),
+                    'role_id'  => $ownerRole->id,
+                    'store_id' => $store->id,
+                    'contact'  => $faker->phoneNumber,
+                    'status'   => 'active',
+                ]
+            );
+
+            $store->update(['owner_id' => $owner->id]);
+
+            User::firstOrCreate(
+                ['email' => "kasir{$i}@{$storeSlug}.test"],
+                ['username' => 'Kasir ' . $shortStoreName, 'password' => Hash::make('password'), 'role_id' => $kasirRole->id, 'store_id' => $store->id, 'contact' => $faker->phoneNumber, 'status' => 'active']
+            );
+            User::firstOrCreate(
+                ['email' => "teknisi{$i}@{$storeSlug}.test"],
+                ['username' => 'Teknisi ' . $shortStoreName, 'password' => Hash::make('password'), 'role_id' => $teknisiRole->id, 'store_id' => $store->id, 'contact' => $faker->phoneNumber, 'status' => 'active']
+            );
+            User::firstOrCreate(
+                ['email' => "gudang{$i}@{$storeSlug}.test"],
+                ['username' => 'Gudang ' . $shortStoreName, 'password' => Hash::make('password'), 'role_id' => $gudangRole->id, 'store_id' => $store->id, 'contact' => $faker->phoneNumber, 'status' => 'active']
+            );
+
+            app()->instance('current_store', $store);
+            \App\Models\Setting::set('store_name', $storeName);
+            \App\Models\Setting::set('store_address', $store->address);
+            \App\Models\Setting::set('store_phone', $store->phone);
+            \App\Models\Setting::set('store_email', $store->email);
+            \App\Models\Setting::set('receipt_footer', 'Terima kasih telah berbelanja di ' . $storeName);
+            \App\Models\Setting::set('tax_percentage', '0');
+            \App\Models\Setting::set('default_currency', 'IDR');
+
+            \App\Models\PaymentSetting::firstOrCreate(
+                ['store_id' => $store->id],
+                ['qris_mode' => 'manual', 'is_qris_active' => true]
+            );
+        }
+
         app()->forgetInstance('current_store');
     }
 }

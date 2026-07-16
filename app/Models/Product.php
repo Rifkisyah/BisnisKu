@@ -54,10 +54,7 @@ class Product extends Model
         return $this->hasMany(StockMovement::class, 'product_code', 'product_code');
     }
 
-    public function analytics(): HasMany
-    {
-        return $this->hasMany(ProductAnalytic::class, 'product_code', 'product_code');
-    }
+
 
     public function isLowStock(): bool
     {
@@ -78,43 +75,43 @@ class Product extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where($this->getTable().'.status', 'active');
     }
 
     /** Active + temporary — used when searching for products to add to transactions */
     public function scopeAvailable($query)
     {
-        return $query->whereIn('status', ['active', 'temporary']);
+        return $query->whereIn($this->getTable().'.status', ['active', 'temporary']);
     }
 
     public function scopeTemporary($query)
     {
-        return $query->where('status', 'temporary');
+        return $query->where($this->getTable().'.status', 'temporary');
     }
 
     public function scopeLowStock($query)
     {
-        return $query->whereColumn('stock', '<=', 'minimum_stock');
+        return $query->whereColumn($this->getTable().'.stock', '<=', $this->getTable().'.minimum_stock');
     }
 
     public function scopePhysical($query)
     {
-        return $query->where('type', 'physical');
+        return $query->where($this->getTable().'.type', 'physical');
     }
 
     public function scopeDigital($query)
     {
-        return $query->where('type', 'digital');
+        return $query->where($this->getTable().'.type', 'digital');
     }
 
     public function scopeService($query)
     {
-        return $query->where('type', 'service');
+        return $query->where($this->getTable().'.type', 'service');
     }
 
     public function scopeSparepart($query)
     {
-        return $query->where('type', 'sparepart');
+        return $query->where($this->getTable().'.type', 'sparepart');
     }
 
     // ─── Code generator ────────────────────────────────────────────────────

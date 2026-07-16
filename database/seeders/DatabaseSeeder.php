@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             DebtPaymentSeeder::class,
             ProductPurchaseSeeder::class,
             StockMovementSeeder::class,
-            ProductAnalyticSeeder::class,
+
             PaymentSeeder::class,
         ]);
     }

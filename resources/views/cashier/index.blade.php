@@ -100,15 +100,34 @@
                     <select x-model="paymentMethod" class="input-field !h-9 mt-1">
                         <option value="cash">{{ __('messages.cash') }}</option>
                         <option value="qris">QRIS (DANA / E-Wallet)</option>
+                        <option value="transfer">Transfer Bank</option>
                     </select>
                 </div>
                 
                 <div x-show="paymentMethod === 'qris'" class="p-3 bg-blue-50 border border-blue-200 rounded-[var(--radius-md)] mt-2 mb-2 text-center" x-cloak>
-                    <p class="type-caption text-blue-800 mb-2"><b>Scan QRIS DANA</b></p>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QRIS" class="w-32 h-32 mx-auto rounded-lg shadow-sm border border-blue-100">
-                    <p class="type-caption text-blue-800 mt-2 text-[10px]">Silakan scan menggunakan DANA atau e-wallet lainnya.</p>
-                </div>                
-                <div x-show="paymentMethod === 'qris'" class="p-3 bg-purple-50 border border-purple-200 rounded-[var(--radius-md)] mt-2">
+                    <p class="type-caption text-blue-800 mb-2"><b>Scan QRIS</b></p>
+                    <img src="{{ !empty($paymentSetting->manual_qris_image) ? asset($paymentSetting->manual_qris_image) : 'https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg' }}" alt="QRIS" class="w-32 h-32 mx-auto rounded-lg shadow-sm border border-blue-100 object-cover">
+                    @if(empty($paymentSetting->manual_qris_image))
+                        <p class="type-caption text-red-600 mt-2 text-[10px]">* Gambar QRIS belum diatur di Pengaturan Pembayaran.</p>
+                    @endif
+                    <p class="type-caption text-blue-800 mt-2 text-[10px]">Silakan scan menggunakan aplikasi E-Wallet pelanggan.</p>
+                </div>
+                
+                <div x-show="paymentMethod === 'transfer'" class="p-3 bg-green-50 border border-green-200 rounded-[var(--radius-md)] mt-2 mb-2" x-cloak>
+                    <p class="type-caption-bold text-green-800 mb-2 border-b border-green-200 pb-1">Informasi Rekening Transfer</p>
+                    @if(!empty($paymentSetting->bank_name) && !empty($paymentSetting->bank_account_number))
+                        <div class="text-sm text-green-900 mt-1">
+                            <p><strong>Bank:</strong> {{ $paymentSetting->bank_name }}</p>
+                            <p><strong>No. Rek:</strong> {{ $paymentSetting->bank_account_number }}</p>
+                            <p><strong>Atas Nama:</strong> {{ $paymentSetting->bank_account_name }}</p>
+                        </div>
+                        <p class="type-caption text-green-700 mt-2 text-[10px]">Silakan minta pelanggan transfer ke rekening di atas.</p>
+                    @else
+                        <p class="type-caption text-red-600 text-[10px]">* Informasi rekening bank belum diatur di Pengaturan Pembayaran.</p>
+                    @endif
+                </div>
+
+                <div x-show="paymentMethod === 'qris' || paymentMethod === 'transfer'" class="p-3 bg-purple-50 border border-purple-200 rounded-[var(--radius-md)] mt-2" x-cloak>
                     <p class="type-caption text-purple-800">{{ __('messages.qris_system_info') }}</p>
                 </div>
 

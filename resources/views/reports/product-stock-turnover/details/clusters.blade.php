@@ -32,7 +32,7 @@
                 <thead><tr class="bg-[var(--color-surface-soft)]">
                     <th class="px-4 py-3 text-left table-header">Nama Produk</th>
                     <th class="px-4 py-3 text-right table-header">Jumlah Terjual</th>
-                    <th class="px-4 py-3 text-right table-header">Frekuensi Terjual</th>
+                    <th class="px-4 py-3 text-right table-header">Total Pendapatan</th>
                     <th class="px-4 py-3 text-right table-header">Hari Tanpa Penjualan</th>
                     <th class="px-4 py-3 table-header">Klasifikasi Pergerakan Produk</th>
                     <th class="px-4 py-3 table-header">Rekomendasi</th>
@@ -59,7 +59,7 @@
                 <tr class="border-b border-[var(--color-hairline-soft)]/50 hover:bg-[var(--color-surface-soft)]">
                     <td class="px-4 py-2.5 type-body-sm font-medium text-[var(--color-ink)]">{{ $cr['product_name'] }}</td>
                     <td class="px-4 py-2.5 type-body-sm text-right text-[var(--color-slate)]">{{ number_format($cr['total_qty_sold'], 0, ',', '.') }} <span class="text-[10px]">unit</span></td>
-                    <td class="px-4 py-2.5 type-body-sm text-right text-[var(--color-slate)]">{{ number_format($cr['transaction_frequency'], 0, ',', '.') }} <span class="text-[10px]">kali</span></td>
+                    <td class="px-4 py-2.5 type-body-sm text-right text-[var(--color-ink-deep)]">Rp {{ number_format($cr['total_revenue'] ?? 0, 0, ',', '.') }}</td>
                     <td class="px-4 py-2.5 type-body-sm text-right text-[var(--color-slate)]">{{ $cr['days_without_sale'] >= 999 ? 'Belum Ada' : $cr['days_without_sale'] . ' Hari' }}</td>
                     <td class="px-4 py-2.5 text-center">
                         <span class="px-2 py-0.5 rounded-md text-xs font-medium inline-flex items-center" style="{{ $clusterBadgeColor }}">{!! $clusterLabel !!}</span>

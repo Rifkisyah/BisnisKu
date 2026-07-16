@@ -12,22 +12,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // 1. Add columns to product_purchase_items (ALREADY RUN)
-        /*
+        // 1. Add columns to product_purchase_items (ALREADY RUN -> but needed for migrate:fresh)
         Schema::table('product_purchase_items', function (Blueprint $table) {
-            $table->enum('source', ['whatsapp', 'marketplace', 'offline', 'other', 'service'])->nullable()->after('product_code');
-            $table->string('supplier_code')->nullable()->after('source');
-            $table->string('marketplace_name', 100)->nullable()->after('supplier_code');
-            $table->string('marketplace_seller', 100)->nullable()->after('marketplace_name');
-            $table->string('marketplace_order_id', 100)->nullable()->after('marketplace_seller');
-            $table->string('marketplace_notes', 500)->nullable()->after('marketplace_order_id');
-            $table->string('store_name', 100)->nullable()->after('marketplace_notes');
-            $table->string('receipt_number', 50)->nullable()->after('store_name');
-            $table->string('offline_notes', 500)->nullable()->after('receipt_number');
-            $table->string('other_source', 100)->nullable()->after('offline_notes');
-            $table->string('other_notes', 500)->nullable()->after('other_source');
+            if (!Schema::hasColumn('product_purchase_items', 'source')) {
+                $table->enum('source', ['whatsapp', 'marketplace', 'offline', 'other', 'service'])->nullable()->after('product_code');
+                $table->string('supplier_code')->nullable()->after('source');
+                $table->string('marketplace_name', 100)->nullable()->after('supplier_code');
+                $table->string('marketplace_seller', 100)->nullable()->after('marketplace_name');
+                $table->string('marketplace_order_id', 100)->nullable()->after('marketplace_seller');
+                $table->string('marketplace_notes', 500)->nullable()->after('marketplace_order_id');
+                $table->string('store_name', 100)->nullable()->after('marketplace_notes');
+                $table->string('receipt_number', 50)->nullable()->after('store_name');
+                $table->string('offline_notes', 500)->nullable()->after('receipt_number');
+                $table->string('other_source', 100)->nullable()->after('offline_notes');
+                $table->string('other_notes', 500)->nullable()->after('other_source');
+            }
         });
-        */
 
         // 2. Copy existing data from product_purchases to product_purchase_items (ALREADY RUN)
         /*

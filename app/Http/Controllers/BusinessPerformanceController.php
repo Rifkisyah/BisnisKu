@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductPurchase;
 use App\Models\ServiceRepair;
 use App\Models\ServiceRepairItem;
 use App\Models\StockMovement;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
-use App\Services\ProductClusteringService;
-use App\Services\SmaForecastService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -56,6 +55,25 @@ class BusinessPerformanceController extends Controller
         $topProducts->transform(function ($p) use ($totalProductRev) {
             $p->revenue_pct = round(($p->total_revenue / $totalProductRev) * 100, 1);
             return $p;
+        });
+
+        // ── Category Breakdown ────────────────────────────────────────────────
+        $categoryBreakdown = TransactionItem::whereHas('transaction',
+                fn ($q) => $q->where('status', 'paid')->whereBetween('transaction_date', [$startDate, $endDate]))
+            ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
+            ->join('categories', 'products.category_code', '=', 'categories.category_code')
+            ->when($categoryFilter, fn($q) => $q->where('products.category_code', $categoryFilter))
+            ->selectRaw('categories.category_code as id, categories.name,
+                SUM(transaction_items.subtotal) as total_revenue,
+                SUM(transaction_items.quantity) as total_qty')
+            ->groupBy('categories.category_code', 'categories.name')
+            ->orderByDesc('total_revenue')
+            ->get();
+
+        $totalCatRev = $categoryBreakdown->sum('total_revenue') ?: 1;
+        $categoryBreakdown->transform(function ($c) use ($totalCatRev) {
+            $c->revenue_pct = round(($c->total_revenue / $totalCatRev) * 100, 1);
+            return $c;
         });
 
         // ─────────────────────────────────────────────────────────────────────
@@ -108,37 +126,74 @@ class BusinessPerformanceController extends Controller
             ->values();
 
         // ─────────────────────────────────────────────────────────────────────
-        // Section 3 — K-Means Clustering
+        // Section 3 — Popular Products (frequency + volume based ranking)
         // ─────────────────────────────────────────────────────────────────────
 
-        $clusteringService = new ProductClusteringService();
-        $clusterResults    = $clusteringService->cluster($startDate, $endDate, $categoryFilter);
+        $clusterResults = Product::active()->physical()
+            ->when($categoryFilter, fn($q) => $q->where('products.category_code', $categoryFilter))
+            ->leftJoin('transaction_items', 'products.product_code', '=', 'transaction_items.product_code')
+            ->leftJoin('transactions', function($join) use ($startDate, $endDate) {
+                $join->on('transaction_items.transaction_code', '=', 'transactions.transaction_code')
+                     ->where('transactions.status', 'paid')
+                     ->whereBetween('transactions.transaction_date', [$startDate, $endDate]);
+            })
+            ->selectRaw('products.product_code, products.name as product_name, 
+                         COALESCE(SUM(transaction_items.quantity), 0) as total_qty_sold, 
+                         COALESCE(SUM(transaction_items.subtotal), 0) as total_revenue')
+            ->groupBy('products.product_code', 'products.name')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'product_code'          => $item->product_code,
+                    'product_name'          => $item->product_name,
+                    'total_qty_sold'        => (int) $item->total_qty_sold,
+                    'total_revenue'         => (float) $item->total_revenue,
+                ];
+            })
+            ->toArray();
 
-        $clusterSummary = ['fast_moving' => 0, 'medium_moving' => 0, 'slow_moving' => 0, 'dead_stock' => 0];
-        foreach ($clusterResults as $r) {
-            $clusterSummary[$r['cluster_label']] = ($clusterSummary[$r['cluster_label']] ?? 0) + 1;
-        }
+        // Sort by total_revenue + total_qty_sold to get most popular first
+        usort($clusterResults, function ($a, $b) {
+            $scoreA = ($a['total_revenue'] ?? 0) * 2 + ($a['total_qty_sold'] ?? 0);
+            $scoreB = ($b['total_revenue'] ?? 0) * 2 + ($b['total_qty_sold'] ?? 0);
+            return $scoreB <=> $scoreA;
+        });
+
+        $totalProductsSold = count(array_filter($clusterResults, fn($r) => ($r['total_qty_sold'] ?? 0) > 0));
 
         // ─────────────────────────────────────────────────────────────────────
-        // Section 4 — SMA Restock Recommendations
+        // Section 4 — Stock Procurement Data
         // ─────────────────────────────────────────────────────────────────────
 
+        $procurements = \App\Models\ProductPurchase::whereBetween('purchase_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->with(['items', 'creator'])
+            ->orderByDesc('purchase_date')
+            ->get();
+
+        $totalProcurementValue = $procurements->sum('total');
+        $receivedProcurements  = $procurements->where('status', 'received')->count();
+        $pendingProcurements   = $procurements->whereIn('status', ['draft', 'ordered', 'partial_received'])->count();
+        $cancelledProcurements = $procurements->where('status', 'cancelled')->count();
+
+        // Procurement per-date trend for chart
+        $procurementTrend = \App\Models\ProductPurchase::whereBetween('purchase_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->selectRaw('DATE(purchase_date) as date, COUNT(*) as count, SUM(total) as total')
+            ->groupByRaw('DATE(purchase_date)')
+            ->orderBy('date')
+            ->get();
+
+        $limit    = $request->input('limit', 10);
         $diffDays = (int) $startDate->diffInDays($endDate);
         if ($diffDays === 0) $diffDays = 1;
 
-        $smaService    = new SmaForecastService();
-        $smaResults    = $smaService->calculateAll($diffDays, $endDate, $categoryFilter);
-        $restockNeeded = collect($smaResults)->where('needs_restock', true)->count();
-        $safeStock     = collect($smaResults)->where('needs_restock', false)->count();
-
-        $limit = $request->input('limit', 10);
-
-        return view('reports.business-performance.index', compact(
-            'startDate', 'endDate', 'categories', 'categoryFilter',
+        return view('reports.product-stock-turnover.index', compact(
+            'startDate', 'endDate', 'categories', 'categoryFilter', 'topProducts', 'categoryBreakdown',
             'stockIn', 'stockOut', 'stockAdj',
             'inventoryTurnover', 'stockMovementTrend', 'deadStockProducts',
-            'clusterResults', 'clusterSummary',
-            'smaResults', 'restockNeeded', 'safeStock', 'diffDays', 'limit'
+            'clusterResults', 'totalProductsSold',
+            'procurements', 'totalProcurementValue', 'receivedProcurements',
+            'pendingProcurements', 'cancelledProcurements', 'procurementTrend',
+            'diffDays', 'limit'
         ));
     }
 
@@ -151,8 +206,8 @@ class BusinessPerformanceController extends Controller
         $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : now()->startOfDay();
         $endDate   = $request->get('end_date')   ? Carbon::parse($request->get('end_date'))   : now();
         $data = $this->gatherDataForPdf($startDate, $endDate, $request);
-        $pdf  = Pdf::loadView('reports.pdf.business-performance', $data)->setPaper('a4', 'landscape');
-        return $pdf->download('bi-report-' . now()->format('Y-m-d') . '.pdf');
+        $pdf  = Pdf::loadView('reports.pdf.product-stock-turnover', $data)->setPaper('a4', 'landscape');
+        return $pdf->download('laporan-perputaran-stok-' . now()->format('Y-m-d') . '.pdf');
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -165,13 +220,37 @@ class BusinessPerformanceController extends Controller
         $endDate   = $request->get('end_date')   ? Carbon::parse($request->get('end_date'))->endOfDay()   : now()->endOfDay();
         $categoryFilter = $request->get('category');
 
-        $clusteringService = new ProductClusteringService();
-        $clusterResults    = $clusteringService->cluster($startDate, $endDate, $categoryFilter);
+        $clusterResults = Product::active()->physical()
+            ->when($categoryFilter, fn($q) => $q->where('products.category_code', $categoryFilter))
+            ->leftJoin('transaction_items', 'products.product_code', '=', 'transaction_items.product_code')
+            ->leftJoin('transactions', function($join) use ($startDate, $endDate) {
+                $join->on('transaction_items.transaction_code', '=', 'transactions.transaction_code')
+                     ->where('transactions.status', 'paid')
+                     ->whereBetween('transactions.transaction_date', [$startDate, $endDate]);
+            })
+            ->selectRaw('products.product_code, products.name as product_name, 
+                         COUNT(DISTINCT transactions.transaction_code) as transaction_frequency, 
+                         COALESCE(SUM(transaction_items.quantity), 0) as total_qty_sold, 
+                         COALESCE(SUM(transaction_items.subtotal), 0) as total_revenue')
+            ->groupBy('products.product_code', 'products.name')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'product_code'          => $item->product_code,
+                    'product_name'          => $item->product_name,
+                    'transaction_frequency' => (int) $item->transaction_frequency,
+                    'total_qty_sold'        => (int) $item->total_qty_sold,
+                    'total_revenue'         => (float) $item->total_revenue,
+                ];
+            })
+            ->toArray();
 
-        $clusterFilter = $request->get('cluster_filter', 'all');
-        if ($clusterFilter !== 'all') {
-            $clusterResults = array_filter($clusterResults, fn($item) => $item['cluster_label'] === $clusterFilter);
-        }
+        // Sort by transaction_frequency + total_qty_sold to get most popular first
+        usort($clusterResults, function ($a, $b) {
+            $scoreA = ($a['transaction_frequency'] ?? 0) * 2 + ($a['total_qty_sold'] ?? 0);
+            $scoreB = ($b['transaction_frequency'] ?? 0) * 2 + ($b['total_qty_sold'] ?? 0);
+            return $scoreB <=> $scoreA;
+        });
 
         $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
         $perPage = 50;
@@ -181,7 +260,7 @@ class BusinessPerformanceController extends Controller
             'query' => $request->query(),
         ]);
 
-        return view('reports.business-performance.details.clusters', compact('paginatedClusters', 'startDate', 'endDate'));
+        return view('reports.product-stock-turnover.details.clusters', compact('paginatedClusters', 'startDate', 'endDate'));
     }
 
     public function sma(Request $request)
@@ -210,7 +289,7 @@ class BusinessPerformanceController extends Controller
             'query' => $request->query(),
         ]);
 
-        return view('reports.business-performance.details.sma', compact('paginatedSma', 'startDate', 'endDate', 'diffDays'));
+        return view('reports.product-stock-turnover.details.sma', compact('paginatedSma', 'startDate', 'endDate', 'diffDays'));
     }
 
 
@@ -232,8 +311,36 @@ class BusinessPerformanceController extends Controller
             ->limit(10)
             ->get();
 
-        $clusteringService = new ProductClusteringService();
-        $clusterResults    = $clusteringService->cluster($startDate, $endDate, $categoryFilter);
+        $clusterResults = Product::active()->physical()
+            ->when($categoryFilter, fn($q) => $q->where('products.category_code', $categoryFilter))
+            ->leftJoin('transaction_items', 'products.product_code', '=', 'transaction_items.product_code')
+            ->leftJoin('transactions', function($join) use ($startDate, $endDate) {
+                $join->on('transaction_items.transaction_code', '=', 'transactions.transaction_code')
+                     ->where('transactions.status', 'paid')
+                     ->whereBetween('transactions.transaction_date', [$startDate, $endDate]);
+            })
+            ->selectRaw('products.product_code, products.name as product_name, 
+                         COUNT(DISTINCT transactions.transaction_code) as transaction_frequency, 
+                         COALESCE(SUM(transaction_items.quantity), 0) as total_qty_sold, 
+                         COALESCE(SUM(transaction_items.subtotal), 0) as total_revenue')
+            ->groupBy('products.product_code', 'products.name')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'product_code'          => $item->product_code,
+                    'product_name'          => $item->product_name,
+                    'transaction_frequency' => (int) $item->transaction_frequency,
+                    'total_qty_sold'        => (int) $item->total_qty_sold,
+                    'total_revenue'         => (float) $item->total_revenue,
+                ];
+            })
+            ->toArray();
+
+        usort($clusterResults, function ($a, $b) {
+            $scoreA = ($a['transaction_frequency'] ?? 0) * 2 + ($a['total_qty_sold'] ?? 0);
+            $scoreB = ($b['transaction_frequency'] ?? 0) * 2 + ($b['total_qty_sold'] ?? 0);
+            return $scoreB <=> $scoreA;
+        });
 
         return compact('productRevenue', 'serviceRevenue', 'topProducts', 'clusterResults', 'startDate', 'endDate');
     }

@@ -207,7 +207,7 @@ return [
     'kmeans_report' => 'Laporan Pergerakan Produk',
     'prediction_report' => 'Laporan Prediksi Stok',
     'sales_trend_repair' => 'Tren Penjualan & Perbaikan',
-    'top_5_products' => '5 Produk Terlaris',
+    'top_5_products' => 'Produk Terlaris',
     'kmeans_classification' => 'Klasifikasi Pergerakan Stok Produk',
     'stock_sma_warning' => 'Rekomendasi Pengisian Ulang Stok',
     'all_categories' => 'Semua Kategori',

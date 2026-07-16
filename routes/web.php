@@ -22,10 +22,14 @@ use App\Http\Controllers\SettingController;
 // ─── Public Landing Page ─────────────────────────────────────────────────────
 Route::middleware('locale')->group(function () {
     Route::get('/', function () {
+        $store = \App\Models\Store::first();
+        if ($store) {
+            return redirect()->route('catalog.store.index', ['store' => $store->slug]);
+        }
         return view('welcome');
     })->name('home');
 
-    // Legacy catalog redirect → inform user to use per-store URL
+    // Legacy catalog redirect
     Route::get('/catalog', function () {
         return redirect()->route('home');
     })->name('catalog');
@@ -141,10 +145,10 @@ Route::middleware(['auth', 'locale', 'set.tenant'])->group(function () {
         Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
 
         // Business Performance (formerly BI)
-        Route::get('/reports/business-performance', [BusinessPerformanceController::class, 'index'])->name('reports.business_performance');
-        Route::get('/reports/business-performance/clusters', [BusinessPerformanceController::class, 'clusters'])->name('reports.business_performance.clusters');
-        Route::get('/reports/business-performance/sma', [BusinessPerformanceController::class, 'sma'])->name('reports.business_performance.sma');
-        Route::get('/reports/business-performance/export-pdf', [BusinessPerformanceController::class, 'exportPdf'])->name('reports.business_performance.export_pdf');
+        Route::get('/reports/product-stock-turnover', [BusinessPerformanceController::class, 'index'])->name('reports.business_performance');
+        Route::get('/reports/product-stock-turnover/clusters', [BusinessPerformanceController::class, 'clusters'])->name('reports.business_performance.clusters');
+        Route::get('/reports/product-stock-turnover/sma', [BusinessPerformanceController::class, 'sma'])->name('reports.business_performance.sma');
+        Route::get('/reports/product-stock-turnover/export-pdf', [BusinessPerformanceController::class, 'exportPdf'])->name('reports.business_performance.export_pdf');
 
         // Reports
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

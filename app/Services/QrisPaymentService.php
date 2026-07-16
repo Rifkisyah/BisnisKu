@@ -17,9 +17,7 @@ class QrisPaymentService
     public function __construct()
     {
         $settings = PaymentSetting::getSettings();
-        // Here we can switch to real gateway like Midtrans based on settings
-        // For now, use Dummy
-        $this->gateway = new DummyQrisGatewayService();
+        $this->gateway = new MidtransGatewayService();
     }
 
     public function createPayment(Transaction $transaction)
@@ -32,7 +30,7 @@ class QrisPaymentService
         if ($settings->qris_mode === 'manual') {
             return $this->createManualQrisPayment($transaction, $settings);
         } else {
-            return $this->createDynamicQrisPayment($transaction, $settings);
+            return $this->createDynamicPayment($transaction, $settings);
         }
     }
 
@@ -55,25 +53,34 @@ class QrisPaymentService
         ];
     }
 
-    protected function createDynamicQrisPayment(Transaction $transaction, PaymentSetting $settings)
+    protected function createDynamicPayment(Transaction $transaction, PaymentSetting $settings)
     {
-        $externalOrderId = 'QRIS-' . $transaction->transaction_code . '-' . time();
+        $externalOrderId = 'TRX-' . $transaction->transaction_code . '-' . time();
         
-        $response = $this->gateway->generateQris([
-            'external_order_id' => $externalOrderId,
-            'amount' => $transaction->total,
-        ]);
+        $params = [
+            'transaction_details' => [
+                'order_id' => $externalOrderId,
+                'gross_amount' => $transaction->total,
+            ],
+            'customer_details' => [
+                'first_name' => 'Pelanggan',
+                'last_name' => 'BisnisKu',
+                // You can get actual customer details if you store them
+            ]
+        ];
+
+        $response = $this->gateway->generateSnapUrl($params);
 
         if (!$response['success']) {
-            throw new Exception("Gagal generate QRIS: " . $response['message']);
+            throw new Exception("Gagal generate pembayaran: " . $response['message']);
         }
 
         $payment = Payment::create([
             'payment_code' => Payment::generateCode(),
             'transaction_code' => $transaction->transaction_code,
-            'payment_method' => 'qris',
-            'qris_mode' => 'dynamic',
-            'provider' => $settings->qris_provider,
+            'payment_method' => 'midtrans',
+            'qris_mode' => 'dynamic', // Legacy flag to differentiate from manual
+            'provider' => 'midtrans',
             'amount' => $transaction->total,
             'status' => 'pending',
             'external_order_id' => $externalOrderId,
@@ -82,7 +89,8 @@ class QrisPaymentService
         return [
             'success' => true,
             'qris_mode' => 'dynamic',
-            'qris_url' => $response['qris_url'],
+            'qris_url' => $response['redirect_url'],
+            'snap_token' => $response['snap_token'],
             'payment_code' => $payment->payment_code,
             'external_order_id' => $externalOrderId
         ];
