@@ -25,9 +25,9 @@
             elseif ($diffDays == 365) $activeFilter = 365;
             elseif ($diffDays == 30 || !request()->has('start_date')) $activeFilter = 30;
         @endphp
-        <button type="button" onclick="setDateRange(7)" class="flex-1 text-center justify-center {{ $activeFilter === 7 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs sm:text-sm">{{ __('messages.week') }}</button>
-        <button type="button" onclick="setDateRange(30)" class="flex-1 text-center justify-center {{ $activeFilter === 30 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs sm:text-sm">{{ __('messages.month') }}</button>
-        <button type="button" onclick="setDateRange(365)" class="flex-1 text-center justify-center {{ $activeFilter === 365 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs sm:text-sm">{{ __('messages.year') }}</button>
+        <button type="button" onclick="setDateRange(7)" class="flex-1 text-center justify-center {{ $activeFilter === 7 ? 'pill-tab-active !border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs sm:text-sm">{{ __('messages.week') }}</button>
+        <button type="button" onclick="setDateRange(30)" class="flex-1 text-center justify-center {{ $activeFilter === 30 ? 'pill-tab-active !border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs sm:text-sm">{{ __('messages.month') }}</button>
+        <button type="button" onclick="setDateRange(365)" class="flex-1 text-center justify-center {{ $activeFilter === 365 ? 'pill-tab-active !border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs sm:text-sm">{{ __('messages.year') }}</button>
     </div>
 
     <div class="flex w-full md:w-auto md:ml-auto gap-2 flex-wrap sm:flex-nowrap">
@@ -50,36 +50,41 @@
 </form>
 
 {{-- Stats Cards --}}
-<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-8">
-    <div class="card-feature p-5">
-        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider">{{ __('messages.total_revenue') }}</p>
-        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)]">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</p>
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 mb-8">
+    <div class="card-feature print:break-inside-avoid p-5">
+        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider truncate" title="Total Keseluruhan (Penjualan + Servis)">Total Keseluruhan</p>
+        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)] truncate">Rp {{ number_format($totalCombinedRevenue, 0, ',', '.') }}</p>
         <div class="mt-2 h-1 w-12 rounded-full bg-[var(--color-primary)]"></div>
     </div>
-    <div class="card-feature p-5">
-        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider">{{ __('messages.service_revenue') }}</p>
-        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)]">Rp {{ number_format($serviceRevenue, 0, ',', '.') }}</p>
+    <div class="card-feature print:break-inside-avoid p-5">
+        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider truncate" title="{{ __('messages.total_revenue') }}">{{ __('messages.total_revenue') }}</p>
+        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)] truncate">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</p>
+        <div class="mt-2 h-1 w-12 rounded-full bg-[var(--color-primary)]"></div>
+    </div>
+    <div class="card-feature print:break-inside-avoid p-5">
+        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider truncate" title="{{ __('messages.service_revenue') }}">{{ __('messages.service_revenue') }}</p>
+        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)] truncate">Rp {{ number_format($serviceRevenue, 0, ',', '.') }}</p>
         <div class="mt-2 h-1 w-12 rounded-full bg-[var(--color-success)]"></div>
     </div>
-    <div class="card-feature p-5">
-        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider">{{ __('messages.total_transactions') }}</p>
-        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)]">{{ number_format($transactionCount) }}</p>
+    <div class="card-feature print:break-inside-avoid p-5">
+        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider truncate" title="{{ __('messages.total_transactions') }}">{{ __('messages.total_transactions') }}</p>
+        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)] truncate">{{ number_format($transactionCount) }}</p>
         <div class="mt-2 h-1 w-12 rounded-full bg-[var(--color-fb-blue)]"></div>
     </div>
-    <div class="card-feature p-5">
-        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider">{{ __('messages.active_repairs') }}</p>
-        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)]">{{ number_format($activeRepairs) }}</p>
+    <div class="card-feature print:break-inside-avoid p-5">
+        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider truncate" title="{{ __('messages.active_repairs') }}">{{ __('messages.active_repairs') }}</p>
+        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)] truncate">{{ number_format($activeRepairs) }}</p>
         <div class="mt-2 h-1 w-12 rounded-full bg-[var(--color-critical)]"></div>
     </div>
-    <div class="card-feature p-5">
-        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider">{{ __('messages.total_products') }}</p>
-        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)]">{{ number_format($productCount) }}</p>
+    <div class="card-feature print:break-inside-avoid p-5">
+        <p class="type-caption-bold text-[var(--color-slate)] uppercase tracking-wider truncate" title="{{ __('messages.total_products') }}">{{ __('messages.total_products') }}</p>
+        <p class="mt-3 type-heading-sm text-[var(--color-ink-deep)] truncate">{{ number_format($productCount) }}</p>
         <div class="mt-2 h-1 w-12 rounded-full bg-[var(--color-attention)]"></div>
     </div>
 </div>
 
 {{-- 1. Combined Trend Widget --}}
-<div class="card-feature mb-6" x-data="{ view: 'chart', chartType: 'line' }" x-init="$watch('chartType', val => updateTrendChart(val))">
+<div class="card-feature print:break-inside-avoid mb-6" x-data="{ view: 'chart', chartType: 'line' }" x-init="$watch('chartType', val => updateTrendChart(val))">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 md:p-5 border-b border-[var(--color-hairline-soft)]">
         <div class="flex items-center gap-3">
             <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">
@@ -134,7 +139,7 @@
                         $rVal = $repairTrend->where('date', $dt)->first()->total_revenue ?? 0;
                     @endphp
                     <tr class="border-b border-[var(--color-hairline-soft)] hover:bg-[var(--color-surface-soft)] transition-colors">
-                        <td class="py-3 px-4 type-body-sm">{{ \Carbon\Carbon::parse($dt)->format('d/m/Y') }}</td>
+                        <td class="py-3 px-4 type-body-sm">{{ \Carbon\Carbon::parse($dt)->format('d/m/Y H:i') }}</td>
                         <td class="py-3 px-4 type-body-sm text-right text-[var(--color-primary)]">Rp {{ number_format($sVal, 0, ',', '.') }}</td>
                         <td class="py-3 px-4 type-body-sm text-right text-[var(--color-success)]">Rp {{ number_format($rVal, 0, ',', '.') }}</td>
                         <td class="py-3 px-4 type-body-sm text-right font-bold text-[var(--color-ink-deep)]">Rp {{ number_format($sVal + $rVal, 0, ',', '.') }}</td>
@@ -147,11 +152,11 @@
     </div>
 </div>
 
-{{-- 2. Grid for Top Products & K-Means --}}
+{{-- 2. Top Products & Top Categories --}}
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     
-    {{-- Top Products Widget --}}
-    <div class="card-feature flex flex-col" x-data="{ view: 'chart', chartType: 'doughnut' }" x-init="$watch('chartType', val => updateTopProductsChart(val))">
+    {{-- Top Products --}}
+    <div class="card-feature print:break-inside-avoid flex flex-col h-[450px] print:h-auto" x-data="{ view: 'table', chartType: 'doughnut', metric: 'revenue' }" x-init="$watch('chartType', val => updateTopProductsChart(val, metric)); $watch('metric', val => updateTopProductsChart(chartType, val)); $watch('view', val => { if(val === 'chart') setTimeout(() => updateTopProductsChart(chartType, metric), 50) })">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 md:p-5 border-b border-[var(--color-hairline-soft)]">
             <div class="flex items-center gap-3">
                 <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">
@@ -160,152 +165,316 @@
                 </h3>
             </div>
             <div class="flex flex-col sm:flex-row w-full md:w-auto gap-2 mt-2 md:mt-0">
-                <a href="{{ route('reports.sales_revenue.products', request()->all()) }}" class="w-full sm:w-auto text-center justify-center pill-tab !bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:!bg-[var(--color-primary)]/20 !text-xs sm:mr-2">{{ __('messages.all_products') }} </a>
                 <div class="flex w-full sm:w-auto gap-2">
-                    <button @click="view = 'chart'" :class="view === 'chart' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('messages.chart') }}</button>
-                    <button @click="view = 'table'" :class="view === 'table' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('messages.table') }}</button>
+                    <button @click="view = 'chart'" :class="view === 'chart' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('Grafik') }}</button>
+                    <button @click="view = 'table'" :class="view === 'table' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('Tabel') }}</button>
                 </div>
             </div>
         </div>
         
-        <div x-show="view === 'chart'" class="p-5 flex-1 flex flex-col">
+        <div x-show="view === 'chart'" class="p-5 flex-1 flex flex-col" style="display: none;">
             <div class="flex flex-col sm:flex-row sm:justify-end gap-2 mb-4 w-full">
                 <select x-model="chartType" class="input-field w-full sm:w-auto text-xs !py-1.5">
-                    <option value="doughnut">{{ __('messages.doughnut_chart') }}</option>
-                    <option value="pie">{{ __('messages.pie_chart') }}</option>
-                    <option value="bar">{{ __('messages.bar_chart') }}</option>
+                    <option value="doughnut">Doughnut Chart</option>
+                    <option value="pie">Pie Chart</option>
+                    <option value="bar">Bar Chart</option>
+                </select>
+                <select x-model="metric" class="input-field w-full sm:w-auto text-xs !py-1.5">
+                    <option value="revenue">Pendapatan</option>
+                    <option value="qty">Kuantitas</option>
                 </select>
             </div>
             @if(count($topProducts) > 0)
-            <div style="height:250px;" class="flex items-center justify-center relative"><canvas id="topProductsChart"></canvas></div>
+            <div style="height:250px;" class="flex items-center justify-center relative w-full"><canvas id="topProductsChart"></canvas></div>
             @else
             <div style="height:250px;" class="text-center text-[var(--color-slate)] w-full flex items-center justify-center">{{ __('messages.no_data') }}</div>
             @endif
         </div>
 
-        <div x-show="view === 'table'" class="p-0 overflow-x-auto flex-1" style="display: none;">
-            <table class="w-full h-full">
-                <thead>
-                    <tr class="bg-[var(--color-surface-soft)] border-b border-[var(--color-hairline-soft)]">
-                        <th class="py-3 px-4 text-left type-caption-bold">{{ __('messages.product') }}</th>
-                        <th class="py-3 px-4 text-center type-caption-bold">{{ __('messages.quantity') }}</th>
-                        <th class="py-3 px-4 text-right type-caption-bold">{{ __('messages.total_revenue') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($topProducts as $item)
-                    <tr class="border-b border-[var(--color-hairline-soft)] hover:bg-[var(--color-surface-soft)] transition-colors">
-                        <td class="py-3 px-4 type-body-sm text-[var(--color-ink-deep)] font-medium">{{ $item->name }}</td>
-                        <td class="py-3 px-4 type-body-sm text-center">{{ $item->total_qty }}</td>
-                        <td class="py-3 px-4 type-body-sm text-right">Rp {{ number_format($item->total_revenue, 0, ',', '.') }}</td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="3" class="py-8 text-center type-body-sm text-[var(--color-slate)]">{{ __('messages.no_data') }}</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-
-</div>
-
-{{-- 3. SMA Restock Widget --}}
-<div class="card-feature mb-6" x-data="{ view: 'chart', smaFilter: 'all', chartType: 'doughnut', metric: 'status', limit: 10 }" x-init="$watch('view', val => { if(val === 'chart') setTimeout(() => window.dispatchEvent(new Event('resize')), 50) }); $watch('chartType', val => updateRestockChart(val, metric)); $watch('metric', val => updateRestockChart(chartType, val))">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 md:p-5 border-b border-[var(--color-hairline-soft)]">
-        <div class="flex items-center gap-3">
-            <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">
-                <svg class="w-5 h-5 inline-block -mt-1 mr-1 text-[var(--color-critical)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                {{ __('messages.stock_sma_warning') }}
-            </h3>
-        </div>
-        <div class="flex flex-col sm:flex-row w-full md:w-auto gap-2 mt-2 md:mt-0">
-            <a href="{{ route('reports.business_performance.sma', request()->all()) }}" class="w-full sm:w-auto text-center justify-center pill-tab !bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:!bg-[var(--color-primary)]/20 !text-xs sm:mr-2">{{ __('messages.prediction_report') }} </a>
-            <div class="flex w-full sm:w-auto gap-2">
-                <button @click="view = 'chart'" :class="view === 'chart' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('messages.chart') }}</button>
-                <button @click="view = 'table'" :class="view === 'table' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('messages.table') }}</button>
+        <div x-show="view === 'table'" class="flex-1 flex flex-col overflow-hidden">
+            <div class="p-0 overflow-y-auto print:overflow-visible flex-1">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-[var(--color-surface-soft)] border-b border-[var(--color-hairline-soft)] sticky top-0">
+                            <th class="py-3 px-4 text-left type-caption-bold">{{ __('messages.product') }}</th>
+                            <th class="py-3 px-4 text-center type-caption-bold">{{ __('messages.quantity') }}</th>
+                            <th class="py-3 px-4 text-right type-caption-bold">{{ __('messages.total_revenue') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($topProducts as $item)
+                        <tr class="border-b border-[var(--color-hairline-soft)] hover:bg-[var(--color-surface-soft)] transition-colors">
+                            <td class="py-3 px-4 type-body-sm text-[var(--color-ink-deep)] font-medium">{{ $item->name }}</td>
+                            <td class="py-3 px-4 type-body-sm text-center">{{ $item->total_qty }}</td>
+                            <td class="py-3 px-4 type-body-sm text-right">Rp {{ number_format($item->total_revenue, 0, ',', '.') }}</td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="3" class="py-8 text-center type-body-sm text-[var(--color-slate)]">{{ __('messages.no_data') }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-[var(--color-hairline-soft)] text-center bg-[var(--color-surface)] print:hidden">
+                <a href="{{ route('reports.sales_revenue.products') }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
+                    Lihat Keseluruhan Data
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
             </div>
         </div>
     </div>
-    
-    <div x-show="view === 'chart'" class="p-5 flex-1 flex flex-col">
-        <div class="flex flex-col sm:flex-row sm:justify-end gap-2 mb-4 w-full">
-            <select x-model="chartType" class="input-field w-full sm:w-auto text-xs !py-1.5">
-                <option value="doughnut">Doughnut Chart</option>
-                <option value="pie">Pie Chart</option>
-                <option value="bar">Bar Chart</option>
-            </select>
-            <select x-model="metric" class="input-field w-full sm:w-auto text-xs !py-1.5">
-                <option value="status">Status (Jumlah Produk)</option>
-                <option value="units">Saran Tambah (Jumlah Unit)</option>
-            </select>
-        </div>
-        @if(count($smaResults) > 0)
-        <div style="height:280px; position:relative;"><canvas id="biRestockChart"></canvas></div>
-        @else
-        <div style="height:280px;" class="text-center text-[var(--color-slate)] w-full flex items-center justify-center">{{ __('messages.no_data') }}</div>
-        @endif
-    </div>
 
-    <div x-show="view === 'table'" x-cloak class="p-0 flex-1">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b border-[var(--color-hairline-soft)]">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full md:w-auto">
-                <span class="type-caption text-[var(--color-slate)]">Filter:</span>
-                <select x-model="smaFilter" class="input-field !py-1.5 !px-3 w-full sm:w-auto text-xs">
-                    <option value="all">{{ __('Semua Produk') }}</option>
-                    <option value="restock">{{ __('Perlu Isi Ulang Stok') }}</option>
-                    <option value="ok">{{ __('Tidak Perlu Isi Ulang Stok') }}</option>
+    {{-- Top Categories --}}
+    <div class="card-feature print:break-inside-avoid flex flex-col h-[450px] print:h-auto" x-data="{ view: 'table', chartType: 'doughnut', metric: 'revenue' }" x-init="$watch('chartType', val => updateTopCategoriesChart(val, metric)); $watch('metric', val => updateTopCategoriesChart(chartType, val)); $watch('view', val => { if(val === 'chart') setTimeout(() => updateTopCategoriesChart(chartType, metric), 50) })">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 md:p-5 border-b border-[var(--color-hairline-soft)]">
+            <div class="flex items-center gap-3">
+                <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">
+                    <svg class="w-5 h-5 inline-block -mt-1 mr-1 text-[var(--color-fb-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+                    Top Kategori
+                </h3>
+            </div>
+            <div class="flex flex-col sm:flex-row w-full md:w-auto gap-2 mt-2 md:mt-0">
+                <div class="flex w-full sm:w-auto gap-2">
+                    <button @click="view = 'chart'" :class="view === 'chart' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('Grafik') }}</button>
+                    <button @click="view = 'table'" :class="view === 'table' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('Tabel') }}</button>
+                </div>
+            </div>
+        </div>
+        
+        <div x-show="view === 'chart'" class="p-5 flex-1 flex flex-col" style="display: none;">
+            <div class="flex flex-col sm:flex-row sm:justify-end gap-2 mb-4 w-full">
+                <select x-model="chartType" class="input-field w-full sm:w-auto text-xs !py-1.5">
+                    <option value="doughnut">Doughnut Chart</option>
+                    <option value="pie">Pie Chart</option>
+                    <option value="bar">Bar Chart</option>
+                </select>
+                <select x-model="metric" class="input-field w-full sm:w-auto text-xs !py-1.5">
+                    <option value="revenue">Pendapatan</option>
+                    <option value="qty">Terjual</option>
                 </select>
             </div>
+            @if(count($topCategories) > 0)
+            <div style="height:250px;" class="flex items-center justify-center relative w-full"><canvas id="topCategoriesChart"></canvas></div>
+            @else
+            <div style="height:250px;" class="text-center text-[var(--color-slate)] w-full flex items-center justify-center">{{ __('messages.no_data') }}</div>
+            @endif
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="bg-[var(--color-surface-soft)] border-b border-[var(--color-hairline-soft)]">
-                        <th class="px-4 py-3 text-left type-caption-bold">Produk</th>
-                        <th class="px-4 py-3 text-right type-caption-bold">{{ __('Rata-rata Terjual / Hari') }}</th>
-                        <th class="px-4 py-3 text-right type-caption-bold">{{ __('Stok Tersedia') }}</th>
-                        <th class="px-4 py-3 text-right type-caption-bold">{{ __('Estimasi Kebutuhan (:days Hari)', ['days' => (int) $startDate->diffInDays($endDate) ?: 1]) }}</th>
-                        <th class="px-4 py-3 text-right type-caption-bold">{{ __('Perkiraan Stok Habis') }}</th>
-                        <th class="px-4 py-3 text-right type-caption-bold">{{ __('Saran Tambah Stok') }}</th>
-                        <th class="px-4 py-3 text-center type-caption-bold">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse(array_slice($smaResults, 0, 5) as $index => $sr)
-                    <tr class="border-b border-[var(--color-hairline-soft)]/50 hover:bg-[var(--color-surface-soft)] transition-colors"
-                        x-show="(smaFilter === 'all' || (smaFilter === 'restock' && {{ $sr['needs_restock'] ? 'true' : 'false' }}) || (smaFilter === 'ok' && {{ !$sr['needs_restock'] ? 'true' : 'false' }}))">
-                        <td class="px-4 py-2.5 type-body-sm font-medium text-[var(--color-ink)]">{{ $sr['product_name'] }}</td>
-                        <td class="px-4 py-2.5 type-body-sm text-right text-[var(--color-slate)]">{{ number_format($sr['sma_daily'], 2, ',', '.') }} <span class="text-[10px]">unit</span></td>
-                        <td class="px-4 py-2.5 type-body-sm text-right {{ $sr['current_stock'] <= $sr['minimum_stock'] ? 'text-[var(--color-critical)] font-bold' : 'text-[var(--color-ink)]' }}">{{ number_format($sr['current_stock'], 0, ',', '.') }} <span class="text-[10px]">unit</span></td>
-                        <td class="px-4 py-2.5 type-body-sm text-right text-[var(--color-slate)]">{{ number_format($sr['predicted_demand_14d'], 0, ',', '.') }} <span class="text-[10px]">unit</span></td>
-                        <td class="px-4 py-2.5 text-right">
-                            @php
-                                $dsr = $sr['days_of_stock_remaining'];
-                                $dsrStyle = $dsr <= 7 ? 'color:var(--color-critical); font-weight:700' : ($dsr <= 14 ? 'color:#D97706' : 'color:var(--color-success)');
-                            @endphp
-                            <span class="type-body-sm" style="{{ $dsrStyle }}">{{ $dsr >= 999 ? '∞' : $dsr . ' hari' }}</span>
-                        </td>
-                        <td class="px-4 py-2.5 text-right">
-                            @if($sr['restock_recommendation'] > 0)
-                                <span class="badge badge-neutral">+{{ $sr['restock_recommendation'] }} unit</span>
-                            @else
-                                <span class="type-caption text-[var(--color-stone)]">-</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-2.5 text-center">
-                            @if($sr['needs_restock'])
-                                <span class="badge badge-critical">{{ __('Perlu Isi Ulang Stok') }}</span>
-                            @else
-                                <span class="badge badge-success">{{ __('Tidak Perlu Isi Ulang Stok') }}</span>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="7" class="py-8 text-center type-body-sm text-[var(--color-slate)]">{{ __('messages.no_data') }}</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+
+        <div x-show="view === 'table'" class="flex-1 flex flex-col overflow-hidden">
+            <div class="p-0 overflow-y-auto print:overflow-visible flex-1">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-[var(--color-surface-soft)] border-b border-[var(--color-hairline-soft)] sticky top-0">
+                            <th class="py-3 px-4 text-left type-caption-bold">Kategori</th>
+                            <th class="py-3 px-4 text-center type-caption-bold">Terjual</th>
+                            <th class="py-3 px-4 text-right type-caption-bold">Pendapatan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($topCategories as $item)
+                        <tr class="border-b border-[var(--color-hairline-soft)] hover:bg-[var(--color-surface-soft)] transition-colors">
+                            <td class="py-3 px-4 type-body-sm text-[var(--color-ink-deep)] font-medium">{{ $item->name }}</td>
+                            <td class="py-3 px-4 type-body-sm text-center">{{ $item->total_qty }}</td>
+                            <td class="py-3 px-4 type-body-sm text-right">Rp {{ number_format($item->total_revenue, 0, ',', '.') }}</td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="3" class="py-8 text-center type-body-sm text-[var(--color-slate)]">{{ __('messages.no_data') }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-[var(--color-hairline-soft)] text-center bg-[var(--color-surface)] print:hidden">
+                <a href="{{ route('reports.sales_revenue.categories') }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
+                    Lihat Keseluruhan Data
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- 3. Recent Transactions & Unpaid Debts --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    
+    {{-- Recent Transactions --}}
+    <div class="card-feature print:break-inside-avoid flex flex-col h-[450px] print:h-auto">
+        <div class="p-4 md:p-5 border-b border-[var(--color-hairline-soft)] flex justify-between items-center">
+            <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">
+                <svg class="w-5 h-5 inline-block -mt-1 mr-1 text-[var(--color-success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                Transaksi Terbaru
+            </h3>
+        </div>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <div class="p-0 overflow-y-auto print:overflow-visible flex-1">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-[var(--color-surface-soft)] border-b border-[var(--color-hairline-soft)] sticky top-0">
+                            <th class="py-3 px-4 text-left type-caption-bold">Kode</th>
+                            <th class="py-3 px-4 text-center type-caption-bold">Tanggal</th>
+                            <th class="py-3 px-4 text-right type-caption-bold">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($recentTransactions as $trx)
+                        <tr class="border-b border-[var(--color-hairline-soft)] hover:bg-[var(--color-surface-soft)] transition-colors">
+                            <td class="py-3 px-4 type-body-sm text-[var(--color-ink-deep)] font-medium"><a href="{{ route('transactions.show', $trx->transaction_code) }}" class="text-[var(--color-primary)] hover:underline">{{ $trx->transaction_code }}</a></td>
+                            <td class="py-3 px-4 type-body-sm text-center">{{ \Carbon\Carbon::parse($trx->transaction_date)->format('d/m/Y H:i') }}</td>
+                            <td class="py-3 px-4 type-body-sm text-right">Rp {{ number_format($trx->total, 0, ',', '.') }}</td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="3" class="py-8 text-center type-body-sm text-[var(--color-slate)]">{{ __('messages.no_data') }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-[var(--color-hairline-soft)] text-center bg-[var(--color-surface)] print:hidden">
+                <a href="{{ route('transactions.index') }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
+                    Lihat Keseluruhan Data
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {{-- Unpaid Debts --}}
+    <div class="card-feature print:break-inside-avoid flex flex-col h-[450px] print:h-auto">
+        <div class="p-4 md:p-5 border-b border-[var(--color-hairline-soft)] flex justify-between items-center">
+            <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">
+                <svg class="w-5 h-5 inline-block -mt-1 mr-1 text-[var(--color-critical)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Analisis Hutang (Belum Lunas)
+            </h3>
+            <div class="type-caption-bold text-[var(--color-critical)] bg-[var(--color-critical)]/10 px-2 py-1 rounded">
+                Total: Rp {{ number_format($totalUnpaidDebtAmount, 0, ',', '.') }}
+            </div>
+        </div>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <div class="p-0 overflow-y-auto print:overflow-visible flex-1">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-[var(--color-surface-soft)] border-b border-[var(--color-hairline-soft)] sticky top-0">
+                            <th class="py-3 px-4 text-left type-caption-bold">Keterangan</th>
+                            <th class="py-3 px-4 text-center type-caption-bold">Jatuh Tempo</th>
+                            <th class="py-3 px-4 text-right type-caption-bold">Sisa Hutang</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($unpaidDebts as $debt)
+                        <tr class="border-b border-[var(--color-hairline-soft)] hover:bg-[var(--color-surface-soft)] transition-colors">
+                            <td class="py-3 px-4 type-body-sm text-[var(--color-ink-deep)] font-medium">{{ $debt->debtor_name ?: 'Hutang' }}</td>
+                            <td class="py-3 px-4 type-body-sm text-center {{ $debt->due_date && \Carbon\Carbon::parse($debt->due_date)->isPast() ? 'text-[var(--color-critical)] font-bold' : '' }}">
+                                {{ $debt->due_date ? \Carbon\Carbon::parse($debt->due_date)->format('d/m/Y') : '-' }}
+                            </td>
+                            <td class="py-3 px-4 type-body-sm text-right text-[var(--color-critical)]">Rp {{ number_format($debt->remaining_amount, 0, ',', '.') }}</td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="3" class="py-8 text-center type-body-sm text-[var(--color-slate)]">Tidak ada hutang belum lunas</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-[var(--color-hairline-soft)] text-center bg-[var(--color-surface)] print:hidden">
+                <a href="{{ route('debts.index') }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
+                    Lihat Keseluruhan Data
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- 4. Procurement Data & Top Spareparts --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    
+    {{-- Procurement Data --}}
+    <div class="card-feature print:break-inside-avoid flex flex-col">
+        <div class="p-4 md:p-5 border-b border-[var(--color-hairline-soft)] flex justify-between items-center">
+            <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">
+                <svg class="w-5 h-5 inline-block -mt-1 mr-1 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                Data Pengadaan
+            </h3>
+        </div>
+        <div class="p-5 flex flex-col gap-4 flex-1 justify-center">
+            <div class="flex items-center justify-between p-3 bg-[var(--color-surface-soft)] rounded-lg">
+                <span class="type-body-sm font-medium">Total Nilai Pengadaan</span>
+                <span class="type-subtitle-md text-[var(--color-primary)]">Rp {{ number_format($totalProcurementValue, 0, ',', '.') }}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-3 bg-[var(--color-surface-soft)] rounded-lg text-center">
+                    <span class="type-display text-[var(--color-success)]">{{ $receivedProcurements }}</span>
+                    <p class="type-caption text-[var(--color-slate)] mt-1">Diterima</p>
+                </div>
+                <div class="p-3 bg-[var(--color-surface-soft)] rounded-lg text-center">
+                    <span class="type-display text-[var(--color-attention)]">{{ $pendingProcurements }}</span>
+                    <p class="type-caption text-[var(--color-slate)] mt-1">Pending/Proses</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Top Spareparts --}}
+    <div class="card-feature print:break-inside-avoid flex flex-col h-[450px] print:h-auto" x-data="{ view: 'table', chartType: 'doughnut', metric: 'revenue' }" x-init="$watch('chartType', val => updateTopSparepartsChart(val, metric)); $watch('metric', val => updateTopSparepartsChart(chartType, val)); $watch('view', val => { if(val === 'chart') setTimeout(() => updateTopSparepartsChart(chartType, metric), 50) })">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 md:p-5 border-b border-[var(--color-hairline-soft)]">
+            <div class="flex items-center gap-3">
+                <h3 class="type-subtitle-lg text-[var(--color-ink-deep)]">
+                    <svg class="w-5 h-5 inline-block -mt-1 mr-1 text-[var(--color-stone)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Top Sparepart Digunakan
+                </h3>
+            </div>
+            <div class="flex flex-col sm:flex-row w-full md:w-auto gap-2 mt-2 md:mt-0">
+                <div class="flex w-full sm:w-auto gap-2">
+                    <button @click="view = 'chart'" :class="view === 'chart' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('Grafik') }}</button>
+                    <button @click="view = 'table'" :class="view === 'table' ? 'pill-tab-active' : ''" class="flex-1 text-center justify-center pill-tab !text-xs">{{ __('Tabel') }}</button>
+                </div>
+            </div>
+        </div>
+        
+        <div x-show="view === 'chart'" class="p-5 flex-1 flex flex-col" style="display: none;">
+            <div class="flex flex-col sm:flex-row sm:justify-end gap-2 mb-4 w-full">
+                <select x-model="chartType" class="input-field w-full sm:w-auto text-xs !py-1.5">
+                    <option value="doughnut">Doughnut Chart</option>
+                    <option value="pie">Pie Chart</option>
+                    <option value="bar">Bar Chart</option>
+                </select>
+                <select x-model="metric" class="input-field w-full sm:w-auto text-xs !py-1.5">
+                    <option value="revenue">Nilai/Biaya</option>
+                    <option value="qty">Jumlah</option>
+                </select>
+            </div>
+            @if(count($topSpareparts) > 0)
+            <div style="height:250px;" class="flex items-center justify-center relative w-full"><canvas id="topSparepartsChart"></canvas></div>
+            @else
+            <div style="height:250px;" class="text-center text-[var(--color-slate)] w-full flex items-center justify-center">{{ __('messages.no_data') }}</div>
+            @endif
+        </div>
+
+        <div x-show="view === 'table'" class="flex-1 flex flex-col overflow-hidden">
+            <div class="p-0 overflow-y-auto print:overflow-visible flex-1">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-[var(--color-surface-soft)] border-b border-[var(--color-hairline-soft)] sticky top-0">
+                            <th class="py-3 px-4 text-left type-caption-bold">Sparepart</th>
+                            <th class="py-3 px-4 text-center type-caption-bold">Jumlah</th>
+                            <th class="py-3 px-4 text-right type-caption-bold">Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($topSpareparts as $part)
+                        <tr class="border-b border-[var(--color-hairline-soft)] hover:bg-[var(--color-surface-soft)] transition-colors">
+                            <td class="py-3 px-4 type-body-sm text-[var(--color-ink-deep)] font-medium">{{ $part->name }}</td>
+                            <td class="py-3 px-4 type-body-sm text-center">{{ $part->total_qty }}</td>
+                            <td class="py-3 px-4 type-body-sm text-right">Rp {{ number_format($part->total_cost, 0, ',', '.') }}</td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="3" class="py-8 text-center type-body-sm text-[var(--color-slate)]">{{ __('messages.no_data') }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-[var(--color-hairline-soft)] text-center bg-[var(--color-surface)] print:hidden">
+                <a href="{{ route('reports.service_analysis.spareparts') }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
+                    Lihat Keseluruhan Data
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -323,6 +492,129 @@
             document.getElementById('dash-end-date').value = end.toISOString().split('T')[0];
             document.getElementById('dashboard-filter-form').submit();
         }
+
+        window.rawChartData = {
+            topProducts: {!! json_encode($topProducts) !!},
+            topCategories: {!! json_encode($topCategories) !!},
+            topSpareparts: {!! json_encode($topSpareparts) !!}
+        };
+        window.appCharts = window.appCharts || {};
+
+        const combinedSales = {!! json_encode($salesTrend) !!};
+        const combinedRepairs = {!! json_encode($repairTrend) !!};
+
+        window.updateTrendChart = function(type) {
+            const ctx = document.getElementById('combinedTrendChart');
+            if (!ctx) return;
+            if (window.appCharts['combinedTrendChart']) {
+                window.appCharts['combinedTrendChart'].destroy();
+            }
+
+            const allDates = [...new Set([...combinedSales.map(i => i.date), ...combinedRepairs.map(i => i.date)])].sort();
+            
+            const salesData = allDates.map(d => {
+                const found = combinedSales.find(i => i.date === d);
+                return found ? found.total : 0;
+            });
+            const repairData = allDates.map(d => {
+                const found = combinedRepairs.find(i => i.date === d);
+                return found ? found.total_revenue : 0;
+            });
+
+            window.appCharts['combinedTrendChart'] = new Chart(ctx, {
+                type: type || 'line',
+                data: {
+                    labels: allDates,
+                    datasets: [
+                        { label: 'Penjualan', data: salesData, borderColor: '#2563EB', backgroundColor: 'rgba(37,99,235,0.1)', fill: type==='line', tension: 0.4, borderWidth: 2 },
+                        { label: 'Perbaikan', data: repairData, borderColor: '#16A34A', backgroundColor: 'rgba(22,163,74,0.1)', fill: type==='line', tension: 0.4, borderWidth: 2 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ctx.dataset.label + ': Rp ' + new Intl.NumberFormat('id-ID').format(ctx.raw)
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(val, index) {
+                                    const dateObj = new Date(this.getLabelForValue(val));
+                                    return dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(val) {
+                                    return 'Rp ' + new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(val);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        const WIDGET_COLORS = ['#2563EB', '#16A34A', '#D97706', '#DC2626', '#0284C7', '#8B5CF6', '#EC4899', '#14B8A6'];
+
+        function createWidgetChart(ctxId, dataObj, type, metric, isRevenue) {
+            const ctx = document.getElementById(ctxId);
+            if (!ctx || !dataObj.length) return;
+            if (window.appCharts[ctxId]) window.appCharts[ctxId].destroy();
+            
+            const isRadial = type === 'doughnut' || type === 'pie';
+            
+            const ds = {
+                labels: dataObj.map(p => p.name),
+                datasets: [{
+                    label: isRevenue ? 'Pendapatan/Nilai' : 'Kuantitas',
+                    data: dataObj.map(p => parseFloat(isRevenue ? (p.total_revenue || p.total_cost) : p.total_qty)),
+                    backgroundColor: WIDGET_COLORS,
+                    borderRadius: isRadial ? 0 : 6,
+                    borderWidth: isRadial ? 2 : 0,
+                    borderColor: isRadial ? '#fff' : 'transparent',
+                }]
+            };
+            
+            const options = { 
+                indexAxis: isRadial ? 'x' : 'y', 
+                responsive: true, 
+                maintainAspectRatio: false,
+                cutout: type === 'doughnut' ? '60%' : 0,
+                plugins: { 
+                    legend: { display: isRadial, position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } },
+                    tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + (isRevenue ? 'Rp ' + new Intl.NumberFormat('id-ID').format(ctx.raw) : ctx.raw) } }
+                },
+                scales: isRadial ? { x: { display: false }, y: { display: false } } : {
+                    x: { beginAtZero: true, grid: { color: 'rgba(148,163,184,0.12)' }, ticks: { color: '#94A3B8', font: { size: 11 } } },
+                    y: { grid: { display: false }, ticks: { color: '#475569', font: { size: 11 } } }
+                }
+            };
+            
+            window.appCharts[ctxId] = new Chart(ctx, { type: type, data: ds, options: options });
+        }
+
+        window.updateTopProductsChart = function(type, metric) {
+            createWidgetChart('topProductsChart', window.rawChartData.topProducts, type, metric, metric === 'revenue');
+        };
+        window.updateTopCategoriesChart = function(type, metric) {
+            createWidgetChart('topCategoriesChart', window.rawChartData.topCategories, type, metric, metric === 'revenue');
+        };
+        window.updateTopSparepartsChart = function(type, metric) {
+            createWidgetChart('topSparepartsChart', window.rawChartData.topSpareparts, type, metric, metric === 'revenue');
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof updateTrendChart === 'function') {
+                setTimeout(() => updateTrendChart('line'), 100);
+            }
+        });
     </script>
 <style>
 @media print {

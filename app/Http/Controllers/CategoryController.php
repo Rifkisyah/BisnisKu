@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -12,11 +13,22 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         if (auth()->user()->isKasir()) abort(403, 'Akses Ditolak: Kasir tidak dapat mengelola kategori.');
-        $categories = Category::when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%"))
+        $query = Category::when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%"))
             ->when($request->type, fn($q, $t) => $q->where('type', $t))
-            ->applySort($request->sort)
-            ->paginate(15)
-            ->withQueryString();
+            ->applySort($request->sort);
+
+        if ($request->get('export') === 'pdf') {
+            $categories = $query->get();
+            $pdf = Pdf::loadView('categories.pdf', compact('categories'));
+            return $pdf->download('laporan-kategori.pdf');
+        }
+
+        if ($request->get('print') === '1' || $request->has('print')) {
+            $categories = $query->get();
+            return view('categories.pdf', ['categories' => $categories, 'isPrint' => true]);
+        }
+
+        $categories = $query->paginate(15)->withQueryString();
 
         return view('categories.index', compact('categories'));
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('payment_code')->unique();
             $table->string('transaction_code');
-            $table->enum('payment_method', ['cash', 'transfer', 'qris']);
+            $table->enum('payment_method', ['cash', 'qris']);
             $table->enum('qris_mode', ['manual', 'dynamic'])->nullable();
             $table->string('provider')->nullable();
             $table->decimal('amount', 15, 2);

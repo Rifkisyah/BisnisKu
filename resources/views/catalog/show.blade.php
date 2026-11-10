@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $product->name }} - {{ \App\Models\Setting::get('store_name', 'BisnisKu') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,28 +18,29 @@
 
     <style>
         :root {
-            --color-primary-meta: #0064e0;
-            --color-primary-deep: #0056c2;
+            --color-primary-meta: #2563eb;
+            --color-primary-deep: #1d4ed8;
             --color-canvas: #ffffff;
-            --color-surface-soft: #f5f6f7;
-            --color-ink-deep: #1c2b33;
-            --color-ink: #334155;
-            --color-charcoal: #475569;
+            --color-surface-soft: #f1f5f9;
+            --color-ink-deep: #0f172a;
+            --color-ink: #1e293b;
+            --color-charcoal: #334155;
             --color-slate: #64748b;
-            --color-hairline: #e2e8f0;
-            --color-warning: #f59e0b;
+            --color-hairline: #cbd5e1;
+            --color-warning: #d97706;
         }
 
         html.dark {
-            --color-canvas: #111827;
-            --color-surface-soft: #1f2937;
-            --color-ink-deep: #f9fafb;
-            --color-ink: #d1d5db;
-            --color-charcoal: #9ca3af;
-            --color-slate: #6b7280;
-            --color-hairline: #374151;
+            --color-canvas: #0f172a;
+            --color-surface-soft: #1e293b;
+            --color-ink-deep: #f8fafc;
+            --color-ink: #f1f5f9;
+            --color-charcoal: #e2e8f0;
+            --color-slate: #94a3b8;
+            --color-hairline: #334155;
             --color-primary-meta: #3b82f6;
             --color-primary-deep: #60a5fa;
+            --color-warning: #f59e0b;
         }
 
         body { 
@@ -124,8 +126,10 @@
     <header class="header-meta sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="{{ route('catalog.store.index', ['store' => app('current_store')->slug]) }}" class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-full flex items-center justify-center font-meta-display font-bold text-lg" style="background-color: var(--color-ink-deep); color: var(--color-canvas);">
-                    {{ substr(\App\Models\Setting::get('store_name', 'B'), 0, 1) }}
+                <div class="h-10 w-10 rounded-full flex items-center justify-center shadow-sm" style="background-color: var(--color-ink-deep); color: var(--color-canvas);">
+                    <svg class="w-6 h-6 text-[var(--color-primary-meta)]" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
                 </div>
                 <h1 class="font-meta-display font-medium text-xl hidden sm:block">{{ \App\Models\Setting::get('store_name', 'Nama Toko') }}</h1>
             </a>

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('page-title', __('messages.sales_and_revenue_report'))
 @section('content')
+<div class="print:hidden">
 
 {{-- ═══════════════════════════════════════════════════════ --}}
 {{-- HEADER & FILTER                                         --}}
@@ -10,28 +11,29 @@
 </div>
 
 <div class="mb-6 card-feature p-5">
-    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-        <div>
+    <div class="flex flex-col xl:flex-row xl:items-start justify-between gap-6">
+        <div class="xl:w-1/3">
             <h1 class="type-heading-sm !text-xl sm:!text-2xl text-[var(--color-ink-deep)] flex items-center gap-2">
-                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <svg class="w-6 h-6 text-[var(--color-primary)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 Laporan Penjualan & Pendapatan
             </h1>
             <p class="type-caption text-[var(--color-slate)] mt-2">Mencakup Transaksi Penjualan · Periode {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} <b>-</b> {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
         </div>
         
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-            <form method="GET" class="flex flex-col md:flex-row md:items-end gap-3 w-full" id="sales-filter-form">
-                <div class="flex flex-col w-full md:w-auto">
+        <div class="xl:w-2/3 w-full">
+            <form method="GET" class="flex flex-row flex-wrap xl:justify-end items-end gap-3 w-full" id="sales-filter-form">
+                <div class="flex flex-col">
                     <label for="sales-start-date" class="type-caption-bold text-[var(--color-slate)] mb-1">Tanggal Mulai</label>
-                    <input type="date" name="start_date" id="sales-start-date" value="{{ $startDate }}" class="input-field w-full md:w-auto text-xs !py-1.5" onchange="this.form.submit()">
+                    <input type="date" name="start_date" id="sales-start-date" value="{{ $startDate }}" class="input-field text-xs !py-1.5 min-w-[120px]" onchange="this.form.submit()">
                 </div>
-                <div class="flex flex-col w-full md:w-auto">
+                <div class="flex flex-col">
                     <label for="sales-end-date" class="type-caption-bold text-[var(--color-slate)] mb-1">Tanggal Akhir</label>
-                    <input type="date" name="end_date" id="sales-end-date" value="{{ $endDate }}" class="input-field w-full md:w-auto text-xs !py-1.5" onchange="this.form.submit()">
+                    <input type="date" name="end_date" id="sales-end-date" value="{{ $endDate }}" class="input-field text-xs !py-1.5 min-w-[120px]" onchange="this.form.submit()">
                 </div>
 
                 <input type="hidden" name="limit" id="limit-input" value="{{ $limit }}">
-                <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto mt-2 md:mt-0 md:border-r border-[var(--color-hairline-soft)] md:pr-3">
+                
+                <div class="flex flex-row items-center gap-2 mt-2 md:mt-0 xl:border-r border-[var(--color-hairline-soft)] xl:pr-3">
                 @php
                     $diffDays = \Carbon\Carbon::parse($startDate)->startOfDay()->diffInDays(\Carbon\Carbon::parse($endDate)->startOfDay());
                     $activeFilter = null;
@@ -39,17 +41,17 @@
                     elseif ($diffDays == 365) $activeFilter = 365;
                     elseif ($diffDays == 30 || !request()->has('start_date')) $activeFilter = 30;
                 @endphp
-                <button type="button" onclick="setDateRange(7)" class="flex-1 text-center justify-center {{ $activeFilter === 7 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.week') }}</button>
-                <button type="button" onclick="setDateRange(30)" class="flex-1 text-center justify-center {{ $activeFilter === 30 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.month') }}</button>
-                <button type="button" onclick="setDateRange(365)" class="flex-1 text-center justify-center {{ $activeFilter === 365 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.year') }}</button>
+                <button type="button" onclick="setDateRange(7)" class="w-[84px] text-center justify-center {{ $activeFilter === 7 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.week') ?? 'Minggu' }}</button>
+                <button type="button" onclick="setDateRange(30)" class="w-[84px] text-center justify-center {{ $activeFilter === 30 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.month') ?? 'Bulan' }}</button>
+                <button type="button" onclick="setDateRange(365)" class="w-[84px] text-center justify-center {{ $activeFilter === 365 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.year') ?? 'Tahun' }}</button>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto mt-2 md:mt-0 md:ml-auto">
-                <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}" class="flex-1 justify-center btn-ghost !py-2 !px-3 text-xs flex items-center gap-1 text-[var(--color-critical)] border-[var(--color-critical)]/20 hover:bg-[var(--color-critical)]/10 rounded-[var(--radius-md)]" title="PDF">
+                <div class="flex flex-row items-center gap-2 mt-2 md:mt-0">
+                <button type="button" onclick="downloadPdf()" class="w-[130px] justify-center btn-ghost !py-2 !px-3 text-xs flex items-center gap-1 text-[var(--color-critical)] border-[var(--color-critical)]/20 hover:bg-[var(--color-critical)]/10 rounded-[var(--radius-md)]" title="PDF">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     PDF
-                </a>
-                <button type="button" onclick="window.print()" class="flex-1 justify-center btn-ghost !py-2 !px-3 text-xs flex items-center gap-1 rounded-[var(--radius-md)]" title="Cetak">
+                </button>
+                <button type="button" onclick="window.print()" class="w-[130px] justify-center btn-ghost !py-2 !px-3 text-xs flex items-center gap-1 rounded-[var(--radius-md)]" title="Cetak">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                     Cetak
                 </button>
@@ -143,7 +145,7 @@
             </table>
         </div>
         <div class="p-4 border-t border-[var(--color-hairline-soft)] text-center mt-auto">
-            <a href="{{ route('reports.sales_revenue.transactions', request()->all()) }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
+            <a href="{{ route('transactions.index', request()->all()) }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
                 Lihat Keseluruhan Data
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </a>
@@ -283,9 +285,9 @@
                             default   => 'badge-critical',
                         };
                         $label = match($d->status) {
-                            'paid'    => 'Lunas',
-                            'partial' => 'Sebagian',
-                            default   => 'Belum Bayar',
+                            'paid'    => __('messages.paid'),
+                            'partial' => __('messages.partial'),
+                            default   => __('messages.unpaid'),
                         };
                     @endphp
                     <span class="badge {{ $badge }}">{{ $label }}</span>
@@ -298,7 +300,7 @@
 
         @if($limit !== 'all')
         <div class="p-4 border-t border-[var(--color-hairline-soft)] text-center mt-auto">
-            <a href="{{ route('reports.sales_revenue.debts', request()->all()) }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
+            <a href="{{ route('debts.index', request()->all()) }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
                 Lihat Keseluruhan Data
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </a>
@@ -331,8 +333,170 @@
     </div>
 </div>
 
+</div>
+<!-- END print:hidden -->
+
+{{-- ═══════════════════════════════════════════════════════ --}}
+{{-- PRINT TEMPLATE (HIDDEN ON WEB)                          --}}
+{{-- ═══════════════════════════════════════════════════════ --}}
+<div class="hidden print:block w-full text-black bg-white" style="margin:0;padding:0;font-family:'Inter',sans-serif">
+<style>
+@media print {
+    @page { size: A4 landscape; margin: 12mm 15mm; }
+    body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .print\:hidden { display: none !important; }
+    .print\:block { display: block !important; }
+    
+    .pr-container { width: 100%; max-width: 100%; margin: 0 auto; color: #0f172a; }
+    .pr-header { display: table; width: 100%; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px; }
+    .pr-header-left { display: table-cell; vertical-align: bottom; }
+    .pr-header-right { display: table-cell; vertical-align: bottom; text-align: right; }
+    .pr-title { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; margin: 0 0 4px 0; }
+    .pr-subtitle { font-size: 11px; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
+    .pr-meta { font-size: 12px; color: #475569; margin: 2px 0; }
+    
+    .pr-section { margin-bottom: 20px; break-inside: avoid; }
+    .pr-sh { display: table; width: 100%; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+    .pr-snum { display: table-cell; width: 24px; vertical-align: middle; font-size: 14px; font-weight: 800; color: #2563EB; }
+    .pr-stitle { display: table-cell; vertical-align: middle; font-size: 14px; font-weight: 700; color: #1e293b; }
+    
+    .pr-kpi { display: table; width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 10px 0; margin-left: -10px; margin-right: -10px; margin-bottom: 15px; }
+    .pr-kpi-item { display: table-cell; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; }
+    .pr-kpi-label { font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+    .pr-kpi-val { font-size: 18px; font-weight: 800; color: #0f172a; }
+    
+    .prt { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px; }
+    .prt th { background: #f1f5f9; color: #475569; font-weight: 600; text-align: left; padding: 6px 8px; border-bottom: 2px solid #cbd5e1; }
+    .prt td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+    .prt .c { text-align: center; }
+    .prt .r { text-align: right; }
+    
+    .pr-chart-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 15px; }
+    .pr-row { display: table; width: 100%; table-layout: fixed; border-spacing: 15px 0; margin-left: -15px; margin-right: -15px; }
+    .pr-col { display: table-cell; vertical-align: top; }
+    
+    .pr-footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; display: flex; justify-content: space-between; }
+    .pr-pb { page-break-after: always; }
+}
+</style>
+
+<div class="pr-container">
+    <div class="pr-header">
+        <div class="pr-header-left">
+            <h1 class="pr-title">Laporan Penjualan & Pendapatan</h1>
+            <p class="pr-subtitle">{{ \App\Models\Setting::get('store_name', 'Nama Toko') }}</p>
+        </div>
+        <div class="pr-header-right">
+            <p class="pr-meta"><strong>Periode:</strong> {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} – {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
+            <p class="pr-meta"><strong>Dicetak:</strong> {{ now()->format('d M Y H:i') }}</p>
+        </div>
+    </div>
+
+    {{-- SECTION 1: RINGKASAN PENJUALAN --}}
+    <div class="pr-section">
+        <div class="pr-sh"><div class="pr-snum">1</div><div class="pr-stitle">Ringkasan Pendapatan & Laba</div></div>
+        <div class="pr-kpi">
+            <div class="pr-kpi-item" style="border-top:3px solid #3b82f6">
+                <div class="pr-kpi-label">Total Penjualan</div>
+                <div class="pr-kpi-val">Rp {{ number_format($salesRevenue,0,',','.') }}</div>
+            </div>
+            <div class="pr-kpi-item" style="border-top:3px solid #8b5cf6">
+                <div class="pr-kpi-label">Total Transaksi</div>
+                <div class="pr-kpi-val">{{ number_format($totalTransactions,0,',','.') }}</div>
+            </div>
+            <div class="pr-kpi-item" style="border-top:3px solid #14b8a6">
+                <div class="pr-kpi-label">Laba Kotor</div>
+                <div class="pr-kpi-val">Rp {{ number_format($grossProfit,0,',','.') }}</div>
+            </div>
+            <div class="pr-kpi-item" style="border-top:3px solid #10b981">
+                <div class="pr-kpi-label">Laba Bersih</div>
+                <div class="pr-kpi-val" style="color:#10b981">Rp {{ number_format($netProfit,0,',','.') }}</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- SECTION 2: TREN PENJUALAN --}}
+    <div class="pr-section">
+        <div class="pr-sh"><div class="pr-snum">2</div><div class="pr-stitle">Tren Penjualan Harian</div></div>
+        <div class="pr-chart-box" id="print-sales-trend-container">
+            <p style="font-size:10px;color:#94a3b8;margin-bottom:5px">Grafik Tren Penjualan Harian</p>
+            <!-- Image injected via JS -->
+        </div>
+    </div>
+
+    <div class="pr-pb"></div>
+
+    {{-- SECTION 3: RINGKASAN HUTANG & PIUTANG --}}
+    <div class="pr-section">
+        <div class="pr-sh"><div class="pr-snum">3</div><div class="pr-stitle">Analisis Hutang & Piutang</div></div>
+        
+        <div class="pr-row">
+            <div class="pr-col" style="width:60%">
+                <div class="pr-kpi">
+                    <div class="pr-kpi-item" style="border-top:3px solid #f59e0b">
+                        <div class="pr-kpi-label">Total Piutang Aktif</div>
+                        <div class="pr-kpi-val" style="color:#ef4444">Rp {{ number_format($totalDebtAmt,0,',','.') }}</div>
+                    </div>
+                    <div class="pr-kpi-item" style="border-top:3px solid #10b981">
+                        <div class="pr-kpi-label">Total Terlunasi</div>
+                        <div class="pr-kpi-val" style="color:#10b981">Rp {{ number_format($paidDebtAmt,0,',','.') }}</div>
+                    </div>
+                </div>
+                
+                @if(count($activeDebts ?? []) > 0)
+                <p style="font-size:11px;font-weight:bold;margin-bottom:5px">Daftar Piutang Jatuh Tempo / Aktif (Top 10)</p>
+                <table class="prt">
+                    <thead><tr>
+                        <th>Pelanggan</th>
+                        <th>Tgl Jatuh Tempo</th>
+                        <th class="r">Sisa Piutang</th>
+                        <th class="c">Status</th>
+                    </tr></thead>
+                    <tbody>
+                    @foreach($activeDebts->take(10) as $d)
+                    <tr>
+                        <td style="font-weight:bold">{{ $d->customer_name }}</td>
+                        <td style="{{ $d->isOverdue() ? 'color:#ef4444;font-weight:bold' : '' }}">{{ $d->due_date ? $d->due_date->format('d M Y') : '-' }}</td>
+                        <td class="r" style="font-weight:bold">Rp {{ number_format($d->remaining_amount,0,',','.') }}</td>
+                        <td class="c">
+                            @if($d->isOverdue()) <span style="color:#ef4444">Jatuh Tempo</span>
+                            @else <span style="color:#f59e0b">Belum Lunas</span> @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+                @else
+                <div style="background:#f0fdf4;color:#166534;padding:10px;border-radius:6px;font-size:11px;border:1px solid #bbf7d0">✅ Tidak ada hutang/piutang aktif dalam periode ini.</div>
+                @endif
+            </div>
+            <div class="pr-col" style="width:40%">
+                <div class="pr-chart-box" id="print-debt-trend-container">
+                    <p style="font-size:10px;color:#94a3b8;margin-bottom:5px">Status Hutang</p>
+                    <!-- Image injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="pr-footer">
+        <span>{{ \App\Models\Setting::get('store_name', 'Nama Toko') }} · Laporan Penjualan & Pendapatan</span>
+        <span>Dicetak: {{ now()->format('d M Y H:i') }}</span>
+    </div>
+</div>
 @endsection
+
+<form id="pdf-export-form" method="POST" action="{{ route('reports.sales_revenue.export_pdf') }}" style="display:none;">
+    @csrf
+    <input type="hidden" name="start_date" id="pdf_start_date">
+    <input type="hidden" name="end_date" id="pdf_end_date">
+    <input type="hidden" name="limit" id="pdf_limit">
+    <input type="hidden" name="chart_sales_trend" id="pdf_chart_sales_trend">
+    <input type="hidden" name="chart_debt_trend" id="pdf_chart_debt_trend">
+</form>
+
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 window.appCharts = {};
 window.rawChartData = {
@@ -363,10 +527,10 @@ window.updateSalesTrendChart = function(type, metric) {
             datasets: [{
                 label: 'Pendapatan Harian',
                 data: window.rawChartData.daily.map(r => parseFloat(r.total)),
-                borderColor: isRadial ? '#fff' : '#0064E0',
-                backgroundColor: isRadial ? COLORS : 'rgba(0,100,224,0.1)',
+                borderColor: isRadial ? '#fff' : '#2563EB',
+                backgroundColor: isRadial ? COLORS : 'rgba(37,99,235,0.1)',
                 borderWidth: 2,
-                pointBackgroundColor: '#0064E0',
+                pointBackgroundColor: '#2563EB',
                 pointRadius: window.rawChartData.daily.length > 60 ? 0 : 3,
                 fill: true,
                 tension: 0.4
@@ -582,5 +746,31 @@ function updateLimit(val) {
     document.getElementById('limit-input').value = val;
     document.getElementById('sales-filter-form').submit();
 }
+
+function downloadPdf() {
+    document.getElementById('pdf_start_date').value = document.getElementById('sales-start-date').value;
+    document.getElementById('pdf_end_date').value = document.getElementById('sales-end-date').value;
+    document.getElementById('pdf_limit').value = document.getElementById('limit-input').value;
+    
+    const salesChart = document.getElementById('salesTrendChart');
+    if (salesChart) document.getElementById('pdf_chart_sales_trend').value = salesChart.toDataURL('image/png');
+    
+    const debtChart = document.getElementById('debtTrendChart');
+    if (debtChart) document.getElementById('pdf_chart_debt_trend').value = debtChart.toDataURL('image/png');
+    
+    document.getElementById('pdf-export-form').submit();
+}
+
+window.addEventListener('beforeprint', () => {
+    const salesChart = document.getElementById('salesTrendChart');
+    if (salesChart) {
+        document.getElementById('print-sales-trend-container').innerHTML = '<img src="' + salesChart.toDataURL('image/png') + '" style="max-height: 200px; width: auto; margin: 0 auto; display: block;">';
+    }
+    
+    const debtChart = document.getElementById('debtTrendChart');
+    if (debtChart) {
+        document.getElementById('print-debt-trend-container').innerHTML = '<img src="' + debtChart.toDataURL('image/png') + '" style="max-height: 160px; width: auto; margin: 0 auto; display: block;">';
+    }
+});
 </script>
 @endpush

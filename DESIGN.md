@@ -1,49 +1,54 @@
 ## Overview
 
-Meta's commerce surfaces (homepage, Quest configurator, Ray-Ban product detail, prescription page) read as a confident hardware merchandiser. The brand voice is photography-first: large, full-bleed product imagery dominates above-the-fold real estate, with white space and tight typographic hierarchy carrying the rest. The system has a recognizable dual-CTA pattern — a black pill-shaped primary on marketing surfaces shifting to a saturated cobalt blue ({colors.primary}) inside the buy-now flows, paired with an outlined ghost button for secondary navigation.
+**BisnisKu** adalah platform sistem POS (Point of Sale), manajemen stok, pengadaan, pencatatan hutang/piutang, layanan reparasi/servis, analisis intelijen bisnis (K-Means Clustering & Simple Moving Average), serta katalog produk publik.
 
-Optimistic VF — Meta's variable display face — anchors the entire system, ranging from a 64px hero display down to a 12px caption. The face's `ss01` and `ss02` stylistic sets are switched on across every heading role, contributing to the brand's slightly humanist, friendly geometric character. Below 768px the system collapses cleanly: hero stacks, pill nav becomes a hamburger, three-up feature grids flatten to a single column, and product configurators drop their right-rail summary into a sticky bottom bar.
+Tema antarmuka dirancang agar **ramah, profesional, kontras tinggi, dan sangat mudah dipahami oleh orang awam** (pemilik toko, kasir, staf gudang, teknisi, maupun pembeli).
 
-**Key Characteristics:**
-- Stark white canvas ({colors.canvas}) carrying full-bleed product photography with `{rounded.xxxl}` (32px) corner softening on showcase tiles
-- Two-tier primary button system: marketing CTAs use {colors.ink-button} pills; commerce CTAs use {colors.primary} cobalt pills inside buy-now panels
-- Optimistic VF as the universal display + body face with consistent `ss01, ss02` OpenType features
-- Pill-shaped buttons ({rounded.full}) and `{rounded.xxxl}`/`{rounded.feature}` cards as the dominant geometric signature
-- Saturated promotional banners (yellow {colors.warning}, dark {colors.ink-deep}) used sparingly above the nav for time-bound offers
-- Photographic feature cards with no card chrome (no border, no shadow) — the product imagery IS the surface treatment
+### Prinsip Desain:
+1. **Warna Brand Bisnis Terpercaya**: Menggunakan biru modern (`#2563EB` di Light Mode, `#3B82F6` di Dark Mode) yang melambangkan stabilitas bisnis, teknologi kasir yang handal, dan profesionalitas.
+2. **Psikologi Warna Status (Traffic Light Universal)**:
+   - **Hijau (`#16A34A` / `#22C55E`)**: Sukses, Lunas, Stok Aman, Sangat Laris (High Moving).
+   - **Amber / Kuning Hangat (`#D97706` / `#F59E0B`)**: Peringatan, Menipis, Belum Lunas Sebagian, Cukup Laris (Medium Moving). Menghindari kuning pucat yang silau dan tidak terbaca di layar terang.
+   - **Merah (`#DC2626` / `#EF4444`)**: Bahaya, Belum Bayar / Hutang, Stok Habis, Batal, Kurang Laris / Stok Mati.
+   - **Biru Info (`#0284C7` / `#38BDF8`)**: Informasi, Proses Servis, Pengumuman.
+3. **Kenyamanan Mata (Light & Dark Mode)**:
+   - **Light Mode**: Latar belakang abu-abu lembut (`#F1F5F9`) dengan kartu putih bersih (`#FFFFFF`) dan border jelas (`#CBD5E1` / `#E2E8F0`) sehingga batasan tombol, form, dan kartu langsung terlihat.
+   - **Dark Mode**: Latar belakang navy-slate (`#0F172A`) dengan kartu slate (`#1E293B`) dan garis batas tegas (`#334155` / `#475569`) yang nyaman untuk mata saat shift kerja malam tanpa membuat teks kabur.
+4. **Tombol Aksi Jelas**: Tombol utama (`.btn-primary`, `.btn-buy`) memakai warna primer brand dengan teks putih tebal dan bayangan halus, bukan warna hitam monoton yang membingungkan.
 
 ## Colors
 
-> Source pages: meta.com/ (homepage), /ai-glasses/ray-ban-meta-skyler-gen-2/ (PDP), /quest/quest-3s/buy-now/ (configurator), /ai-glasses/prescription/ (lens upsell). Token coverage was identical across all four pages — the design system is genuinely unified.
+### Light Mode
+- **Primary Brand**: `#2563EB` (Blue-600)
+- **Primary Deep (Hover)**: `#1D4ED8` (Blue-700)
+- **Primary Soft (Highlight)**: `rgba(37, 99, 235, 0.10)`
+- **Canvas (Card & Panel)**: `#FFFFFF`
+- **Surface Soft (Page Background)**: `#F1F5F9`
+- **Hairline (Input Borders)**: `#CBD5E1`
+- **Hairline Soft (Card Dividers)**: `#E2E8F0`
+- **Headings (Deep Ink)**: `#0F172A`
+- **Body Text (Ink)**: `#1E293B`
+- **Secondary Text (Slate)**: `#64748B`
+- **Success (Lunas / Aman)**: `#16A34A`
+- **Warning / Attention (Perhatian)**: `#D97706`
+- **Critical (Hutang / Bahaya)**: `#DC2626`
+- **Info (Proses)**: `#0284C7`
 
-### Brand & Accent
-- **Cobalt Primary** ({colors.primary}): The buy-now CTA color. Used on every "Add to cart", "Configure", "Pre-order" button inside the commerce flow and the right-rail purchase panel.
-- **Deep Cobalt** ({colors.primary-deep}): Pressed-state and dark-surface variant of the cobalt primary; also the active link color.
-- **Soft Cobalt** ({colors.primary-soft}): Translucent background tint for informational callouts (`{colors.primary-soft}` at 15% alpha).
-- **Facebook Blue** ({colors.fb-blue}): Selected radio/checkbox state and inline form-control activation color.
-- **Meta Link Blue** ({colors.meta-link}): Reserved for legacy navigation and footer link affordances.
-- **Oculus Purple** ({colors.oculus-purple}): VR product accent — used inside Quest-branded surfaces for category emphasis.
-
-### Surface
-- **Canvas White** ({colors.canvas}): Page background and primary card surface.
-- **Soft Cloud** ({colors.surface-soft}): Subtle product-thumbnail and warranty-card background; also the search-pill rest state.
-- **Hairline Gray** ({colors.hairline}): 1px input border and form-control divider.
-- **Hairline Soft** ({colors.hairline-soft}): Quieter divider used on cards, footer separators, and section breaks.
-
-### Text
-- **Deep Ink** ({colors.ink-deep}): Primary headline and body text on light surfaces.
-- **Ink** ({colors.ink}): Standard body and secondary headline text.
-- **Charcoal** ({colors.charcoal}): Tertiary body text and form-button labels.
-- **Slate** ({colors.slate}): Section-header copy and supporting microcopy.
-- **Steel** ({colors.steel}): Quieter caption text and footer link hierarchy.
-- **Stone** ({colors.stone}): Disabled or de-emphasized labels.
-
-### Semantic
-- **Success** ({colors.success}): "In stock", "Free returns" affirmations.
-- **Attention** ({colors.attention}): Mid-priority alerts and timed callouts.
-- **Warning** ({colors.warning}): Promotional banners ("Get 25% off…") and limited-time tags.
-- **Critical** ({colors.critical}): Validation errors, destructive feedback.
-- **Critical Strong** ({colors.critical-strong}): Form-input error border and inline error labels.
+### Dark Mode
+- **Primary Brand**: `#3B82F6` (Blue-500)
+- **Primary Deep (Hover)**: `#60A5FA` (Blue-400)
+- **Primary Soft (Highlight)**: `rgba(59, 130, 246, 0.20)`
+- **Canvas (Card & Panel)**: `#1E293B`
+- **Surface Soft (Page Background)**: `#0F172A`
+- **Hairline (Input Borders)**: `#475569`
+- **Hairline Soft (Card Dividers)**: `#334155`
+- **Headings (Deep Ink)**: `#F8FAFC`
+- **Body Text (Ink)**: `#F1F5F9`
+- **Secondary Text (Slate)**: `#94A3B8`
+- **Success (Lunas / Aman)**: `#22C55E`
+- **Warning / Attention (Perhatian)**: `#F59E0B`
+- **Critical (Hutang / Bahaya)**: `#EF4444`
+- **Info (Proses)**: `#38BDF8`
 
 ## Typography
 

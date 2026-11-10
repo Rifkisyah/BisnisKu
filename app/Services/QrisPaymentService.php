@@ -60,25 +60,28 @@ class QrisPaymentService
         $params = [
             'transaction_details' => [
                 'order_id' => $externalOrderId,
-                'gross_amount' => $transaction->total,
+                'gross_amount' => (int) $transaction->total,
             ],
             'customer_details' => [
                 'first_name' => 'Pelanggan',
-                'last_name' => 'BisnisKu',
-                // You can get actual customer details if you store them
+                'last_name'  => 'BisnisKu',
             ]
         ];
 
         $response = $this->gateway->generateSnapUrl($params);
 
         if (!$response['success']) {
-            throw new Exception("Gagal generate pembayaran: " . $response['message']);
+            $msg = $response['message'];
+            if (strpos($msg, 'ServerKey/ClientKey is null') !== false || strpos($msg, 'server-key') !== false || strpos($msg, '401') !== false || strpos($msg, 'unauthorized') !== false) {
+                throw new Exception("NOT_CONFIGURED:Kunci Server/Client Midtrans belum diatur atau tidak valid. Silakan atur terlebih dahulu di menu Pengaturan Pembayaran.");
+            }
+            throw new Exception("Gagal generate pembayaran: " . $msg);
         }
 
         $payment = Payment::create([
             'payment_code' => Payment::generateCode(),
             'transaction_code' => $transaction->transaction_code,
-            'payment_method' => 'midtrans',
+            'payment_method' => 'qris',
             'qris_mode' => 'dynamic', // Legacy flag to differentiate from manual
             'provider' => 'midtrans',
             'amount' => $transaction->total,
@@ -89,7 +92,6 @@ class QrisPaymentService
         return [
             'success' => true,
             'qris_mode' => 'dynamic',
-            'qris_url' => $response['redirect_url'],
             'snap_token' => $response['snap_token'],
             'payment_code' => $payment->payment_code,
             'external_order_id' => $externalOrderId
@@ -109,7 +111,7 @@ class QrisPaymentService
             $transaction = $payment->transaction;
             $transaction->update(['status' => 'paid']);
 
-            // Decrease stock
+            // Deduct stock now that the transaction is paid
             $stockService = new StockService();
             foreach ($transaction->items as $item) {
                 $stockService->stockOut(
@@ -131,6 +133,9 @@ class QrisPaymentService
             $payment->update(['status' => 'cancelled']);
             $transaction = $payment->transaction;
             $transaction->update(['status' => 'cancelled']);
+            
+            // Stock is not restored because it was not deducted for a pending QRIS transaction
+
             return true;
         });
     }

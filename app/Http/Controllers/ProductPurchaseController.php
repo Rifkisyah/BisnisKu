@@ -20,7 +20,7 @@ class ProductPurchaseController extends Controller
 
     public function index(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(90)->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
 
         $query = ProductPurchase::with('creator')
@@ -36,6 +36,13 @@ class ProductPurchaseController extends Controller
                 'purchases' => $allPurchases, 'startDate' => $startDate, 'endDate' => $endDate,
             ]);
             return $pdf->download('laporan-pengadaan.pdf');
+        }
+
+        if ($request->get('print') === '1' || $request->has('print')) {
+            $productPurchases = $query->applySort($request->sort)->get();
+            return view('product-purchases.pdf', [
+                'purchases' => $productPurchases, 'startDate' => $startDate, 'endDate' => $endDate, 'isPrint' => true,
+            ]);
         }
 
         $productPurchases = $query->applySort($request->sort)->paginate(15)->withQueryString();
@@ -370,6 +377,21 @@ class ProductPurchaseController extends Controller
             $oldStatus = $productPurchase->status;
             $newStatus = $validated['status'];
 
+            // Auto-detect partial received
+            if (in_array($newStatus, ['received', 'partial_received']) && !empty($validated['items'])) {
+                $isPartial = false;
+                foreach ($validated['items'] as $itemData) {
+                    $item = ProductPurchaseItem::find($itemData['id']);
+                    if ($item && $item->product_purchase_code === $productPurchase->product_purchase_code) {
+                        if (isset($itemData['quantity_received']) && $itemData['quantity_received'] < $item->quantity) {
+                            $isPartial = true;
+                            break;
+                        }
+                    }
+                }
+                $newStatus = $isPartial ? 'partial_received' : 'received';
+            }
+
             // Guard: cannot re-receive
             if ($oldStatus === 'received') {
                 throw \Illuminate\Validation\ValidationException::withMessages([
@@ -385,12 +407,23 @@ class ProductPurchaseController extends Controller
             }
 
             // Update item qty received/rejected jika ada
+            $qtyDifferences = [];
             if (!empty($validated['items'])) {
                 foreach ($validated['items'] as $itemData) {
                     $item = ProductPurchaseItem::find($itemData['id']);
                     if ($item && $item->product_purchase_code === $productPurchase->product_purchase_code) {
+                        $oldQtyReceived = $item->quantity_received ?? 0;
+                        $newQtyReceived = $itemData['quantity_received'];
+                        
+                        // If it's the final 'received' status and they didn't specify quantity_received, assume full quantity
+                        if ($newStatus === 'received' && empty($newQtyReceived) && $newQtyReceived !== '0' && $newQtyReceived !== 0) {
+                            $newQtyReceived = $item->quantity;
+                        }
+
+                        $qtyDifferences[$item->id] = $newQtyReceived - $oldQtyReceived;
+
                         $item->update([
-                            'quantity_received' => $itemData['quantity_received'],
+                            'quantity_received' => $newQtyReceived,
                             'quantity_rejected'  => $itemData['quantity_rejected'],
                             'rejection_notes'    => $itemData['rejection_notes'] ?? null,
                             'purchase_price'     => $itemData['purchase_price'] ?? $item->purchase_price,
@@ -415,9 +448,7 @@ class ProductPurchaseController extends Controller
 
                 foreach ($productPurchase->items as $item) {
                     $effectiveCode = $item->effective_product_code;
-                    $qtyToAdd      = $newStatus === 'partial_received'
-                        ? $item->quantity_received
-                        : ($item->quantity_received > 0 ? $item->quantity_received : $item->quantity);
+                    $qtyToAdd      = $qtyDifferences[$item->id] ?? 0;
 
                     if ($effectiveCode && $qtyToAdd > 0) {
                         $stockService->stockIn(
@@ -494,8 +525,8 @@ class ProductPurchaseController extends Controller
 
     public function destroy(ProductPurchase $productPurchase)
     {
-        if ($productPurchase->isCancelled()) {
-            return back()->with('error', 'Pengadaan yang dibatalkan tidak bisa dihapus.');
+        if ($productPurchase->isCancelled() && auth()->user()->role->name !== 'owner') {
+            return back()->with('error', 'Pengadaan yang dibatalkan hanya bisa dihapus oleh Owner.');
         }
 
         // Revert stock jika ada barang yang sempat diterima (status partial_received atau received)

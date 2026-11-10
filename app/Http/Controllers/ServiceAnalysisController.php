@@ -10,9 +10,9 @@ use Illuminate\Http\Request;
 
 class ServiceAnalysisController extends Controller
 {
-    public function index(Request $request)
+    private function getReportData(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(30)->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
 
         $startCarbon = Carbon::parse($startDate)->startOfDay();
@@ -53,22 +53,32 @@ class ServiceAnalysisController extends Controller
             ->limit(10)
             ->get();
 
-        if ($request->get('export') === 'pdf') {
-            $pdf = Pdf::loadView('reports.pdf.service-analysis', compact(
-                'startDate', 'endDate', 'repairs', 'serviceStats', 'serviceTrend', 'topSpareparts'
-            ));
-            return $pdf->download('laporan-analisis-layanan-perbaikan.pdf');
-        }
+        return compact('startDate', 'endDate', 'repairs', 'serviceStats', 'serviceTrend', 'topSpareparts');
+    }
 
-        return view('reports.service-analysis.index', compact(
-            'startDate', 'endDate',
-            'repairs', 'serviceStats', 'serviceTrend', 'topSpareparts'
-        ));
+    public function index(Request $request)
+    {
+        $data = $this->getReportData($request);
+        return view('reports.service-analysis.index', $data);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $data = $this->getReportData($request);
+        
+        $data['chart_service_trend'] = $request->input('chart_service_trend');
+        
+        $data['storeName'] = \App\Models\Setting::get('store_name', 'Nama Toko');
+        $data['storeAddress'] = \App\Models\Setting::get('store_address', '');
+        $data['storePhone'] = \App\Models\Setting::get('store_phone', '');
+
+        $pdf = Pdf::loadView('reports.pdf.service-analysis', $data)->setPaper('a4', 'landscape');
+        return $pdf->download('laporan-analisis-layanan-perbaikan-' . now()->format('Y-m-d') . '.pdf');
     }
 
     public function trends(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(30)->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
 
         $startCarbon = Carbon::parse($startDate)->startOfDay();
@@ -86,7 +96,7 @@ class ServiceAnalysisController extends Controller
 
     public function spareparts(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(30)->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
 
         $startCarbon = Carbon::parse($startDate)->startOfDay();

@@ -68,23 +68,30 @@
     <thead><tr class="border-b border-[var(--color-hairline-soft)] bg-[var(--color-surface-soft)]">
         <th class="px-5 py-3 text-left table-header">{{ __('messages.code') }}</th><th class="px-5 py-3 text-left table-header">{{ __('messages.date') }}</th>
         <th class="px-5 py-3 text-left table-header">{{ __('messages.customer_name') }}</th><th class="px-5 py-3 text-left table-header">{{ __('messages.total') }}</th>
-        <th class="px-5 py-3 text-left table-header">{{ __('messages.payment_method') }}</th><th class="px-5 py-3 text-left table-header">{{ __('messages.actions') }}</th>
+        <th class="px-5 py-3 text-left table-header">{{ __('messages.payment_method') }}</th><th class="px-5 py-3 text-left table-header">Status</th><th class="px-5 py-3 text-left table-header">{{ __('messages.actions') }}</th>
     </tr></thead><tbody>
     @forelse($transactions as $t)
-    <tr class="border-b border-[var(--color-hairline-soft)]/50 hover:bg-[var(--color-surface-soft)] transition-colors duration-150">
+    <tr onclick="window.location='{{ route('transactions.show', $t) }}'" class="border-b border-[var(--color-hairline-soft)]/50 hover:bg-[var(--color-surface-soft)] transition-colors duration-150 cursor-pointer">
         <td class="px-5 py-3 type-caption-bold text-[var(--color-primary)]">{{ $t->transaction_code }}</td>
         <td class="px-5 py-3 type-body-sm text-[var(--color-slate)]">{{ $t->transaction_date->format('d/m/Y H:i') }}</td>
         <td class="px-5 py-3 type-body-sm text-[var(--color-ink)]">{{ $t->customer_name ?: '-' }}</td>
         <td class="px-5 py-3 type-body-sm font-bold text-[var(--color-ink)]">Rp {{ number_format($t->total, 0, ',', '.') }}</td>
         <td class="px-5 py-3"><span class="badge badge-neutral">{{ __('messages.'.$t->payment_method) }}</span></td>
+        <td class="px-5 py-3">
+            @if($t->status === 'paid')
+                <span class="badge badge-success">Berhasil</span>
+            @elseif($t->status === 'cancelled')
+                <span class="badge !bg-[var(--color-critical)] !text-white">Dibatalkan</span>
+            @endif
+        </td>
         <td class="px-5 py-3 text-right"><div class="flex items-center justify-end gap-1">
             <a href="{{ route('transactions.show', $t) }}" class="btn-ghost !py-1.5 !px-3 !text-xs">{{ __('messages.detail') }}</a>
             @if(auth()->user()->isOwner())
-            <button @click="$dispatch('open-delete-modal', { url: '{{ route('transactions.destroy', $t) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
+            <button @click.stop="$dispatch('open-delete-modal', { url: '{{ route('transactions.destroy', $t) }}' })" class="btn-ghost !py-1.5 !px-3 !text-xs !text-[var(--color-critical)] !border-[var(--color-critical)]/20">{{ __('messages.delete') }}</button>
             @endif
         </div></td>
     </tr>
-    @empty<tr><td colspan="6" class="px-5 py-12 text-center type-body-md text-[var(--color-stone)]">{{ __('messages.no_data') }}</td></tr>@endforelse
+    @empty<tr><td colspan="7" class="px-5 py-12 text-center type-body-md text-[var(--color-stone)]">{{ __('messages.no_data') }}</td></tr>@endforelse
     </tbody></table></div>
     <div class="border-t border-[var(--color-hairline-soft)] px-5 py-3">{{ $transactions->links() }}</div>
 </div>

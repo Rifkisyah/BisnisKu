@@ -2,48 +2,47 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Role;
+use App\Models\Store;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Faker\Factory as Faker;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $owner = Role::firstOrCreate(['name' => 'owner']);
-        $kasir = Role::firstOrCreate(['name' => 'kasir']);
-        $teknisi = Role::firstOrCreate(['name' => 'teknisi']);
-        $gudang = Role::firstOrCreate(['name' => 'gudang']);
+        $store = Store::where('slug', 'armal-cellular')->first();
+        if (!$store) return;
 
-        User::firstOrCreate(
-            ['email' => 'owner@armalcellular.test'], 
-            ['username' => 'Owner Armal', 'password' => Hash::make('password'), 'role_id' => $owner->id, 'contact' => '081234567890', 'status' => 'active']
-        );
-        User::firstOrCreate(
-            ['email' => 'kasir@armalcellular.test'], 
-            ['username' => 'Kasir Armal', 'password' => Hash::make('password'), 'role_id' => $kasir->id, 'contact' => '081234567891', 'status' => 'active']
-        );
-        User::firstOrCreate(
-            ['email' => 'teknisi@armalcellular.test'], 
-            ['username' => 'Teknisi Armal', 'password' => Hash::make('password'), 'role_id' => $teknisi->id, 'contact' => '081234567892', 'status' => 'active']
-        );
-        User::firstOrCreate(
-            ['email' => 'gudang@armalcellular.test'], 
-            ['username' => 'Gudang Armal', 'password' => Hash::make('password'), 'role_id' => $gudang->id, 'contact' => '081234567893', 'status' => 'active']
-        );
+        $kasirRole  = Role::where('name', 'kasir')->first();
+        $teknisiRole = Role::where('name', 'teknisi')->first();
 
-        $faker = Faker::create('id_ID');
-        for ($i = 0; $i < 17; $i++) {
+        // Tambahan staf UMKM mikro konter realistis (sift sore / asisten teknisi)
+        if ($kasirRole) {
             User::firstOrCreate(
-                ['email' => $faker->unique()->safeEmail()],
+                ['email' => 'kasir2@armalcellular.test'],
                 [
-                    'username' => $faker->name(),
+                    'username' => 'Kasir Sore Armal',
                     'password' => Hash::make('password'),
-                    'role_id' => $faker->randomElement([$kasir->id, $teknisi->id]),
-                    'contact' => $faker->phoneNumber(),
-                    'status' => 'active',
+                    'role_id'  => $kasirRole->id,
+                    'store_id' => $store->id,
+                    'contact'  => '081234567894',
+                    'status'   => 'active',
+                ]
+            );
+        }
+
+        if ($teknisiRole) {
+            User::firstOrCreate(
+                ['email' => 'teknisi2@armalcellular.test'],
+                [
+                    'username' => 'Asisten Teknisi Armal',
+                    'password' => Hash::make('password'),
+                    'role_id'  => $teknisiRole->id,
+                    'store_id' => $store->id,
+                    'contact'  => '081234567895',
+                    'status'   => 'active',
                 ]
             );
         }

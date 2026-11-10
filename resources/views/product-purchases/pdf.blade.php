@@ -10,7 +10,7 @@
         <td>{{ \Carbon\Carbon::parse($p->purchase_date)->format('d/m/Y') }}</td>
         <td>{{ ucfirst($p->source) }}</td>
         <td>{{ $p->supplier->name ?? '-' }}</td>
-        <td>{{ strtoupper($p->status) }}</td>
+        <td>{{ strtoupper(__('messages.' . $p->status)) }}</td>
         <td class="text-right">Rp {{ number_format($p->total,0,',','.') }}</td>
     </tr>
     @endforeach

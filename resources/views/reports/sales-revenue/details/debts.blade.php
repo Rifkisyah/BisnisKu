@@ -60,9 +60,9 @@
                                 default   => 'badge-critical',
                             };
                             $label = match($d->status) {
-                                'paid'    => 'Lunas',
-                                'partial' => 'Sebagian',
-                                default   => 'Belum Bayar',
+                                'paid'    => __('messages.paid'),
+                                'partial' => __('messages.partial'),
+                                default   => __('messages.unpaid'),
                             };
                         @endphp
                         <span class="badge {{ $badge }}">{{ $label }}</span>

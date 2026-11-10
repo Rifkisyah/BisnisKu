@@ -19,7 +19,7 @@ class ServiceRepairController extends Controller
 
     public function index(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(90)->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
 
         $query = ServiceRepair::with(['technician', 'items'])
@@ -32,12 +32,10 @@ class ServiceRepairController extends Controller
             });
         }
 
-        $serviceRepairs = $query
+        $queryFilter = $query
             ->when($request->search, fn($q, $s) => $q->where('repair_code', 'like', "%{$s}%")->orWhere('customer_name', 'like', "%{$s}%"))
             ->when($request->status, fn($q, $st) => $q->where('status', $st))
-            ->applySort($request->sort)
-            ->paginate(15)
-            ->withQueryString();
+            ->applySort($request->sort, 'created_at', 'customer_name');
 
         if ($request->get('export') === 'pdf') {
             $allRepairs = $query->get();
@@ -46,6 +44,15 @@ class ServiceRepairController extends Controller
             ]);
             return $pdf->download('laporan-perbaikan.pdf');
         }
+
+        if ($request->get('print') === '1' || $request->has('print')) {
+            $allRepairs = $queryFilter->get();
+            return view('service-repairs.pdf', [
+                'repairs' => $allRepairs, 'startDate' => $startDate, 'endDate' => $endDate, 'isPrint' => true,
+            ]);
+        }
+
+        $serviceRepairs = $queryFilter->paginate(15)->withQueryString();
 
         return view('service-repairs.index', compact('serviceRepairs', 'startDate', 'endDate'));
     }
@@ -168,7 +175,7 @@ class ServiceRepairController extends Controller
             'customer_phone' => 'nullable|string|min:7|max:20',
             'notes'          => 'nullable|string|max:500',
             'down_payment'   => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|in:cash,qris,transfer',
+            'payment_method' => 'nullable|in:cash,qris',
         ]);
 
                 DB::transaction(function () use ($request, $validated, $serviceRepair) {
@@ -231,7 +238,7 @@ class ServiceRepairController extends Controller
                 $validated = $request->validate([
             'status'               => 'required|string',
             'down_payment'         => 'nullable|numeric|min:0',
-            'final_payment_method' => 'nullable|in:cash,qris,transfer',
+            'final_payment_method' => 'nullable|in:cash,qris',
             'items'                => 'nullable|array',
             'items.*.id'           => 'nullable|integer',
             'items.*.service_fee'  => 'nullable',

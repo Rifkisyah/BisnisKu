@@ -10,7 +10,7 @@
         <td>{{ \Carbon\Carbon::parse($d->debt_date)->format('d/m/Y') }}</td>
         <td>{{ $d->debtor_name }}</td>
         <td>{{ $d->due_date ? \Carbon\Carbon::parse($d->due_date)->format('d/m/Y') : '-' }}</td>
-        <td>{{ strtoupper($d->status) }}</td>
+        <td>{{ strtoupper(__('messages.' . $d->status)) }}</td>
         <td class="text-right">Rp {{ number_format($d->total_amount,0,',','.') }}</td>
         <td class="text-right">Rp {{ number_format($d->remaining_amount,0,',','.') }}</td>
     </tr>

@@ -11,7 +11,7 @@ return new class extends Migration
     {
         // Add final_payment_method column
         Schema::table('service_repairs', function (Blueprint $table) {
-            $table->enum('final_payment_method', ['cash', 'transfer', 'qris'])->nullable()->after('payment_method');
+            $table->enum('final_payment_method', ['cash', 'qris'])->nullable()->after('payment_method');
         });
 
         // Change default status to 'diagnosing'

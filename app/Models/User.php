@@ -56,6 +56,11 @@ class User extends Authenticatable
         return $this->hasMany(ServiceRepair::class, 'technician_id');
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->role->name === 'admin';
+    }
+
     public function isOwner(): bool
     {
         return $this->role->name === 'owner';

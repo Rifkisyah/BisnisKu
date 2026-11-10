@@ -42,7 +42,7 @@ $st           = $productPurchase->status;
         </a>
         @endif
         
-        @if($st !== 'cancelled' && in_array(auth()->user()->role->name, ['owner', 'gudang']))
+        @if(auth()->user()->role->name === 'owner' || ($st !== 'cancelled' && auth()->user()->role->name === 'gudang'))
         <button @click="$dispatch('open-delete-modal', { url: '{{ route('product-purchases.destroy', $productPurchase) }}' })" class="btn-ghost !text-[var(--color-critical)] !border-[var(--color-critical)]/20 !px-4 text-xs font-bold flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> {{ __('messages.delete') }}</button>
         @endif
     </div>
@@ -159,30 +159,30 @@ $st           = $productPurchase->status;
                 <div class="relative flex justify-between">
                     {{-- Draft --}}
                     <div>
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full {{ in_array($st, ['draft', 'ordered', 'partial_received', 'received']) ? 'bg-black' : 'bg-gray-200' }} ring-4 ring-white">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full {{ in_array($st, ['draft', 'ordered', 'partial_received', 'received']) ? 'bg-[var(--color-primary)]' : 'bg-gray-200' }} ring-4 ring-white">
                             <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                         </div>
-                        <span class="absolute -ml-2 mt-2 text-xs font-semibold {{ in_array($st, ['draft', 'ordered', 'partial_received', 'received']) ? 'text-black' : 'text-gray-500' }}">Draft</span>
+                        <span class="absolute -ml-2 mt-2 text-xs font-semibold {{ in_array($st, ['draft', 'ordered', 'partial_received', 'received']) ? 'text-[var(--color-primary)]' : 'text-gray-500' }}">Draft</span>
                     </div>
                     
                     {{-- Ordered --}}
                     <div>
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full {{ in_array($st, ['ordered', 'partial_received', 'received']) ? 'bg-black' : 'bg-gray-200' }} ring-4 ring-white">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full {{ in_array($st, ['ordered', 'partial_received', 'received']) ? 'bg-[var(--color-primary)]' : 'bg-gray-200' }} ring-4 ring-white">
                             <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
                         </div>
-                        <span class="absolute -ml-3 mt-2 text-xs font-semibold {{ in_array($st, ['ordered', 'partial_received', 'received']) ? 'text-black' : 'text-gray-500' }}">Ordered</span>
+                        <span class="absolute -ml-3 mt-2 text-xs font-semibold {{ in_array($st, ['ordered', 'partial_received', 'received']) ? 'text-[var(--color-primary)]' : 'text-gray-500' }}">Ordered</span>
                     </div>
 
                     {{-- Received --}}
                     <div>
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full {{ $st === 'received' ? 'bg-black' : ($st === 'partial_received' ? 'bg-amber-500' : 'bg-gray-200') }} ring-4 ring-white">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-full {{ $st === 'received' ? 'bg-[var(--color-success)]' : ($st === 'partial_received' ? 'bg-amber-500' : 'bg-gray-200') }} ring-4 ring-white">
                             @if($st === 'partial_received')
                             <span class="text-white font-bold text-xs">½</span>
                             @else
                             <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                             @endif
                         </div>
-                        <span class="absolute -ml-3 mt-2 text-xs font-semibold {{ $st === 'received' ? 'text-black' : ($st === 'partial_received' ? 'text-amber-500' : 'text-gray-500') }}">{{ $st === 'partial_received' ? 'Partial' : 'Received' }}</span>
+                        <span class="absolute -ml-3 mt-2 text-xs font-semibold {{ $st === 'received' ? 'text-[var(--color-success)]' : ($st === 'partial_received' ? 'text-amber-500' : 'text-gray-500') }}">{{ $st === 'partial_received' ? 'Partial' : 'Received' }}</span>
                     </div>
                 </div>
             </div>
@@ -218,7 +218,7 @@ $st           = $productPurchase->status;
                 {{-- Draft → Ordered --}}
                 <form method="POST" action="{{ route('product-purchases.update-status', $productPurchase) }}" class="flex-1">@csrf @method('PATCH')
                     <input type="hidden" name="status" value="ordered">
-                    <button type="button" @click="$dispatch('open-action-confirm', { title: 'Tandai Ordered?', message: 'Apakah Anda yakin pesanan ini sudah diteruskan ke supplier?', formEl: $el.closest('form') })" class="w-full rounded-full bg-black px-6 py-3.5 text-[14px] font-bold text-white hover:bg-gray-800 transition-colors flex justify-center items-center gap-2 hover:cursor-pointer">
+                    <button type="button" @click="$dispatch('open-action-confirm', { title: 'Tandai Ordered?', message: 'Apakah Anda yakin pesanan ini sudah diteruskan ke supplier?', formEl: $el.closest('form') })" class="w-full btn-primary !py-3.5 text-[14px] flex justify-center items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
                         Kirim Pengajuan Pengadaan (Tandai Ordered)
                     </button>
@@ -228,7 +228,7 @@ $st           = $productPurchase->status;
                 @if($productPurchase->isOrdered() || $productPurchase->isPartial())
                 {{-- Ordered / Partial → Received (with qty input) --}}
                 <div x-data="{ open: false }" class="flex-1">
-                    <button @click="open = !open" type="button" class="w-full rounded-full bg-black px-6 py-3.5 text-[14px] font-bold text-white hover:bg-gray-800 transition-colors flex justify-center items-center gap-2 hover:cursor-pointer">
+                    <button @click="open = !open" type="button" class="w-full btn-primary !py-3.5 text-[14px] flex justify-center items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                         Konfirmasi Penerimaan Barang
                     </button>
@@ -286,13 +286,9 @@ $st           = $productPurchase->status;
                             </div>
 
                             <div class="flex gap-3 pt-4">
-                                <button type="button" @click="$dispatch('open-action-confirm', { title: 'Terima Penuh?', message: 'Stok barang akan otomatis bertambah.', formEl: $el.closest('form'), btnName: 'status', btnValue: 'received' })" name="status" value="received" class="flex-1 rounded-full bg-green-600 px-6 py-3.5 text-[14px] font-bold text-white hover:bg-green-700 flex justify-center items-center gap-2 transition-colors">
+                                <button type="button" @click="$dispatch('open-action-confirm', { title: 'Konfirmasi Penerimaan?', message: 'Status (diterima penuh/sebagian) akan ditentukan otomatis berdasarkan jumlah barang yang diterima. Stok barang akan bertambah sesuai input.', formEl: $el.closest('form'), btnName: 'status', btnValue: 'received' })" name="status" value="received" class="w-full rounded-full bg-green-600 px-6 py-3.5 text-[14px] font-bold text-white hover:bg-green-700 flex justify-center items-center gap-2 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    {{ __('messages.mark_fully_received') }}
-                                </button>
-                                <button type="button" @click="$dispatch('open-action-confirm', { title: 'Terima Sebagian?', message: 'Stok barang akan bertambah sesuai input, namun status pengadaan belum selesai.', formEl: $el.closest('form'), btnName: 'status', btnValue: 'partial_received' })" name="status" value="partial_received" class="flex-1 rounded-full bg-amber-500 px-6 py-3.5 text-[14px] font-bold text-white hover:bg-amber-600 flex justify-center items-center gap-2 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                    {{ __('messages.mark_partially_received') }}
+                                    Konfirmasi Penerimaan Barang
                                 </button>
                             </div>
                         </form>

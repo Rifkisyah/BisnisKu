@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreign('debt_code')->references('debt_code')->on('debts')->onDelete('cascade');
             $table->decimal('amount', 15, 2);
             $table->date('payment_date');
-            $table->enum('payment_method', ['cash', 'transfer', 'qris'])->default('cash');
+            $table->enum('payment_method', ['cash', 'qris'])->default('cash');
             $table->text('notes')->nullable();
             $table->timestamps();
         });

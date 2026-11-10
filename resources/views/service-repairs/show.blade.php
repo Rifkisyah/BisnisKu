@@ -100,7 +100,7 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                     </p>
                     <form method="POST" action="{{ route('service-repairs.update-status', $serviceRepair) }}" @submit.prevent="$dispatch('open-confirm-modal', { form: $event.target, title: 'Teruskan ke Teknisi?', text: 'Apakah Anda yakin ingin meneruskan data ini ke teknisi untuk diagnosa?', confirmText: 'Ya, Teruskan', color: 'gray' })">@csrf @method('PATCH')
                         <input type="hidden" name="status" value="diagnosing">
-                        <button type="submit" class="w-full rounded-full bg-black px-6 py-3 text-sm font-bold text-white hover:bg-gray-800 transition-colors flex justify-center items-center gap-2">
+                        <button type="submit" class="w-full btn-primary !py-3 flex justify-center items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             Diagnosa (→ Menunggu Diagnosa)
                         </button>
@@ -141,7 +141,6 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                                             <select name="payment_method" class="input-field !h-9 !py-1 !text-xs w-full">
                                                 <option value="cash" {{ $serviceRepair->payment_method === 'cash' ? 'selected' : '' }}>Cash</option>
                                                 <option value="qris" {{ $serviceRepair->payment_method === 'qris' ? 'selected' : '' }}>QRIS</option>
-                                                <option value="transfer" {{ $serviceRepair->payment_method === 'transfer' ? 'selected' : '' }}>Transfer Bank</option>
                                             </select>
                                         </div>
                                     </div>
@@ -170,7 +169,7 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                                 @if($dpOk && $serviceRepair->down_payment > 0)
                                 <form method="POST" action="{{ route('service-repairs.update-status', $serviceRepair) }}" @submit.prevent="$dispatch('open-confirm-modal', { form: $event.target, title: 'Mulai Perbaikan?', text: 'Apakah Anda yakin ingin memulai proses perbaikan?', confirmText: 'Ya, Mulai Perbaikan', color: 'gray' })">@csrf @method('PATCH')
                                     <input type="hidden" name="status" value="repairing">
-                                    <button type="submit" class="w-full rounded-full bg-black px-6 py-3 text-sm font-bold text-white hover:bg-gray-800 transition-colors flex justify-center items-center gap-2">
+                                    <button type="submit" class="w-full btn-primary !py-3 flex justify-center items-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                         Mulai Perbaikan (&#8594; Diproses)
                                     </button>
@@ -204,7 +203,7 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                         @if(auth()->user()->isTeknisi() || auth()->user()->isOwner())
                         <form method="POST" action="{{ route('service-repairs.update-status', $serviceRepair) }}" @submit.prevent="$dispatch('open-confirm-modal', { form: $event.target, title: 'Selesaikan Perbaikan?', text: 'Apakah Anda yakin perbaikan telah selesai dan perangkat siap diambil pelanggan?', confirmText: 'Ya, Selesai', color: 'gray' })">@csrf @method('PATCH')
                             <input type="hidden" name="status" value="ready">
-                            <button type="submit" class="w-full rounded-full bg-black px-6 py-3 text-sm font-bold text-white hover:bg-gray-800 transition-colors flex justify-center items-center gap-2">
+                            <button type="submit" class="w-full btn-primary !py-3 flex justify-center items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 Selesaikan Perbaikan (→ Siap Diambil)
                             </button>
@@ -299,12 +298,11 @@ $remaining = max(0, $serviceRepair->total_cost - $serviceRepair->down_payment);
                                     <option value="">-- Pilih --</option>
                                     <option value="cash">Cash</option>
                                     <option value="qris">QRIS</option>
-                                    <option value="transfer">Transfer Bank</option>
                                 </select>
                             </div>
                         </div>
                         <p class="text-sm text-green-700 font-medium" x-show="remaining <= 0" x-cloak>✅ Sudah lunas (tidak ada sisa pembayaran)</p>
-                        <button type="button" @click="$dispatch('open-confirm', {title: 'Selesaikan Data Perbaikan', message: 'Konfirmasi barang sudah diambil dan pelanggan sudah melunasi pembayaran?', type: 'primary', buttonText: 'Ya, Selesaikan', action: () => $el.closest('form').submit()})" class="rounded-full bg-black px-6 py-3 text-sm font-bold text-white hover:bg-gray-800 w-full flex items-center justify-center gap-2 transition-colors">
+                        <button type="button" @click="$dispatch('open-confirm', {title: 'Selesaikan Data Perbaikan', message: 'Konfirmasi barang sudah diambil dan pelanggan sudah melunasi pembayaran?', type: 'primary', buttonText: 'Ya, Selesaikan', action: () => $el.closest('form').submit()})" class="btn-primary !py-3 w-full flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                             Tutup Data Perbaikan & Konfirmasi Pelunasan
                         </button>

@@ -12,7 +12,7 @@
         <td>{{ \Carbon\Carbon::parse($r->start_date)->format('d/m/Y H:i') }}</td>
         <td>{{ $r->customer_name }}</td>
         <td>{{ $r->technician->username ?? '-' }}</td>
-        <td>{{ strtoupper($r->status) }}</td>
+        <td>{{ strtoupper(__('messages.' . $r->status)) }}</td>
         <td class="text-right">Rp {{ number_format($r->total_cost,0,',','.') }}</td>
     </tr>
     @endforeach

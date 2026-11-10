@@ -1,0 +1,15 @@
+.git\
+.vscode\
+node_modules\
+build_infinityfree\
+exclude_build.txt
+build_for_infinityfree.bat
+.phpunit.cache\
+tests\
+UML\
+DESIGN.md
+.editorconfig
+.gitattributes
+.gitignore
+phpunit.xml
+phpunit.dusk.xml

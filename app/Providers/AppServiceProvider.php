@@ -31,11 +31,13 @@ class AppServiceProvider extends ServiceProvider
             }
             $view->with('globalShopName', $shopName);
         });
-        \Illuminate\Database\Eloquent\Builder::macro('applySort', function (string|null $sort, string $defaultCol = 'created_at') {
+        \Illuminate\Database\Eloquent\Builder::macro('applySort', function (string|null $sort, string $defaultCol = 'created_at', string $nameCol = 'name') {
             return match($sort) {
                 'created_at_asc'  => $this->oldest(),
                 'updated_at_desc' => $this->orderBy('updated_at', 'desc'),
                 'updated_at_asc'  => $this->orderBy('updated_at', 'asc'),
+                'name_asc'        => $this->orderBy($nameCol, 'asc'),
+                'name_desc'       => $this->orderBy($nameCol, 'desc'),
                 default           => $this->latest($defaultCol),
             };
         });

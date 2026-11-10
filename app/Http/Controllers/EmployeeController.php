@@ -20,20 +20,27 @@ class EmployeeController extends Controller
             ->when($request->role, fn($q, $r) => $q->whereHas('role', fn($rq) => $rq->where('name', $r)));
 
         if ($request->get('export') === 'pdf') {
-            $employees = $query->applySort($request->sort)->get();
+            $employees = $query->applySort($request->sort, 'created_at', 'username')->get();
             $pdf = Pdf::loadView('employees.pdf', compact('employees'));
             return $pdf->download('laporan-karyawan.pdf');
         }
 
-        $employees = $query->applySort($request->sort)->paginate(15)->withQueryString();
-        $roles = Role::all();
+        if ($request->get('print') === '1' || $request->has('print')) {
+            $employees = $query->applySort($request->sort, 'created_at', 'username')->get();
+            return view('employees.pdf', ['employees' => $employees, 'isPrint' => true]);
+        }
+
+        $employees = $query->applySort($request->sort, 'created_at', 'username')->paginate(15)->withQueryString();
+        // Exclude 'admin' role from employee management — admin is a super-role not assignable via this form
+        $roles = Role::where('name', '!=', 'admin')->get();
 
         return view('employees.index', compact('employees', 'roles'));
     }
 
     public function create()
     {
-        $roles = Role::all();
+        // Exclude 'admin' role from employee management
+        $roles = Role::where('name', '!=', 'admin')->get();
         return view('employees.create', compact('roles'));
     }
 
@@ -64,7 +71,8 @@ class EmployeeController extends Controller
 
     public function edit(User $employee)
     {
-        $roles = Role::all();
+        // Exclude 'admin' role from employee management
+        $roles = Role::where('name', '!=', 'admin')->get();
         return view('employees.edit', compact('employee', 'roles'));
     }
 

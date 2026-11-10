@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __('Log in') }} - {{ $globalShopName }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +18,7 @@
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: var(--color-canvas, #ffffff);
-            color: var(--color-ink, #1C2B33);
+            color: var(--color-ink, #1e293b);
             margin: 0;
             padding: 0;
             -webkit-font-smoothing: antialiased;
@@ -54,8 +55,8 @@
     </div>
 
     {{-- Right Panel — Login Form --}}
-    <div class="flex w-full items-center justify-center px-6 lg:w-1/2 relative">
-        <div class="absolute top-8 right-8 flex items-center gap-4">
+    <div class="flex w-full items-center justify-center px-6 lg:w-1/2 relative pt-28 pb-12 sm:pt-32 sm:pb-16">
+        <div class="absolute top-6 right-6 sm:top-8 sm:right-8 flex items-center gap-4 z-10">
             <form action="{{ route('locale.switch') }}" method="POST" class="flex items-center bg-[var(--color-surface-soft)] rounded-full p-1 border border-[var(--color-hairline-soft)]">
                 @csrf
                 <button type="submit" name="locale" value="en" class="px-3 py-1 rounded-full text-xs font-bold transition-colors {{ app()->getLocale() === 'en' ? 'bg-[var(--color-ink-deep)] text-[var(--color-canvas)] shadow-sm' : 'text-[var(--color-slate)] hover:text-[var(--color-ink)]' }}">EN</button>

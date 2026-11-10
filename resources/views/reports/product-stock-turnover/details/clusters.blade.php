@@ -40,12 +40,12 @@
                 <tbody>
                 @forelse($paginatedClusters as $cr)
                 @php
-                    $clusterBadgeColor = match($cr['cluster_label']) {
-                        'fast_moving'   => 'background:#ECFDF5;color:#059669',
-                        'medium_moving' => 'background:#FFFBEB;color:#D97706',
-                        'slow_moving'   => 'background:#FFF7ED;color:#EA580C',
-                        'dead_stock'    => 'background:#FEF2F2;color:#DC2626',
-                        default         => '',
+                    $clusterClass = match($cr['cluster_label']) {
+                        'fast_moving'   => 'badge-cluster-fast',
+                        'medium_moving' => 'badge-cluster-medium',
+                        'slow_moving'   => 'badge-cluster-slow',
+                        'dead_stock'    => 'badge-cluster-dead',
+                        default         => 'badge-neutral',
                     };
                     
                     $clusterLabel = match($cr['cluster_label']) {
@@ -62,7 +62,7 @@
                     <td class="px-4 py-2.5 type-body-sm text-right text-[var(--color-ink-deep)]">Rp {{ number_format($cr['total_revenue'] ?? 0, 0, ',', '.') }}</td>
                     <td class="px-4 py-2.5 type-body-sm text-right text-[var(--color-slate)]">{{ $cr['days_without_sale'] >= 999 ? 'Belum Ada' : $cr['days_without_sale'] . ' Hari' }}</td>
                     <td class="px-4 py-2.5 text-center">
-                        <span class="px-2 py-0.5 rounded-md text-xs font-medium inline-flex items-center" style="{{ $clusterBadgeColor }}">{!! $clusterLabel !!}</span>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold inline-flex items-center {{ $clusterClass }}">{!! $clusterLabel !!}</span>
                     </td>
                     <td class="px-4 py-2.5 type-caption text-[var(--color-slate)] text-left" style="max-width:250px;">
                         {{ $cr['recommendation'] }}

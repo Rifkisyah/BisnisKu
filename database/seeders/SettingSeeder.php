@@ -2,13 +2,19 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Setting;
+use App\Models\Store;
+use Illuminate\Database\Seeder;
 
 class SettingSeeder extends Seeder
 {
     public function run(): void
     {
+        $store = Store::where('slug', 'armal-cellular')->first();
+        if ($store) {
+            app()->instance('current_store', $store);
+        }
+
         $settings = [
             'store_name' => 'Armal Cellular',
             'store_address' => 'Jl. Pahlawan No. 123, Jakarta Selatan',
@@ -20,9 +26,9 @@ class SettingSeeder extends Seeder
         ];
 
         foreach ($settings as $key => $value) {
-            Setting::firstOrCreate(['key' => $key], [
-                'value' => $value,
-            ]);
+            Setting::set($key, $value);
         }
+
+        app()->forgetInstance('current_store');
     }
 }

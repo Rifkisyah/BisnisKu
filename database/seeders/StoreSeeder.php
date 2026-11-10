@@ -12,175 +12,92 @@ class StoreSeeder extends Seeder
 {
     public function run(): void
     {
+        $adminRole  = Role::where('name', 'admin')->firstOrFail();
         $ownerRole  = Role::where('name', 'owner')->firstOrFail();
         $kasirRole  = Role::where('name', 'kasir')->firstOrFail();
         $teknisiRole = Role::where('name', 'teknisi')->firstOrFail();
         $gudangRole = Role::where('name', 'gudang')->firstOrFail();
 
-        // ─── Toko 1: Armal Cellular ─────────────────────────────────────────
-        $store1 = Store::firstOrCreate(
+        // ─── UMKM Mikro Konter: Armal Cellular ─────────────────────────────
+        $store = Store::firstOrCreate(
             ['slug' => 'armal-cellular'],
             [
                 'name'            => 'Armal Cellular',
                 'address'         => 'Jl. Pahlawan No. 123, Jakarta Selatan',
                 'phone'           => '081234567890',
                 'email'           => 'info@armalcellular.com',
-                'description'     => 'Toko handphone & aksesoris terpercaya sejak 2010.',
+                'description'     => 'Toko Handphone, Pulsa, Aksesoris & Servis HP UMKM Mikro Terpercaya.',
                 'is_active'       => true,
                 'catalog_enabled' => true,
             ]
         );
 
-        $owner1 = User::firstOrCreate(
+        $owner = User::firstOrCreate(
             ['email' => 'owner@armalcellular.test'],
             [
                 'username' => 'Owner Armal',
                 'password' => Hash::make('password'),
                 'role_id'  => $ownerRole->id,
-                'store_id' => $store1->id,
+                'store_id' => $store->id,
                 'contact'  => '081234567890',
                 'status'   => 'active',
             ]
         );
 
         // Link owner to store
-        $store1->update(['owner_id' => $owner1->id]);
+        $store->update(['owner_id' => $owner->id]);
 
-        // Staf Toko 1
+        // Admin user (full access)
         User::firstOrCreate(
-            ['email' => 'kasir@armalcellular.test'],
-            ['username' => 'Kasir Armal', 'password' => Hash::make('password'), 'role_id' => $kasirRole->id, 'store_id' => $store1->id, 'contact' => '081234567891', 'status' => 'active']
-        );
-        User::firstOrCreate(
-            ['email' => 'teknisi@armalcellular.test'],
-            ['username' => 'Teknisi Armal', 'password' => Hash::make('password'), 'role_id' => $teknisiRole->id, 'store_id' => $store1->id, 'contact' => '081234567892', 'status' => 'active']
-        );
-        User::firstOrCreate(
-            ['email' => 'gudang@armalcellular.test'],
-            ['username' => 'Gudang Armal', 'password' => Hash::make('password'), 'role_id' => $gudangRole->id, 'store_id' => $store1->id, 'contact' => '081234567893', 'status' => 'active']
-        );
-
-        // Default settings for Toko 1
-        app()->instance('current_store', $store1);
-        \App\Models\Setting::set('store_name', 'Armal Cellular');
-        \App\Models\Setting::set('store_address', 'Jl. Pahlawan No. 123, Jakarta Selatan');
-        \App\Models\Setting::set('store_phone', '081234567890');
-        \App\Models\Setting::set('store_email', 'info@armalcellular.com');
-        \App\Models\Setting::set('receipt_footer', 'Terima kasih telah berbelanja di Armal Cellular. Barang yang sudah dibeli tidak dapat dikembalikan.');
-        \App\Models\Setting::set('tax_percentage', '0');
-        \App\Models\Setting::set('default_currency', 'IDR');
-
-        \App\Models\PaymentSetting::firstOrCreate(
-            ['store_id' => $store1->id],
-            ['qris_mode' => 'manual', 'is_qris_active' => true]
-        );
-
-        // ─── Toko 2: Demo Elektronik ─────────────────────────────────────────
-        $store2 = Store::firstOrCreate(
-            ['slug' => 'demo-elektronik'],
+            ['email' => 'admin@armalcellular.test'],
             [
-                'name'            => 'Demo Elektronik',
-                'address'         => 'Jl. Merdeka No. 456, Bandung',
-                'phone'           => '022-1234567',
-                'email'           => 'demo@elektronik.test',
-                'description'     => 'Toko elektronik demo untuk keperluan pengujian.',
-                'is_active'       => true,
-                'catalog_enabled' => true,
-            ]
-        );
-
-        $owner2 = User::firstOrCreate(
-            ['email' => 'owner@demo-elektronik.test'],
-            [
-                'username' => 'Owner Demo',
+                'username' => 'Admin Armal',
                 'password' => Hash::make('password'),
-                'role_id'  => $ownerRole->id,
-                'store_id' => $store2->id,
-                'contact'  => '022-1234567',
+                'role_id'  => $adminRole->id,
+                'store_id' => $store->id,
+                'contact'  => '081200000000',
                 'status'   => 'active',
             ]
         );
 
-        $store2->update(['owner_id' => $owner2->id]);
-
-        // Default settings for Toko 2
-        app()->instance('current_store', $store2);
-        \App\Models\Setting::set('store_name', 'Demo Elektronik');
-        \App\Models\Setting::set('receipt_footer', 'Terima kasih telah berbelanja di Demo Elektronik.');
-        \App\Models\Setting::set('tax_percentage', '0');
-        \App\Models\Setting::set('default_currency', 'IDR');
-
-        \App\Models\PaymentSetting::firstOrCreate(
-            ['store_id' => $store2->id],
-            ['qris_mode' => 'manual', 'is_qris_active' => true]
+        // Staf Toko 1
+        User::firstOrCreate(
+            ['email' => 'kasir@armalcellular.test'],
+            [
+                'username' => 'Kasir Armal',
+                'password' => Hash::make('password'),
+                'role_id'  => $kasirRole->id,
+                'store_id' => $store->id,
+                'contact'  => '081234567891',
+                'status'   => 'active',
+            ]
         );
 
-        // Clear tenant context after seeding static stores
-        app()->forgetInstance('current_store');
+        User::firstOrCreate(
+            ['email' => 'teknisi@armalcellular.test'],
+            [
+                'username' => 'Teknisi Armal',
+                'password' => Hash::make('password'),
+                'role_id'  => $teknisiRole->id,
+                'store_id' => $store->id,
+                'contact'  => '081234567892',
+                'status'   => 'active',
+            ]
+        );
 
-        // Generate 98 additional stores to reach 100
-        $faker = \Faker\Factory::create('id_ID');
-        for ($i = 3; $i <= 100; $i++) {
-            $storeName = $faker->company . ' ' . $faker->companySuffix;
-            $storeSlug = \Illuminate\Support\Str::slug($storeName) . '-' . $i;
-            
-            $store = Store::firstOrCreate(
-                ['slug' => $storeSlug],
-                [
-                    'name'            => $storeName,
-                    'address'         => $faker->address,
-                    'phone'           => $faker->phoneNumber,
-                    'email'           => $faker->unique()->safeEmail,
-                    'description'     => $faker->sentence,
-                    'is_active'       => true,
-                    'catalog_enabled' => $faker->boolean(80),
-                ]
-            );
+        User::firstOrCreate(
+            ['email' => 'gudang@armalcellular.test'],
+            [
+                'username' => 'Gudang Armal',
+                'password' => Hash::make('password'),
+                'role_id'  => $gudangRole->id,
+                'store_id' => $store->id,
+                'contact'  => '081234567893',
+                'status'   => 'active',
+            ]
+        );
 
-            $shortStoreName = substr($storeName, 0, 30); // Max 30 chars for store name part of username
-
-            $owner = User::firstOrCreate(
-                ['email' => "owner{$i}@{$storeSlug}.test"],
-                [
-                    'username' => 'Owner ' . $shortStoreName,
-                    'password' => Hash::make('password'),
-                    'role_id'  => $ownerRole->id,
-                    'store_id' => $store->id,
-                    'contact'  => $faker->phoneNumber,
-                    'status'   => 'active',
-                ]
-            );
-
-            $store->update(['owner_id' => $owner->id]);
-
-            User::firstOrCreate(
-                ['email' => "kasir{$i}@{$storeSlug}.test"],
-                ['username' => 'Kasir ' . $shortStoreName, 'password' => Hash::make('password'), 'role_id' => $kasirRole->id, 'store_id' => $store->id, 'contact' => $faker->phoneNumber, 'status' => 'active']
-            );
-            User::firstOrCreate(
-                ['email' => "teknisi{$i}@{$storeSlug}.test"],
-                ['username' => 'Teknisi ' . $shortStoreName, 'password' => Hash::make('password'), 'role_id' => $teknisiRole->id, 'store_id' => $store->id, 'contact' => $faker->phoneNumber, 'status' => 'active']
-            );
-            User::firstOrCreate(
-                ['email' => "gudang{$i}@{$storeSlug}.test"],
-                ['username' => 'Gudang ' . $shortStoreName, 'password' => Hash::make('password'), 'role_id' => $gudangRole->id, 'store_id' => $store->id, 'contact' => $faker->phoneNumber, 'status' => 'active']
-            );
-
-            app()->instance('current_store', $store);
-            \App\Models\Setting::set('store_name', $storeName);
-            \App\Models\Setting::set('store_address', $store->address);
-            \App\Models\Setting::set('store_phone', $store->phone);
-            \App\Models\Setting::set('store_email', $store->email);
-            \App\Models\Setting::set('receipt_footer', 'Terima kasih telah berbelanja di ' . $storeName);
-            \App\Models\Setting::set('tax_percentage', '0');
-            \App\Models\Setting::set('default_currency', 'IDR');
-
-            \App\Models\PaymentSetting::firstOrCreate(
-                ['store_id' => $store->id],
-                ['qris_mode' => 'manual', 'is_qris_active' => true]
-            );
-        }
-
-        app()->forgetInstance('current_store');
+        // Bind store in app container for multi-tenancy traits
+        app()->instance('current_store', $store);
     }
 }

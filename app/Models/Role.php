@@ -17,10 +17,11 @@ class Role extends Model
     public function getDisplayNameAttribute(): string
     {
         $names = [
-            'owner' => 'Pemilik / Owner',
-            'kasir' => 'Staff Kasir / Cashier',
+            'admin'   => 'Admin / Administrator',
+            'owner'   => 'Pemilik / Owner',
+            'kasir'   => 'Staff Kasir / Cashier',
             'teknisi' => 'Teknisi / Technician',
-            'gudang' => 'Staf Gudang / Warehouse',
+            'gudang'  => 'Staf Gudang / Warehouse',
         ];
         return $names[$this->name] ?? ucfirst($this->name);
     }

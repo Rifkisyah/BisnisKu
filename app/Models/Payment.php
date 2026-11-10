@@ -19,6 +19,8 @@ class Payment extends Model
         'amount',
         'status',
         'external_order_id',
+        'qr_string',
+        'expiry_time',
         'reference_number',
         'proof_image',
         'callback_payload',
@@ -29,6 +31,7 @@ class Payment extends Model
     protected $casts = [
         'callback_payload' => 'array',
         'paid_at' => 'datetime',
+        'expiry_time' => 'datetime',
     ];
 
     public function transaction()

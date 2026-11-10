@@ -8,37 +8,50 @@
 @theme {
     --font-sans: 'Montserrat', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
 
-    /* ── Brand & Accent ── */
-    --color-primary: #0064E0;
-    --color-primary-deep: #0143B5;
-    --color-primary-soft: rgba(0, 100, 224, 0.12);
-    --color-fb-blue: #1877F2;
+    /* ── Brand & Accent (BisnisKu) ── */
+    --color-primary: #2563EB;
+    --color-primary-deep: #1D4ED8;
+    --color-primary-soft: rgba(37, 99, 235, 0.10);
+    --color-brand-accent: #3B82F6;
+    --color-fb-blue: #2563EB;
 
-    /* ── Surface ── */
+    /* ── Surface (Light Mode) ── */
     --color-canvas: #FFFFFF;
-    --color-surface-soft: #F5F6F7;
-    --color-hairline: #CED0D4;
-    --color-hairline-soft: #E4E6EB;
+    --color-surface-soft: #F1F5F9;
+    --color-surface-muted: #E2E8F0;
+    --color-hairline: #CBD5E1;
+    --color-hairline-soft: #E2E8F0;
 
-    /* ── Text / Ink ── */
-    --color-ink-deep: #0A131A;
-    --color-ink: #1C2B33;
-    --color-charcoal: #3A4A54;
-    --color-slate: #65676B;
-    --color-steel: #8A8D91;
-    --color-stone: #B0B3B8;
+    /* ── Text / Ink (Light Mode) ── */
+    --color-ink-deep: #0F172A;
+    --color-ink: #1E293B;
+    --color-charcoal: #334155;
+    --color-slate: #64748B;
+    --color-steel: #94A3B8;
+    --color-stone: #94A3B8;
 
     /* ── Buttons ── */
-    --color-ink-button: #0A131A;
+    --color-ink-button: #2563EB;
     --color-on-ink-button: #FFFFFF;
     --color-on-primary: #FFFFFF;
 
-    /* ── Semantic ── */
-    --color-success: #31A24C;
-    --color-attention: #F7B928;
-    --color-warning: #F7D100;
-    --color-critical: #E41E3F;
-    --color-critical-strong: #D0021B;
+    /* ── Semantic Colors (Light Mode) ── */
+    --color-success: #16A34A;
+    --color-success-deep: #15803D;
+    --color-success-soft: rgba(22, 163, 74, 0.12);
+
+    --color-attention: #D97706;
+    --color-attention-soft: rgba(217, 119, 6, 0.12);
+
+    --color-warning: #D97706;
+    --color-warning-soft: rgba(217, 119, 6, 0.12);
+
+    --color-critical: #DC2626;
+    --color-critical-strong: #B91C1C;
+    --color-critical-soft: rgba(220, 38, 38, 0.10);
+
+    --color-info: #0284C7;
+    --color-info-soft: rgba(2, 132, 199, 0.10);
 
     /* ── Radius ── */
     --radius-xs: 2px;
@@ -53,24 +66,46 @@
 }
 
 .dark {
-    /* ── Surface ── */
-    --color-canvas: #111827;
-    --color-surface-soft: #1f2937;
-    --color-hairline: #374151;
-    --color-hairline-soft: #1f2937;
+    /* ── Surface (Dark Mode) ── */
+    --color-canvas: #1E293B;
+    --color-surface-soft: #0F172A;
+    --color-surface-muted: #334155;
+    --color-hairline: #475569;
+    --color-hairline-soft: #334155;
 
-    /* ── Text / Ink ── */
-    --color-ink-deep: #f9fafb;
-    --color-ink: #d1d5db;
-    --color-charcoal: #9ca3af;
-    --color-slate: #6b7280;
-    --color-steel: #4b5563;
-    --color-stone: #374151;
+    /* ── Text / Ink (Dark Mode) ── */
+    --color-ink-deep: #F8FAFC;
+    --color-ink: #F1F5F9;
+    --color-charcoal: #E2E8F0;
+    --color-slate: #94A3B8;
+    --color-steel: #64748B;
+    --color-stone: #64748B;
 
-    /* ── Buttons ── */
-    --color-ink-button: #f9fafb;
-    --color-on-ink-button: #111827;
-    --color-primary: #3b82f6;
+    /* ── Buttons & Brand (Dark Mode) ── */
+    --color-ink-button: #3B82F6;
+    --color-on-ink-button: #FFFFFF;
+    --color-primary: #3B82F6;
+    --color-primary-deep: #60A5FA;
+    --color-primary-soft: rgba(59, 130, 246, 0.20);
+    --color-fb-blue: #3B82F6;
+
+    /* ── Semantic Colors (Dark Mode) ── */
+    --color-success: #22C55E;
+    --color-success-deep: #4ADE80;
+    --color-success-soft: rgba(34, 197, 94, 0.20);
+
+    --color-attention: #FBBF24;
+    --color-attention-soft: rgba(251, 191, 36, 0.20);
+
+    --color-warning: #F59E0B;
+    --color-warning-soft: rgba(245, 158, 11, 0.20);
+
+    --color-critical: #EF4444;
+    --color-critical-strong: #F87171;
+    --color-critical-soft: rgba(239, 68, 68, 0.20);
+
+    --color-info: #38BDF8;
+    --color-info-soft: rgba(56, 189, 248, 0.20);
 }
 
 [x-cloak] { display: none !important; }
@@ -93,93 +128,175 @@
 /* ── Pill Buttons ── */
 .btn-primary {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    background: var(--color-ink-button); color: var(--color-on-ink-button);
+    background: var(--color-primary); color: #FFFFFF;
     font-size: 14px; font-weight: 700; letter-spacing: -0.14px;
-    padding: 14px 30px; border-radius: var(--radius-full);
-    transition: background 150ms ease-out;
+    padding: 12px 26px; border-radius: var(--radius-full);
+    transition: all 150ms ease-out;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
 }
-.btn-primary:active { background: var(--color-charcoal); }
+.btn-primary:hover {
+    background: var(--color-primary-deep);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+.btn-primary:active { transform: scale(0.98); }
 
 .btn-buy {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    background: var(--color-primary); color: var(--color-on-primary);
+    background: var(--color-primary); color: #FFFFFF;
     font-size: 14px; font-weight: 700; letter-spacing: -0.14px;
     padding: 14px 30px; border-radius: var(--radius-full);
-    transition: background 150ms ease-out;
+    transition: all 150ms ease-out;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
 }
-.btn-buy:active { background: var(--color-primary-deep); }
+.btn-buy:hover { background: var(--color-primary-deep); }
+.btn-buy:active { transform: scale(0.98); }
 
 .btn-secondary {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    background: transparent; color: var(--color-ink-deep);
+    background: var(--color-canvas); color: var(--color-ink-deep);
     font-size: 14px; font-weight: 700; letter-spacing: -0.14px;
     padding: 12px 28px; border-radius: var(--radius-full);
-    border: 2px solid var(--color-ink-deep);
-    transition: background 150ms ease-out;
+    border: 1.5px solid var(--color-hairline);
+    transition: all 150ms ease-out;
+}
+.btn-secondary:hover {
+    background: var(--color-surface-soft);
+    border-color: var(--color-slate);
 }
 
 .btn-ghost {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    background: transparent; color: var(--color-ink-deep);
-    font-size: 14px; font-weight: 700; letter-spacing: -0.14px;
+    background: transparent; color: var(--color-ink);
+    font-size: 14px; font-weight: 600; letter-spacing: -0.14px;
     padding: 10px 22px; border-radius: var(--radius-full);
-    border: 2px solid rgba(10, 19, 23, 0.12);
+    border: 1px solid var(--color-hairline);
     transition: all 150ms ease-out;
 }
-.btn-ghost:active { background: var(--color-surface-soft); }
+.btn-ghost:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-ink-deep);
+}
 
 /* ── Pill Tab ── */
 .pill-tab {
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 8px 16px; border-radius: var(--radius-full);
+    padding: 8px 18px; border-radius: var(--radius-full);
     background: var(--color-canvas); color: var(--color-ink);
     border: 1px solid var(--color-hairline);
-    font-size: 14px; font-weight: 700; letter-spacing: -0.14px;
+    font-size: 14px; font-weight: 600; letter-spacing: -0.14px;
     transition: all 150ms ease-out;
 }
+.pill-tab:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-ink-deep);
+}
 .pill-tab-active {
-    background: var(--color-ink-deep); color: var(--color-canvas);
-    border-color: transparent;
+    background: var(--color-primary) !important;
+    color: #FFFFFF !important;
+    border-color: var(--color-primary) !important;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
 }
 
-/* ── Badge Pills ── */
-.badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: var(--radius-full); font-size: 12px; font-weight: 700; line-height: 1.33; }
-.badge-success { background: var(--color-success); color: #fff; }
-.badge-attention { background: var(--color-attention); color: var(--color-canvas); }
-.badge-warning { background: var(--color-warning); color: var(--color-ink-deep); }
-.badge-critical { background: var(--color-critical); color: #fff; }
-.badge-info { background: var(--color-primary-soft); color: var(--color-primary); }
-.badge-neutral { background: var(--color-surface-soft); color: var(--color-charcoal); }
+/* ── Badges ── */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.33;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.badge-success { background: var(--color-success); color: #FFFFFF; }
+.badge-attention { background: var(--color-attention); color: #FFFFFF; }
+.badge-warning { background: var(--color-warning); color: #FFFFFF; }
+.badge-critical { background: var(--color-critical); color: #FFFFFF; }
+.badge-info { background: var(--color-primary); color: #FFFFFF; }
+.badge-neutral { background: var(--color-surface-soft); color: var(--color-charcoal); border: 1px solid var(--color-hairline); }
+
+/* ── K-Means Cluster Badges ── */
+.badge-cluster-fast {
+    background: #DCFCE7;
+    color: #15803D;
+    border: 1px solid #86EFAC;
+}
+.dark .badge-cluster-fast {
+    background: rgba(34, 197, 94, 0.20);
+    color: #4ADE80;
+    border: 1px solid rgba(34, 197, 94, 0.40);
+}
+
+.badge-cluster-medium {
+    background: #FEF3C7;
+    color: #B45309;
+    border: 1px solid #FDE68A;
+}
+.dark .badge-cluster-medium {
+    background: rgba(245, 158, 11, 0.20);
+    color: #FBBF24;
+    border: 1px solid rgba(245, 158, 11, 0.40);
+}
+
+.badge-cluster-slow {
+    background: #FFEDD5;
+    color: #C2410C;
+    border: 1px solid #FED7AA;
+}
+.dark .badge-cluster-slow {
+    background: rgba(249, 115, 22, 0.20);
+    color: #FB923C;
+    border: 1px solid rgba(249, 115, 22, 0.40);
+}
+
+.badge-cluster-dead {
+    background: #FEE2E2;
+    color: #B91C1C;
+    border: 1px solid #FECACA;
+}
+.dark .badge-cluster-dead {
+    background: rgba(239, 68, 68, 0.20);
+    color: #F87171;
+    border: 1px solid rgba(239, 68, 68, 0.40);
+}
 
 /* ── Cards ── */
 .card {
     background: var(--color-canvas);
     border-radius: var(--radius-xl);
     border: 1px solid var(--color-hairline-soft);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
 }
 .card-feature {
     background: var(--color-canvas);
     border-radius: var(--radius-xxxl);
     border: 1px solid var(--color-hairline-soft);
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04);
 }
 .card-sticky {
     background: var(--color-canvas);
     border-radius: var(--radius-xl);
     border: 1px solid var(--color-hairline-soft);
-    box-shadow: rgba(20, 22, 26, 0.3) 0px 1px 4px 0px;
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
 }
 
 /* ── Form Inputs ── */
 .input-field {
     width: 100%; height: 44px;
     background: var(--color-canvas); color: var(--color-ink);
-    border: 1px solid var(--color-hairline); border-radius: var(--radius-lg);
+    border: 1.5px solid var(--color-hairline); border-radius: var(--radius-lg);
     padding: 0 12px; font-size: 14px;
-    transition: border 150ms ease-out;
+    transition: all 150ms ease-out;
 }
 .input-field:focus {
-    border-color: var(--color-fb-blue); border-width: 2px;
-    outline: none; padding: 0 11px;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
+    outline: none;
+}
+select.input-field option {
+    background: var(--color-canvas);
+    color: var(--color-ink);
 }
 
 /* ── Nav Sidebar ── */
@@ -189,9 +306,18 @@
     font-size: 14px; font-weight: 500; letter-spacing: -0.14px;
     color: var(--color-slate); transition: all 150ms ease-out;
 }
-.sidebar-link:hover { background: var(--color-surface-soft); color: var(--color-ink); }
+.sidebar-link:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-ink-deep);
+}
 .sidebar-link-active {
-    background: var(--color-ink-deep); color: var(--color-canvas);
+    background: var(--color-primary) !important;
+    color: #FFFFFF !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+.sidebar-link-active svg {
+    color: #FFFFFF !important;
 }
 
 /* ── Tables ── */
@@ -212,7 +338,6 @@
     .section-gap { padding: 16px; }
     .section-gap-sm { padding: 12px; }
 }
-
 
 /* Global cursor pointer for all buttons as requested */
 button:hover, a:hover, [role="button"]:hover, .btn-primary:hover, .btn-secondary:hover, .btn-ghost:hover, .btn-buy:hover {

@@ -12,20 +12,25 @@ class DebtController extends Controller
 {
     public function index(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(90)->toDateString());
         $endDate = $request->get('end_date', now()->toDateString());
 
         $query = Debt::whereBetween('debt_date', [$startDate, \Carbon\Carbon::parse($endDate)->endOfDay()])
             ->when($request->search, fn($q, $s) => $q->where('debtor_name', 'like', "%{$s}%")->orWhere('debt_code', 'like', "%{$s}%"))
             ->when($request->status, fn($q, $st) => $q->where('status', $st));
 
-        $debts = $query->applySort($request->sort)->paginate(15)->withQueryString();
-
         if ($request->get('export') === 'pdf') {
             $allDebts = $query->get();
             $pdf = Pdf::loadView('debts.pdf', ['debts' => $allDebts, 'startDate' => $startDate, 'endDate' => $endDate]);
             return $pdf->download('laporan-hutang.pdf');
         }
+
+        if ($request->get('print') === '1' || $request->has('print')) {
+            $allDebts = $query->applySort($request->sort, 'created_at', 'debtor_name')->get();
+            return view('debts.pdf', ['debts' => $allDebts, 'startDate' => $startDate, 'endDate' => $endDate, 'isPrint' => true]);
+        }
+
+        $debts = $query->applySort($request->sort, 'created_at', 'debtor_name')->paginate(15)->withQueryString();
 
         return view('debts.index', compact('debts', 'startDate', 'endDate'));
     }
@@ -64,7 +69,7 @@ class DebtController extends Controller
         $validated = $request->validate([
             'amount'         => 'required|numeric|min:1|max:' . $debt->remaining_amount,
             'payment_date'   => 'required|date',
-            'payment_method' => 'required|in:cash,qris,transfer',
+            'payment_method' => 'required|in:cash,qris',
             'notes'          => 'nullable|string|max:500',
         ]);
         DB::transaction(function () use ($validated, $debt) {

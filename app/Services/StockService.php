@@ -20,6 +20,11 @@ class StockService
     public function stockOut(string $productCode, int $quantity, string $referenceType = null, string $referenceCode = null, string $notes = null): void
     {
         $product = Product::findOrFail($productCode);
+        
+        if ($product->type === 'service') {
+            return;
+        }
+
         $previousStock = $product->stock;
 
         if ($product->stock < $quantity) {
@@ -55,6 +60,11 @@ class StockService
     public function stockIn(string $productCode, int $quantity, string $referenceType = null, string $referenceCode = null, string $notes = null): void
     {
         $product = Product::findOrFail($productCode);
+
+        if ($product->type === 'service') {
+            return;
+        }
+
         $previousStock = $product->stock;
 
         $product->stock += $quantity;

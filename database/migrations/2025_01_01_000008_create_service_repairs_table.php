@@ -16,7 +16,7 @@ return new class extends Migration
             $table->decimal('service_fee', 15, 2)->default(0);
             $table->decimal('component_cost', 15, 2)->default(0);
             $table->decimal('total_cost', 15, 2)->default(0);
-            $table->enum('payment_method', ['cash', 'transfer', 'qris'])->default('cash');
+            $table->enum('payment_method', ['cash', 'qris'])->default('cash');
             $table->decimal('down_payment', 15, 2)->default(0);
             $table->enum('status', ['received', 'in_progress', 'waiting_for_parts', 'completed', 'canceled', 'picked_up'])->default('received');
             $table->dateTime('start_date');

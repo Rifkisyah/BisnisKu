@@ -14,6 +14,11 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
+        // Admin has super access — bypasses all role checks
+        if (auth()->user()->isAdmin()) {
+            return $next($request);
+        }
+
         if (!auth()->user()->hasRole(...$roles)) {
             abort(403, 'Unauthorized access.');
         }

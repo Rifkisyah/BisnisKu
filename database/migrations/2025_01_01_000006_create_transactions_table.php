@@ -15,7 +15,7 @@ return new class extends Migration
             $table->decimal('subtotal', 15, 2)->default(0);
             $table->decimal('discount', 15, 2)->default(0);
             $table->decimal('total', 15, 2)->default(0);
-            $table->enum('payment_method', ['cash', 'transfer', 'qris'])->default('cash');
+            $table->enum('payment_method', ['cash', 'qris'])->default('cash');
             $table->decimal('amount_paid', 15, 2)->default(0);
             $table->decimal('change_amount', 15, 2)->default(0);
             $table->enum('status', ['completed', 'canceled', 'pending'])->default('completed');

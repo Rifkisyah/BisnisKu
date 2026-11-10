@@ -17,9 +17,9 @@ class SalesRevenueController extends Controller
         return (new Transaction())->getTable() . '.status';
     }
 
-    public function index(Request $request)
+    private function getReportData(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(30)->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
         $limit     = $request->get('limit', 10);
 
@@ -48,8 +48,6 @@ class SalesRevenueController extends Controller
             
         $netProfit = $grossProfit - $totalDiscount;
 
-
-
         // ── Sales Trend (Daily) ───────────────────────────────────────────────
         $salesTrendDaily = Transaction::completed()
             ->inPeriod($startCarbon, $endCarbon)
@@ -57,7 +55,6 @@ class SalesRevenueController extends Controller
             ->groupByRaw('DATE(transaction_date)')
             ->orderBy('date')
             ->get();
-
 
         // ── Payment Method Breakdown ──────────────────────────────────────────
         $paymentBreakdown = Transaction::completed()
@@ -97,34 +94,47 @@ class SalesRevenueController extends Controller
             ->orderBy('due_date')
             ->get();
 
-        if ($request->get('export') === 'pdf') {
-            $totalRevenue = $salesRevenue;
-            $pdf = Pdf::loadView('reports.pdf.sales-revenue', compact(
-                'transactions', 'salesRevenue', 'totalRevenue', 'startDate', 'endDate'
-            ));
-            return $pdf->download('laporan-penjualan-pendapatan.pdf');
-        }
-
-        return view('reports.sales-revenue.index', compact(
+        return compact(
             'transactions', 'salesRevenue', 'totalTransactions', 'grossProfit', 'netProfit',
             'startDate', 'endDate', 'limit',
             'salesTrendDaily',
             'paymentBreakdown', 'cashierBreakdown',
             'debts', 'totalDebts', 'totalDebtAmt', 'overdueDebts', 'paidDebtAmt',
             'debtTrend', 'activeDebts'
-        ));
+        );
+    }
+
+    public function index(Request $request)
+    {
+        $data = $this->getReportData($request);
+        return view('reports.sales-revenue.index', $data);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $data = $this->getReportData($request);
+        
+        $data['chart_sales_trend'] = $request->input('chart_sales_trend');
+        $data['chart_debt_trend'] = $request->input('chart_debt_trend');
+        
+        $data['storeName'] = \App\Models\Setting::get('store_name', 'Nama Toko');
+        $data['storeAddress'] = \App\Models\Setting::get('store_address', '');
+        $data['storePhone'] = \App\Models\Setting::get('store_phone', '');
+
+        $pdf = Pdf::loadView('reports.pdf.sales-revenue', $data)->setPaper('a4', 'landscape');
+        return $pdf->download('laporan-penjualan-pendapatan-' . now()->format('Y-m-d') . '.pdf');
     }
 
     public function transactions(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(30)->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
 
         $startCarbon = Carbon::parse($startDate)->startOfDay();
         $endCarbon   = Carbon::parse($endDate)->endOfDay();
 
         $transactions = Transaction::with('cashier')
-            ->where($this->transactionStatusColumn(), 'completed')
+            ->where($this->transactionStatusColumn(), 'paid')
             ->whereBetween('transaction_date', [$startCarbon, $endCarbon])
             ->when($request->payment_method, fn($q, $pm) => $q->where('payment_method', $pm))
             ->when($request->cashier_id, fn($q, $id) => $q->where('cashier_id', $id))
@@ -139,7 +149,7 @@ class SalesRevenueController extends Controller
 
     public function debts(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(30)->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
 
         $startCarbon = Carbon::parse($startDate)->startOfDay();
@@ -157,14 +167,14 @@ class SalesRevenueController extends Controller
 
     public function products(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(30)->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
         $startCarbon = Carbon::parse($startDate)->startOfDay();
         $endCarbon   = Carbon::parse($endDate)->endOfDay();
 
         $sort = $request->get('sort', 'desc') === 'asc' ? 'asc' : 'desc';
 
-        $products = TransactionItem::whereHas('transaction', fn($q) => $q->where($this->transactionStatusColumn(), 'completed')
+        $products = TransactionItem::whereHas('transaction', fn($q) => $q->where($this->transactionStatusColumn(), 'paid')
                 ->whereBetween('transaction_date', [$startCarbon, $endCarbon]))
             ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
             ->selectRaw('products.product_code, products.name, SUM(transaction_items.quantity) as total_qty, SUM(transaction_items.subtotal) as total_revenue')
@@ -178,14 +188,14 @@ class SalesRevenueController extends Controller
 
     public function categories(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(30)->toDateString());
         $endDate   = $request->get('end_date', now()->toDateString());
         $startCarbon = Carbon::parse($startDate)->startOfDay();
         $endCarbon   = Carbon::parse($endDate)->endOfDay();
 
         $sort = $request->get('sort', 'desc') === 'asc' ? 'asc' : 'desc';
 
-        $categories = TransactionItem::whereHas('transaction', fn($q) => $q->where($this->transactionStatusColumn(), 'completed')
+        $categories = TransactionItem::whereHas('transaction', fn($q) => $q->where($this->transactionStatusColumn(), 'paid')
                 ->whereBetween('transaction_date', [$startCarbon, $endCarbon]))
             ->join('products', 'transaction_items.product_code', '=', 'products.product_code')
             ->join('categories', 'products.category_code', '=', 'categories.category_code')

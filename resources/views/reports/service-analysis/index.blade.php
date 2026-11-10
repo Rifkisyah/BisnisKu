@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('page-title', 'Laporan Layanan Perbaikan')
 @section('content')
+<div class="print:hidden">
 
 {{-- ═══════════════════════════════════════════════════════ --}}
 {{-- HEADER & FILTER                                         --}}
@@ -10,45 +11,45 @@
 </div>
 
 <div class="mb-6 card-feature p-5">
-    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-        <div>
+    <div class="flex flex-col xl:flex-row xl:items-start justify-between gap-6">
+        <div class="xl:w-1/3">
             <h1 class="type-heading-sm !text-xl sm:!text-2xl text-[var(--color-ink-deep)] flex items-center gap-2">
-                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <svg class="w-6 h-6 text-[var(--color-primary)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Analisis Layanan Perbaikan
             </h1>
             <p class="type-caption text-[var(--color-slate)] mt-2">Statistik perbaikan dan penggunaan sparepart · Periode {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} <b>-</b> {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
         </div>
         
-        <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-            <form method="GET" class="flex flex-col md:flex-row md:items-end gap-3 w-full" id="service-filter-form">
-                <div class="flex flex-col w-full md:w-auto">
+        <div class="xl:w-2/3 w-full">
+            <form method="GET" class="flex flex-row flex-wrap xl:justify-end items-end gap-3 w-full" id="service-filter-form">
+                <div class="flex flex-col">
                     <label for="service-start-date" class="type-caption-bold text-[var(--color-slate)] mb-1">Tanggal Mulai</label>
-                    <input type="date" name="start_date" id="service-start-date" value="{{ \Carbon\Carbon::parse($startDate)->format('Y-m-d') }}" class="input-field w-full md:w-auto text-xs !py-1.5" onchange="this.form.submit()">
+                    <input type="date" name="start_date" id="service-start-date" value="{{ \Carbon\Carbon::parse($startDate)->format('Y-m-d') }}" class="input-field text-xs !py-1.5 min-w-[120px]" onchange="this.form.submit()">
                 </div>
-                <div class="flex flex-col w-full md:w-auto">
+                <div class="flex flex-col">
                     <label for="service-end-date" class="type-caption-bold text-[var(--color-slate)] mb-1">Tanggal Akhir</label>
-                    <input type="date" name="end_date" id="service-end-date" value="{{ \Carbon\Carbon::parse($endDate)->format('Y-m-d') }}" class="input-field w-full md:w-auto text-xs !py-1.5" onchange="this.form.submit()">
+                    <input type="date" name="end_date" id="service-end-date" value="{{ \Carbon\Carbon::parse($endDate)->format('Y-m-d') }}" class="input-field text-xs !py-1.5 min-w-[120px]" onchange="this.form.submit()">
                 </div>
                 
-                <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto mt-2 md:mt-0 md:border-r border-[var(--color-hairline-soft)] md:pr-3">
+                <div class="flex flex-row items-center gap-2 mt-2 md:mt-0 xl:border-r border-[var(--color-hairline-soft)] xl:pr-3">
                 @php
                     $diffDays = \Carbon\Carbon::parse($startDate)->startOfDay()->diffInDays(\Carbon\Carbon::parse($endDate)->startOfDay());
                     $activeFilter = null;
                     if ($diffDays == 7) $activeFilter = 7;
-                    elseif ($diffDays == 30) $activeFilter = 30;
+                    elseif ($diffDays == 30 || !request()->has('start_date')) $activeFilter = 30;
                     elseif ($diffDays == 365) $activeFilter = 365;
                 @endphp
-                <button type="button" onclick="setDateRange(7)" class="flex-1 text-center justify-center {{ $activeFilter === 7 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.week') }}</button>
-                <button type="button" onclick="setDateRange(30)" class="flex-1 text-center justify-center {{ $activeFilter === 30 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.month') }}</button>
-                <button type="button" onclick="setDateRange(365)" class="flex-1 text-center justify-center {{ $activeFilter === 365 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.year') }}</button>
+                <button type="button" onclick="setDateRange(7)" class="w-[84px] text-center justify-center {{ $activeFilter === 7 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.week') ?? 'Minggu' }}</button>
+                <button type="button" onclick="setDateRange(30)" class="w-[84px] text-center justify-center {{ $activeFilter === 30 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.month') ?? 'Bulan' }}</button>
+                <button type="button" onclick="setDateRange(365)" class="w-[84px] text-center justify-center {{ $activeFilter === 365 ? 'bg-black text-white hover:bg-black/80 rounded-full font-semibold shadow-sm border-2 border-transparent' : 'btn-ghost' }} !py-2 !px-3 text-xs">{{ __('messages.year') ?? 'Tahun' }}</button>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto mt-2 md:mt-0 md:ml-auto">
-                <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}" class="flex-1 justify-center btn-ghost !py-2 !px-3 text-xs flex items-center gap-1 text-[var(--color-critical)] border-[var(--color-critical)]/20 hover:bg-[var(--color-critical)]/10 rounded-[var(--radius-md)]" title="PDF">
+                <div class="flex flex-row items-center gap-2 mt-2 md:mt-0">
+                <button type="button" onclick="downloadPdf()" class="w-[130px] justify-center btn-ghost !py-2 !px-3 text-xs flex items-center gap-1 text-[var(--color-critical)] border-[var(--color-critical)]/20 hover:bg-[var(--color-critical)]/10 rounded-[var(--radius-md)]" title="PDF">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     PDF
-                </a>
-                <button type="button" onclick="window.print()" class="flex-1 justify-center btn-ghost !py-2 !px-3 text-xs flex items-center gap-1 rounded-[var(--radius-md)]" title="Cetak">
+                </button>
+                <button type="button" onclick="window.print()" class="w-[130px] justify-center btn-ghost !py-2 !px-3 text-xs flex items-center gap-1 rounded-[var(--radius-md)]" title="Cetak">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                     Cetak
                 </button>
@@ -147,7 +148,7 @@
             </div>
             
             <div class="p-4 border-t border-[var(--color-hairline-soft)] text-center mt-auto">
-                <a href="{{ route('reports.service_analysis.trends', request()->all()) }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
+                <a href="{{ route('service-repairs.index', request()->all()) }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
                     Lihat Keseluruhan Data
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
@@ -214,7 +215,7 @@
             </div>
 
             <div class="p-4 border-t border-[var(--color-hairline-soft)] text-center mt-auto">
-                <a href="{{ route('reports.service_analysis.spareparts', request()->all()) }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
+                <a href="{{ route('service-repairs.index', request()->all()) }}" class="bg-[var(--color-ink)] text-white hover:bg-[var(--color-ink-deep)] transition-colors rounded-[var(--radius-full)] font-medium type-body-sm !py-2 !px-6 inline-flex items-center gap-2">
                     Lihat Keseluruhan Data
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
@@ -222,6 +223,138 @@
         </div>
     </div>
 </div>
+
+</div>
+<!-- END print:hidden -->
+
+{{-- ═══════════════════════════════════════════════════════ --}}
+{{-- PRINT TEMPLATE (HIDDEN ON WEB)                          --}}
+{{-- ═══════════════════════════════════════════════════════ --}}
+<div class="hidden print:block w-full text-black bg-white" style="margin:0;padding:0;font-family:'Inter',sans-serif">
+<style>
+@media print {
+    @page { size: A4 landscape; margin: 12mm 15mm; }
+    body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .print\:hidden { display: none !important; }
+    .print\:block { display: block !important; }
+    
+    .pr-container { width: 100%; max-width: 100%; margin: 0 auto; color: #0f172a; }
+    .pr-header { display: table; width: 100%; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px; }
+    .pr-header-left { display: table-cell; vertical-align: bottom; }
+    .pr-header-right { display: table-cell; vertical-align: bottom; text-align: right; }
+    .pr-title { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; margin: 0 0 4px 0; }
+    .pr-subtitle { font-size: 11px; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
+    .pr-meta { font-size: 12px; color: #475569; margin: 2px 0; }
+    
+    .pr-section { margin-bottom: 20px; break-inside: avoid; }
+    .pr-sh { display: table; width: 100%; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+    .pr-snum { display: table-cell; width: 24px; vertical-align: middle; font-size: 14px; font-weight: 800; color: #2563EB; }
+    .pr-stitle { display: table-cell; vertical-align: middle; font-size: 14px; font-weight: 700; color: #1e293b; }
+    
+    .pr-kpi { display: table; width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 10px 0; margin-left: -10px; margin-right: -10px; margin-bottom: 15px; }
+    .pr-kpi-item { display: table-cell; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; }
+    .pr-kpi-label { font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+    .pr-kpi-val { font-size: 18px; font-weight: 800; color: #0f172a; }
+    
+    .prt { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px; }
+    .prt th { background: #f1f5f9; color: #475569; font-weight: 600; text-align: left; padding: 6px 8px; border-bottom: 2px solid #cbd5e1; }
+    .prt td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+    .prt .c { text-align: center; }
+    .prt .r { text-align: right; }
+    
+    .pr-chart-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 15px; }
+    .pr-row { display: table; width: 100%; table-layout: fixed; border-spacing: 15px 0; margin-left: -15px; margin-right: -15px; }
+    .pr-col { display: table-cell; vertical-align: top; }
+    
+    .pr-footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; display: flex; justify-content: space-between; }
+    .pr-pb { page-break-after: always; }
+}
+</style>
+
+<div class="pr-container">
+    <div class="pr-header">
+        <div class="pr-header-left">
+            <h1 class="pr-title">Analisis Layanan Perbaikan</h1>
+            <p class="pr-subtitle">{{ \App\Models\Setting::get('store_name', 'Nama Toko') }}</p>
+        </div>
+        <div class="pr-header-right">
+            <p class="pr-meta"><strong>Periode:</strong> {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} – {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
+            <p class="pr-meta"><strong>Dicetak:</strong> {{ now()->format('d M Y H:i') }}</p>
+        </div>
+    </div>
+
+    {{-- SECTION 1: RINGKASAN PERBAIKAN --}}
+    <div class="pr-section">
+        <div class="pr-sh"><div class="pr-snum">1</div><div class="pr-stitle">Ringkasan Tiket Layanan</div></div>
+        <div class="pr-kpi">
+            <div class="pr-kpi-item" style="border-top:3px solid #3b82f6">
+                <div class="pr-kpi-label">Total Perbaikan</div>
+                <div class="pr-kpi-val">{{ $serviceStats['total'] }}</div>
+            </div>
+            <div class="pr-kpi-item" style="border-top:3px solid #f59e0b">
+                <div class="pr-kpi-label">Aktif</div>
+                <div class="pr-kpi-val" style="color:#f59e0b">{{ $serviceStats['active'] }}</div>
+            </div>
+            <div class="pr-kpi-item" style="border-top:3px solid #10b981">
+                <div class="pr-kpi-label">Selesai</div>
+                <div class="pr-kpi-val" style="color:#10b981">{{ $serviceStats['done'] }}</div>
+            </div>
+            <div class="pr-kpi-item" style="border-top:3px solid #0ea5e9; background:#f0f9ff; border-color:#bae6fd">
+                <div class="pr-kpi-label">Revenue Service</div>
+                <div class="pr-kpi-val" style="color:#0ea5e9">Rp {{ number_format($serviceStats['revenue'], 0, ',', '.') }}</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- SECTION 2: TREN & SPAREPART --}}
+    <div class="pr-section">
+        <div class="pr-sh"><div class="pr-snum">2</div><div class="pr-stitle">Tren Bulanan & Penggunaan Sparepart</div></div>
+        
+        <div class="pr-row">
+            <div class="pr-col" style="width:50%">
+                <div class="pr-chart-box" id="print-service-trend-container">
+                    <p style="font-size:10px;color:#94a3b8;margin-bottom:5px">Tren Bulanan Perbaikan</p>
+                    <!-- Image injected via JS -->
+                </div>
+            </div>
+            <div class="pr-col" style="width:50%">
+                @if(count($topSpareparts ?? []) > 0)
+                <p style="font-size:11px;font-weight:bold;margin-bottom:5px">Penggunaan Sparepart Terbanyak (Top 10)</p>
+                <table class="prt">
+                    <thead><tr>
+                        <th>Sparepart</th>
+                        <th class="c">Qty</th>
+                        <th class="r">Total Biaya</th>
+                    </tr></thead>
+                    <tbody>
+                    @foreach($topSpareparts as $ts)
+                    <tr>
+                        <td style="font-weight:bold">{{ $ts->name }}</td>
+                        <td class="c">{{ $ts->total_qty }}</td>
+                        <td class="r">Rp {{ number_format($ts->total_cost, 0, ',', '.') }}</td>
+                    </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+                @else
+                <div style="background:#f8fafc;padding:10px;border-radius:6px;font-size:11px;border:1px dashed #cbd5e1;text-align:center">Belum ada penggunaan sparepart.</div>
+                @endif
+            </div>
+        </div>
+    </div>
+    
+    <div class="pr-footer">
+        <span>{{ \App\Models\Setting::get('store_name', 'Nama Toko') }} · Laporan Layanan Perbaikan</span>
+        <span>Dicetak: {{ now()->format('d M Y H:i') }}</span>
+    </div>
+</div>
+
+<form id="pdf-export-form" method="POST" action="{{ route('reports.service_analysis.export_pdf') }}" style="display:none;">
+    @csrf
+    <input type="hidden" name="start_date" id="pdf_start_date">
+    <input type="hidden" name="end_date" id="pdf_end_date">
+    <input type="hidden" name="chart_service_trend" id="pdf_chart_service_trend">
+</form>
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -232,7 +365,7 @@ window.rawServiceData = {
     topSpareparts: @json($topSpareparts)
 };
 
-const PALETTE = ['#0064E0','#10B981','#F59E0B','#6366F1','#F43F5E','#06B6D4','#8B5CF6','#14B8A6','#F97316','#EC4899'];
+const PALETTE = ['#2563EB','#10B981','#F59E0B','#6366F1','#F43F5E','#06B6D4','#8B5CF6','#14B8A6','#F97316','#EC4899'];
 
 window.updateServiceTrendChart = function(type, metric) {
     const ctx = document.getElementById('serviceTrendChart');
@@ -335,6 +468,23 @@ function setDateRange(days) {
     document.getElementById('service-end-date').value   = fmt(end);
     document.getElementById('service-filter-form').submit();
 }
+
+function downloadPdf() {
+    document.getElementById('pdf_start_date').value = document.getElementById('service-start-date').value;
+    document.getElementById('pdf_end_date').value = document.getElementById('service-end-date').value;
+    
+    const trendChart = document.getElementById('serviceTrendChart');
+    if (trendChart) document.getElementById('pdf_chart_service_trend').value = trendChart.toDataURL('image/png');
+    
+    document.getElementById('pdf-export-form').submit();
+}
+
+window.addEventListener('beforeprint', () => {
+    const trendChart = document.getElementById('serviceTrendChart');
+    if (trendChart) {
+        document.getElementById('print-service-trend-container').innerHTML = '<img src="' + trendChart.toDataURL('image/png') + '" style="max-height: 200px; width: auto; margin: 0 auto; display: block;">';
+    }
+});
 </script>
 @endpush
 @endsection

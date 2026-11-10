@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         if (DB::getDriverName() !== 'sqlite') {
-            DB::statement("ALTER TABLE transactions MODIFY payment_method ENUM('cash', 'transfer', 'qris', 'debt') DEFAULT 'cash'");
+            DB::statement("ALTER TABLE transactions MODIFY payment_method ENUM('cash', 'qris', 'debt') DEFAULT 'cash'");
         }
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         if (DB::getDriverName() !== 'sqlite') {
-            DB::statement("ALTER TABLE transactions MODIFY payment_method ENUM('cash', 'transfer', 'qris') DEFAULT 'cash'");
+            DB::statement("ALTER TABLE transactions MODIFY payment_method ENUM('cash', 'qris') DEFAULT 'cash'");
         }
     }
 };

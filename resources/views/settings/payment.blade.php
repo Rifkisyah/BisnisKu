@@ -49,46 +49,75 @@
 
             {{-- Dynamic QRIS Config --}}
             <div x-show="mode === 'dynamic'" class="space-y-4 pt-4 border-t border-[var(--color-hairline-soft)]" x-cloak>
-                <h4 class="type-body-sm-bold text-[var(--color-ink)]">Konfigurasi API / Payment Gateway</h4>
-                <div class="mb-4 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm border border-blue-200">
-                    <strong>Catatan:</strong> Untuk keamanan, Client Key, Server Key, dan Webhook URL diatur secara teknis oleh developer di konfigurasi backend (file .env). Anda hanya perlu memilih provider dan memasukkan Merchant ID.
+                <h4 class="type-body-sm-bold text-[var(--color-ink)]">Konfigurasi Midtrans QRIS Dinamis</h4>
+                <div class="mb-4 p-4 bg-blue-50 text-blue-900 rounded-lg text-sm border border-blue-200 space-y-2">
+                    <strong class="text-blue-800 font-bold block mb-1">📋 Panduan Setup Midtrans (Wajib Diisi):</strong>
+                    <ol class="list-decimal list-inside space-y-1 ml-1">
+                        <li>Daftar/Login ke <a href="https://dashboard.midtrans.com" target="_blank" class="underline font-bold text-blue-700">dashboard.midtrans.com</a></li>
+                        <li>Pastikan metode pembayaran <strong>QRIS</strong> sudah aktif di menu <em>Settings → Payment Methods</em></li>
+                        <li>Masuk ke menu <em>Settings → Access Keys</em>, lalu salin <strong>Server Key</strong> dan masukkan ke kolom di bawah.</li>
+                        <li>Pada dashboard Midtrans, isi <strong>Payment Notification URL</strong> (Webhook) dengan URL ini: <br>
+                            <code class="bg-blue-100 px-2 py-0.5 rounded text-xs font-mono text-blue-800 mt-1 inline-block">{{ url('/api/webhooks/midtrans') }}</code>
+                        </li>
+                    </ol>
+                    <p class="text-xs text-blue-700 mt-2 bg-blue-100/50 p-2 rounded border border-blue-200/50">
+                        ℹ️ <strong>Lingkungan Midtrans:</strong> Anda dapat memilih secara manual apakah ingin menggunakan mode <strong>Sandbox (Testing)</strong> atau <strong>Production (Live)</strong>.
+                    </p>
                 </div>
-                <div>
-                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Provider QRIS</label>
-                    <select name="qris_provider" class="input-field">
-                        <option value="">Pilih Provider</option>
-                        <option value="midtrans" {{ old('qris_provider', $paymentSetting->qris_provider) == 'midtrans' ? 'selected' : '' }}>Midtrans</option>
-                        <option value="xendit" {{ old('qris_provider', $paymentSetting->qris_provider) == 'xendit' ? 'selected' : '' }}>Xendit</option>
-                        <option value="dana" {{ old('qris_provider', $paymentSetting->qris_provider) == 'dana' ? 'selected' : '' }}>DANA API</option>
-                    </select>
-                </div>
+
+                <input type="hidden" name="qris_provider" value="midtrans">
+                <input type="hidden" name="is_production" value="0">
+
                 <div>
                     <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Merchant ID</label>
-                    <input type="text" name="merchant_id" value="{{ old('merchant_id', $paymentSetting->merchant_id) }}" class="input-field">
+                    <input type="text" name="merchant_id" value="{{ old('merchant_id', $paymentSetting->merchant_id) }}" class="input-field" placeholder="Contoh: G123456789">
                 </div>
+
+                <div>
+                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">
+                        Server Key
+                        <span class="text-[var(--color-stone)] font-normal">(Wajib)</span>
+                    </label>
+                    <input type="text" name="server_key" value="{{ old('server_key', $paymentSetting->server_key) }}"
+                        class="input-field font-mono text-sm"
+                        placeholder="Server Key Anda...">
+                </div>
+
+                <div>
+                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">
+                        Client Key
+                        <span class="text-[var(--color-stone)] font-normal">(Untuk frontend)</span>
+                    </label>
+                    <input type="text" name="client_key" value="{{ old('client_key', $paymentSetting->client_key) }}"
+                        class="input-field font-mono text-sm"
+                        placeholder="{{ $paymentSetting->client_key ? '••••••••••••••••••• (sudah diisi)' : 'Client Key Anda...' }}">
+                </div>
+
+                <div>
+                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">QRIS Acquirer</label>
+                    <select name="qris_acquirer" class="input-field">
+                        <option value="gopay" {{ old('qris_acquirer', $paymentSetting->qris_acquirer ?? 'gopay') == 'gopay' ? 'selected' : '' }}>
+                            GoPay (Direkomendasikan — mendukung semua aplikasi QRIS)
+                        </option>
+                        <option value="airpay shopee" {{ old('qris_acquirer', $paymentSetting->qris_acquirer) == 'airpay shopee' ? 'selected' : '' }}>
+                            ShopeePay
+                        </option>
+                    </select>
+                    <p class="type-caption text-[var(--color-stone)] mt-1">Acquirer adalah pihak yang memproses QRIS. GoPay mendukung semua aplikasi QRIS (GoPay, OVO, Dana, dll).</p>
+                </div>
+
+                {{-- Test Connection Button --}}
+                @if($paymentSetting->server_key)
+                <div class="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+                    <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                        <p class="type-caption-bold text-green-800">Server Key sudah tersimpan dan siap digunakan</p>
+                        <p class="type-caption text-green-700">Mode Lingkungan: {{ $paymentSetting->is_production ? '🟢 Production (Live)' : '🟡 Sandbox (Testing)' }}</p>
+                    </div>
+                </div>
+                @endif
             </div>
 
-            {{-- Bank Config --}}
-            <div class="space-y-4 pt-6 border-t border-[var(--color-hairline-soft)] mt-6">
-                <h3 class="type-subtitle-lg text-[var(--color-ink-deep)] mb-2 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-[var(--color-primary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>
-                    Pengaturan Rekening Bank (Transfer)
-                </h3>
-                <p class="type-caption text-[var(--color-slate)] mb-4">Informasi rekening bank yang akan ditampilkan saat kasir memilih metode pembayaran Transfer.</p>
-                
-                <div>
-                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Nama Bank</label>
-                    <input type="text" name="bank_name" value="{{ old('bank_name', $paymentSetting->bank_name) }}" class="input-field" placeholder="Contoh: BCA / Mandiri / BRI">
-                </div>
-                <div>
-                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Nomor Rekening</label>
-                    <input type="text" name="bank_account_number" value="{{ old('bank_account_number', $paymentSetting->bank_account_number) }}" class="input-field" placeholder="Contoh: 1234567890">
-                </div>
-                <div>
-                    <label class="block type-caption-bold text-[var(--color-slate)] mb-1.5">Atas Nama</label>
-                    <input type="text" name="bank_account_name" value="{{ old('bank_account_name', $paymentSetting->bank_account_name) }}" class="input-field" placeholder="Contoh: Toko BisnisKu">
-                </div>
-            </div>
 
             <button type="submit" class="btn-primary !py-2.5 !px-5 w-full mt-4">{{ __('messages.save') }} Pengaturan</button>
         </form>

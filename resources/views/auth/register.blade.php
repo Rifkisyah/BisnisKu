@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __('Sign up') }} - {{ $globalShopName }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +18,7 @@
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: var(--color-canvas, #ffffff);
-            color: var(--color-ink, #1C2B33);
+            color: var(--color-ink, #1e293b);
             margin: 0;
             padding: 0;
             -webkit-font-smoothing: antialiased;
@@ -54,8 +55,8 @@
     </div>
 
     {{-- Right Panel — Register Form --}}
-    <div class="flex w-full items-center justify-center px-6 lg:w-1/2 relative py-12">
-        <div class="absolute top-8 right-8 flex items-center gap-4">
+    <div class="flex w-full items-center justify-center px-6 lg:w-1/2 relative pt-28 pb-12 sm:pt-32 sm:pb-16">
+        <div class="absolute top-6 right-6 sm:top-8 sm:right-8 flex items-center gap-4 z-10">
             <form action="{{ route('locale.switch') }}" method="POST" class="flex items-center bg-[var(--color-surface-soft)] rounded-full p-1 border border-[var(--color-hairline-soft)]">
                 @csrf
                 <button type="submit" name="locale" value="en" class="px-3 py-1 rounded-full text-xs font-bold transition-colors {{ app()->getLocale() === 'en' ? 'bg-[var(--color-ink-deep)] text-[var(--color-canvas)] shadow-sm' : 'text-[var(--color-slate)] hover:text-[var(--color-ink)]' }}">EN</button>
@@ -131,7 +132,7 @@
                 <div>
                     <label class="block type-body-sm-bold text-[var(--color-ink)] mb-2">
                         {{ __('URL Katalog') }}
-                        <span class="text-[var(--color-slate)] font-normal">(opsional, auto-generate)</span>
+                        <span class="text-[var(--color-slate)] font-normal">{{ __('(opsional, auto-generate)') }}</span>
                     </label>
                     <div class="flex items-center gap-0">
                         <span class="inline-flex items-center h-11 px-3 text-xs text-[var(--color-slate)] bg-[var(--color-surface-soft)] border border-r-0 border-[var(--color-hairline)] rounded-l-[var(--radius-lg)]">bisnisku.app/store/</span>
@@ -143,9 +144,9 @@
                                placeholder="armal-cellular">
                     </div>
                     <div class="mt-1 h-5">
-                        <p x-show="checkingSlug" class="type-caption text-[var(--color-slate)]">Memeriksa ketersediaan...</p>
-                        <p x-show="!checkingSlug && slugAvailable === true" class="type-caption text-[var(--color-success)]">✓ URL Katalog Toko tersedia</p>
-                        <p x-show="!checkingSlug && slugAvailable === false" class="type-caption text-[var(--color-critical)]">✗ URL Katalog Toko telah digunakan, coba yang lain</p>
+                        <p x-show="checkingSlug" class="type-caption text-[var(--color-slate)]">{{ __('Memeriksa ketersediaan...') }}</p>
+                        <p x-show="!checkingSlug && slugAvailable === true" class="type-caption text-[var(--color-success)]">✓ {{ __('URL Katalog Toko tersedia') }}</p>
+                        <p x-show="!checkingSlug && slugAvailable === false" class="type-caption text-[var(--color-critical)]">✗ {{ __('URL Katalog Toko telah digunakan, coba yang lain') }}</p>
                     </div>
                 </div>
 

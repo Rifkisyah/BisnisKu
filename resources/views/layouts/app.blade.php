@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'BisnisKu') - {{ \App\Models\Setting::get('store_name', 'Nama Toko') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=montserrat:300,400,500,600,700,800" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
     <style>
         @media (min-width: 640px) {
@@ -27,8 +29,18 @@
             }
             
             /* Hide Layout */
-            aside, header, #dashboard-filter-form, .print-hidden, .pill-tab, select, button, a.btn, a.pill-tab { display: none !important; }
+            aside, header, #dashboard-filter-form, .print\:hidden, .print-hidden, form, nav[role="navigation"], .pagination, .page-link, select, button, a.btn, a.btn-primary, a.btn-ghost, a.pill-tab, th.print-hidden, td.print-hidden, th.action-col, td.action-col { display: none !important; }
             main { padding: 0 !important; margin: 0 !important; background: white !important; width: 100% !important; max-width: 100% !important; height: auto !important; overflow: visible !important; }
+            
+            /* Force Table view to ALWAYS display when printing even if user is in Grid mode */
+            [x-show*="'table'"] {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            [x-show*="'grid'"] {
+                display: none !important;
+            }
             
             /* Cards & Panels - Clean for Print */
             .card, .card-feature, .bg-white.rounded-2xl { 
@@ -53,6 +65,17 @@
                 print-color-adjust: exact !important; 
                 border-radius: 0 !important;
             }
+        }
+        /* Hide Midtrans Sandbox "TEST" ribbon */
+        #snap-midtrans ~ div[style*="z-index: 9999"],
+        div[class*="snap-test-badge"],
+        div[id*="snap-test"],
+        body > div[style*="position: fixed"][style*="top: 0"][style*="right: 0"][style*="background: #f4a41c"],
+        body > div[style*="position:fixed"][style*="top:0"][style*="right:0"][style*="background:#f4a41c"],
+        body > div[style*="position: fixed"][style*="z-index: 99999"][style*="TEST"],
+        .snap-sandbox-label,
+        [data-testid="snap-sandbox-label"] {
+            display: none !important;
         }
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -131,7 +154,11 @@
             @if($storeLogo)
                 <img src="{{ asset($storeLogo) }}" alt="Logo" class="h-9 w-9 shrink-0 object-cover rounded-[var(--radius-xl)]">
             @else
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--color-primary)] text-white font-bold text-sm">BK</div>
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--color-primary)] text-white shadow-sm">
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                </div>
             @endif
             <div x-show="sidebarOpen" x-transition class="overflow-hidden">
                 <h1 class="text-base font-bold text-[var(--color-ink-deep)] tracking-tight">BisnisKu</h1>
@@ -148,33 +175,36 @@
 
             <x-nav-link route="dashboard" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/>' :label="__('messages.dashboard')" :sidebar-open="true" />
 
-            @if(in_array($r, ['owner', 'kasir']))
+            @if(in_array($r, ['admin', 'kasir']))
             <x-nav-link route="cashier.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>' :label="__('messages.pos')" :sidebar-open="true" />
 
             @endif
 
-            @if(in_array($r, ['owner', 'kasir', 'gudang']))
+            @if(in_array($r, ['admin', 'kasir', 'gudang']))
             <x-nav-link route="products.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>' :label="__('messages.products')" :sidebar-open="true" />
             @endif
-            @if($r === 'owner')
+            @if($r === 'admin')
             <x-nav-link route="categories.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>' :label="__('messages.categories')" :sidebar-open="true" />
             @endif
 
-            @if($r === 'owner')
+            @if(in_array($r, ['admin', 'owner', 'gudang']))
             <x-nav-link route="suppliers.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>' :label="__('messages.suppliers')" :sidebar-open="true" />
-            <x-nav-link route="employees.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>' :label="__('messages.employees')" :sidebar-open="true" />
             <x-nav-link route="product-purchases.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>' :label="__('messages.procurements')" :sidebar-open="true" />
             @endif
+            @if(in_array($r, ['admin', 'owner']))
+            <x-nav-link route="employees.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>' :label="__('messages.employees')" :sidebar-open="true" />
+            @endif
 
-            @if(in_array($r, ['owner', 'teknisi', 'kasir']))
+            @if(in_array($r, ['admin', 'teknisi', 'kasir']))
             <x-nav-link route="service-repairs.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>' :label="__('messages.service_repairs')" :sidebar-open="true" />
             @endif
 
-            @if(in_array($r, ['owner', 'kasir']))
+            @if(in_array($r, ['admin', 'kasir']))
             <x-nav-link route="debts.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>' :label="__('messages.debts')" :sidebar-open="true" />
+            <x-nav-link route="transactions.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>' :label="__('Daftar Transaksi')" :sidebar-open="true" />
             @endif
 
-            @if($r === 'owner')
+            @if(in_array($r, ['admin', 'owner']))
             <x-nav-link route="reports.index" icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>' :label="__('messages.reports')" :sidebar-open="true" />
 
             <div class="pt-4 mt-4 border-t border-[var(--color-hairline-soft)]"></div>
@@ -277,6 +307,53 @@ document.addEventListener('submit', function (e) {
     });
 });
 </script>
+@if(request()->has('print') || request()->get('print') === '1')
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => { 
+            window.print();
+            const url = new URL(window.location);
+            url.searchParams.delete('print');
+            window.history.replaceState({}, '', url);
+        }, 500);
+    });
+</script>
+@endif
 @stack('scripts')
+<script>
+// Remove Midtrans Sandbox "TEST" ribbon that gets injected into the page
+(function removeSandboxRibbon() {
+    function cleanSnapRibbon() {
+        document.querySelectorAll('body > div, body > a').forEach(function(el) {
+            var style = el.getAttribute('style') || '';
+            var text = el.textContent || '';
+            if (
+                (style.includes('position') && style.includes('fixed') && text.trim() === 'TEST') ||
+                (style.includes('z-index: 99999') && text.includes('TEST')) ||
+                (el.id && el.id.includes('snap-test'))
+            ) {
+                el.remove();
+            }
+        });
+    }
+    // Run on load
+    document.addEventListener('DOMContentLoaded', cleanSnapRibbon);
+    // Observe DOM changes for dynamically injected elements
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(m) {
+            m.addedNodes.forEach(function(node) {
+                if (node.nodeType === 1) {
+                    var style = node.getAttribute('style') || '';
+                    var text = node.textContent || '';
+                    if (style.includes('position') && style.includes('fixed') && text.trim() === 'TEST') {
+                        node.remove();
+                    }
+                }
+            });
+        });
+    });
+    observer.observe(document.body || document.documentElement, { childList: true, subtree: false });
+})();
+</script>
 </body>
 </html>

@@ -53,7 +53,7 @@ class CashierController extends Controller
             'items.*.quantity'   => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',
             'discount'           => 'nullable|numeric|min:0',
-            'payment_method'     => 'required|in:cash,qris,debt,transfer',
+            'payment_method'     => 'required|in:cash,qris,debt',
             'amount_paid'        => 'required|numeric|min:0',
             'debtor_name'        => 'required_if:payment_method,debt|nullable|string',
             'debtor_contact'     => 'nullable|string',
@@ -99,6 +99,7 @@ class CashierController extends Controller
 
                 $transactionCode = Transaction::generateCode();
                 $isQris = $validated['payment_method'] === 'qris';
+                $status = $isQris ? 'pending' : 'paid';
 
                 $transaction = Transaction::create([
                     'transaction_code' => $transactionCode,
@@ -108,9 +109,9 @@ class CashierController extends Controller
                     'discount'         => $discount,
                     'total'            => $total,
                     'payment_method'   => $validated['payment_method'],
-                    'amount_paid'      => $amountPaid,
-                    'change_amount'    => $change,
-                    'status'           => $isQris ? 'unpaid' : 'paid',
+                    'amount_paid'      => $status === 'paid' ? $amountPaid : 0,
+                    'change_amount'    => $status === 'paid' ? $change : 0,
+                    'status'           => $status,
                     'notes'            => $validated['notes'] ?? null,
                     'customer_name'    => $validated['customer_name'] ?? null,
                     'customer_contact' => $validated['customer_contact'] ?? null,
@@ -129,7 +130,6 @@ class CashierController extends Controller
                         'status'           => $amountPaid > 0 ? 'partial' : 'unpaid',
                         'transaction_code' => $transactionCode,
                     ]);
-                    $transaction->update(['status' => 'paid']); // Transaction itself is considered paid by the debt agreement
                 }
 
                 foreach ($items as $item) {
@@ -142,8 +142,8 @@ class CashierController extends Controller
                         'discount_product' => 0,
                     ]);
 
-                    // Only reduce stock if it's NOT QRIS (because QRIS reduces stock after payment callback)
-                    if (!$isQris) {
+                    if ($status === 'paid') {
+                        // Deduct stock immediately for cash/debt transactions
                         $stockService->stockOut(
                             $item['product']->product_code,
                             $item['quantity'],
@@ -175,9 +175,10 @@ class CashierController extends Controller
             // Send WA Receipt if contact is provided
             $waSent = false;
             $waError = null;
-            if (!empty($validated['customer_contact'])) {
+            $contactForWa = $validated['payment_method'] === 'debt' ? ($validated['debtor_contact'] ?? null) : ($validated['customer_contact'] ?? null);
+            if (!empty($contactForWa)) {
                 $waService = new \App\Services\WhatsAppService();
-                $phone = \App\Services\WhatsAppService::formatPhone($validated['customer_contact']);
+                $phone = \App\Services\WhatsAppService::formatPhone($contactForWa);
                 
                 $storeName = \App\Models\Setting::get('store_name', 'Toko Kami');
                 $receiptUrl = route('transactions.receipt', $transaction->transaction_code);
@@ -207,9 +208,18 @@ class CashierController extends Controller
                 'wa_error'         => $waError
             ]);
         } catch (\Exception $e) {
+            $msg = $e->getMessage();
+            $needsConfig = false;
+            
+            if (strpos($msg, 'NOT_CONFIGURED:') === 0) {
+                $msg = str_replace('NOT_CONFIGURED:', '', $msg);
+                $needsConfig = true;
+            }
+
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => $msg,
+                'needs_config' => $needsConfig
             ], 422);
         }
     }

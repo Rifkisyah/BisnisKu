@@ -20,6 +20,11 @@ class SupplierController extends Controller
             return $pdf->download('laporan-supplier.pdf');
         }
 
+        if ($request->get('print') === '1' || $request->has('print')) {
+            $suppliers = $query->applySort($request->sort)->get();
+            return view('suppliers.pdf', ['suppliers' => $suppliers, 'isPrint' => true]);
+        }
+
         $suppliers = $query->applySort($request->sort)->paginate(15)->withQueryString();
         return view('suppliers.index', compact('suppliers'));
     }

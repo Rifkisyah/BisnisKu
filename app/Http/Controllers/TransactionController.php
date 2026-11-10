@@ -10,10 +10,11 @@ class TransactionController extends Controller
 {
     public function index(Request $request)
     {
-        $startDate = $request->get('start_date', now()->toDateString());
+        $startDate = $request->get('start_date', now()->subDays(90)->toDateString());
         $endDate = $request->get('end_date', now()->toDateString());
 
         $query = Transaction::with('cashier', 'items.product')
+            ->where('status', '!=', 'pending')
             ->whereBetween('transaction_date', [$startDate, \Carbon\Carbon::parse($endDate)->endOfDay()]);
 
         if (auth()->user()->isKasir()) {
@@ -37,7 +38,7 @@ class TransactionController extends Controller
     public function show(Transaction $transaction)
     {
         if (auth()->user()->isKasir() && $transaction->cashier_id !== auth()->id()) { abort(403); }
-        $transaction->load('items.product', 'cashier');
+        $transaction->load('items.product', 'cashier', 'payments');
         return view('transactions.show', compact('transaction'));
     }
 
@@ -56,7 +57,6 @@ class TransactionController extends Controller
 
     public function cancel(Transaction $transaction)
     {
-        if (auth()->user()->isKasir()) { abort(403); }
         $transaction->update(['status' => 'canceled']);
         foreach ($transaction->items as $item) {
             $item->product->increment('stock', $item->quantity);

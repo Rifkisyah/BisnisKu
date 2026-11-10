@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('stores', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 150);
+            $table->string('slug', 100)->unique(); // URL katalog: /toko/{slug}
+            $table->unsignedBigInteger('owner_id')->nullable(); // FK to users.id (set after users table exists)
+            $table->string('address', 500)->nullable();
+            $table->string('phone', 30)->nullable();
+            $table->string('email', 150)->nullable();
+            $table->string('logo')->nullable();
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->boolean('catalog_enabled')->default(true); // toggle katalog publik
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('stores');
+    }
+};

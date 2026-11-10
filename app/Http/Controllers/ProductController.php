@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Supplier;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,7 +17,7 @@ class ProductController extends Controller
         $tab = $request->get('tab', '');
         $showSparepart = $request->boolean('show_sparepart');
 
-        $products = Product::with('category', 'supplier')
+        $query = Product::with('category', 'supplier')
             ->when($tab, function ($q) use ($tab, $showSparepart) {
                 if ($showSparepart && $tab !== 'sparepart') {
                     $q->whereIn('type', [$tab, 'sparepart']);
@@ -31,9 +32,20 @@ class ProductController extends Controller
             ->when($request->category, fn($q, $c) => $q->where('category_code', $c))
             ->when($request->low_stock, fn($q) => $q->lowStock())
             ->when($request->status, fn($q, $s) => $q->where('status', $s))
-            ->applySort($request->sort)
-            ->paginate(15)
-            ->withQueryString();
+            ->applySort($request->sort);
+
+        if ($request->get('export') === 'pdf') {
+            $products = $query->get();
+            $pdf = Pdf::loadView('products.pdf', compact('products'));
+            return $pdf->download('laporan-produk.pdf');
+        }
+
+        if ($request->get('print') === '1' || $request->has('print')) {
+            $products = $query->get();
+            return view('products.pdf', ['products' => $products, 'isPrint' => true]);
+        }
+
+        $products = $query->paginate(15)->withQueryString();
 
         $categories = Category::active()->get();
 
